@@ -1,0 +1,7 @@
+interface:
+  display_name: "XFlow TDD Workflow"
+  short_description: "TDD issues and MRs for XFlow"
+  default_prompt: "Use $xflow-tdd-workflow in Chinese to clarify my XFlow request, draft a TDD issue, implement safely, and prepare the devctl MR workflow."
+
+policy:
+  allow_implicit_invocation: true

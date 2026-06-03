@@ -1,0 +1,10 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+Thumbs.db:encrypt
+*.lnk
+
+# Temp and log files
+*.log
+tmp/
+temp/
