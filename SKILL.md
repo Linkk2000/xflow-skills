@@ -63,6 +63,22 @@ description: 通用型 Git & Issue TDD 开发工作流。适用于在本地通�
 
 ---
 
+## 平台与 Shell 稳定性准则
+
+在 Windows + WSL + 中文仓库环境中执行本工作流时，AI 助手必须先降低平台噪音，而不是把环境问题误判为业务问题：
+
+详细经验与案例见 `references/ops-lessons.md`，遇到 shell、编码、dev server、远程 issue/MR 命令异常时应优先读取。
+
+1. **WSL 优先且单一执行面**：若用户已明确 WSL 可用，开发、测试、git、devctl、服务启动优先全部在 WSL 内执行；不要在同一任务中频繁混用 PowerShell 与 WSL。
+2. **避免复杂跨 shell 一行命令**：从 PowerShell 调用 `wsl --exec bash -lc` 时，禁止把复杂引号、正则、`$()`、长管道和多层嵌套塞进一行。优先使用项目内脚本、`devctl` 命令、短命令或 heredoc。
+3. **不要依赖中文终端输出做补丁锚点**：中文 Markdown / shell 输出可能显示为 mojibake。编辑中文文档时优先使用 ASCII 锚点、结构位置、行号附近上下文或追加章节，避免用乱码文本作为 patch 匹配依据。
+4. **避免无边界递归扫描**：在 `/mnt/c`、`/mnt/d` 等 Windows 挂载盘上，优先使用 `git grep`、限定目录的 `find -maxdepth` 或精确文件读取；不要用无边界 `grep -R` 扫大型 monorepo。
+5. **进程管理必须精确**：长期服务使用项目脚本或 pid 文件管理。禁止用宽泛 `pkill -f` 模式清进程，因为它可能匹配并杀死当前 shell。若必须清理，先 `pgrep -a` 核对 PID，再按 PID 处理。
+6. **后台服务必须验证存活**：启动 dev server 后，必须在新的 shell 调用中再次检查 `pid`、端口监听和 HTTP 响应，避免进程随 WSL shell 退出而短暂成功。
+7. **环境阻塞与业务修复分线处理**：若 dev server、编码、shell、权限或包管理器问题阻塞 UI 验证，应把它作为独立 B 线记录到 Planning with Files；业务线只能声明已通过的单测/typecheck，不能把未完成的 UI 验证说成已完成。
+
+---
+
 ## Planning with Files 规范 (去平台依赖与沙盒化归档)
 
 为了保证长周期开发的可打断性、多 AI 客户端（如 Cursor、Cline、Gpt 网页端）的绝对兼容，以及历史设计决策的永久可追溯性，AI 助手必须在当前项目根目录下的 `.xflow/issue-<number>/` 独立目录中创建和维护规划文件（其中 `<number>` 为当前 Issue 编号，如 `.xflow/issue-12/task.md`）。禁止依赖任何特定 AI 平台的内置 Artifact 机制或在根目录下直接写入单一文件：
