@@ -13,7 +13,7 @@ Run from the owning repository.
 
 ```bash
 ./devctl help
-./devctl issue create "<title>" --body "<body>" --labels "tdd,frontend"
+./devctl issue create "<title>" --body-file .xflow-local/issue-body.md --labels "tdd,frontend"
 ./devctl issue close <number> --comment "<confirmed summary>"
 ./devctl issue list --state open --limit 20
 ./devctl issue show <number>
@@ -26,6 +26,8 @@ Run from the owning repository.
 ./devctl git mr --title "<title>" --body "<body>" --issue <number>
 ./devctl git done
 ```
+
+For issue creation and comments, use `--body` only for short single-line text. Multi-line Markdown, fenced code, inline backticks, JSON, or shell snippets must be written to a file and passed with `--body-file` so shells do not reinterpret the content.
 
 Remote issue/MR commands require `GITEE_TOKEN` through `~/gitee.env.local` or the environment.
 

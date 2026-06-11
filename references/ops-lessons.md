@@ -9,7 +9,7 @@
   - 未转义的 `|`
   - 多层嵌套引号
   - 带括号的提交信息
-- 需要多行正文、复杂 jq、复杂 curl payload 时，优先写入临时正文文件，再传 `--body-file` 或让脚本读取文件。
+- 需要多行正文、复杂 jq、复杂 curl payload 时，优先写入临时正文文件，再传 `--body-file` 或让脚本读取文件。Markdown 中的反引号、代码块和 `$()` 在 PowerShell/WSL/bash 混合调用时可能被解释为命令替换，不能直接放入 `--body`。
 - 临时脚本只能用于绕开 shell 转义问题，执行后必须删除，不能形成每个 issue 一个临时脚本的习惯。
 - 使用 `wsl bash -lc 'cd /mnt/d/04-code/018-xflow/xflow && <simple command>'` 这种简单形态。若命令涉及 Markdown 正文、jq 过滤、JSON payload，应拆成多步。
 
@@ -42,7 +42,7 @@
 ## GitHub/Gitee Issue
 
 - 创建 issue 必须使用完整 Markdown 正文，不允许只创建标题。
-- 多行 issue 正文优先落到临时文件，通过仓库 devctl 的 `--body-file` 能力传递，避免在 WSL 命令行发生多重嵌套转义灾难。
+- 多行 issue 正文必须落到临时文件，通过仓库 devctl 的 `--body-file` 能力传递，避免在 WSL 命令行发生多重嵌套转义灾难。
 - issue 在 PR/MR 审批/合并前不要关闭。开发完成后先发 PR/MR，等待评审。
 - 开发分支开发完成后，必须使用 `devctl issue comment <number> --body "开发已完成。开发分支为 feature/<number>-<slug>"` 在 Issue 评论中进行状态反馈。
 - issue 评论也可以通过文件传递：`./devctl issue comment <issue> --body-file <file>`。评论中的图片若不是平台已上传附件，应使用分支内版本化证据文件的 raw 链接。
