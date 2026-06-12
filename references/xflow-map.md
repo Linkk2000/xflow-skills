@@ -1,5 +1,38 @@
 # XFlow Project Map For TDD Work
 
+## Academic Product Line
+
+When the repository or task is on the `academic` product branch, use the
+Academic XFlow references before drafting issues, delegating to Claude,
+preparing MR/PR content, or performing remote writes:
+
+- `references/academic-workflow.md`
+- `references/academic-templates.md`
+- `references/academic-schema-contract.md`
+
+Academic tasks use local template artifacts under `.xflow/issue-<id>/`.
+TDD/verify output is recorded in `tdd-result.md` and is a required local review
+input. It proves only machine-checkable readiness; it does not replace human
+review.
+
+Before any remote write, verify the relevant artifacts:
+
+```bash
+devctl check academic-issue --issue <id>
+devctl check tdd-result --issue <id>
+devctl check academic-mr --issue <id>
+devctl check local-review --issue <id> --file <approved-file>
+```
+
+If Claude or AcademicForge is used, also verify:
+
+```bash
+devctl check claude-package --issue <id>
+```
+
+Claude output must remain a reviewable artifact until the human reviewer
+approves it.
+
 ## Repositories
 
 - Frontend: `D:\04-code\018-xflow\xflow`
