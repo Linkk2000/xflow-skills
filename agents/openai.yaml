@@ -1,7 +1,7 @@
 interface:
   display_name: "XFlow TDD Workflow"
   short_description: "TDD issues and MRs for XFlow"
-  default_prompt: "Use $xflow-tdd-workflow in Chinese to clarify my XFlow request, draft a TDD issue, implement safely, and prepare the devctl MR workflow."
+  default_prompt: "Use $xflow-tdd-workflow to run the human-gated XFlow Git and Issue workflow. Read project AGENTS.md first, use devctl.ps1 on Windows or devctl on POSIX, stop at every approval gate, and never bundle push with MR creation."
 
 policy:
   allow_implicit_invocation: true
