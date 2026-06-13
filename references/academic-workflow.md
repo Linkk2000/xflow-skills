@@ -51,6 +51,8 @@ The paper repository should mount the two XFlow repositories under `_ops/`:
   devctl.ps1        -> project wrapper
   SKILL.md          -> synced workflow entrypoint
   .cursorrules      -> Cursor-specific guardrail template
+  .xflow/tools/xflow-powershell-native.ps1
+                    -> composable PowerShell native command helper
   .xflow/           -> local task artifacts
 ```
 
@@ -60,6 +62,10 @@ instead of relying on Codex-specific skill installation.
 
 When Cursor is the upper AI, copy `_ops/workflow/templates/cursorrules.academic`
 to `<paper-repo>/.cursorrules` during initialization.
+
+Also copy `_ops/workflow/templates/xflow-powershell-native.ps1` to
+`<paper-repo>/.xflow/tools/xflow-powershell-native.ps1`. PowerShell scripts
+that run native commands should dot-source this helper.
 
 The first local check in a paper repository is:
 
@@ -71,6 +77,148 @@ On Windows, PowerShell users may run:
 
 ```powershell
 .\devctl.ps1 preflight
+```
+
+## Updating An Initialized Paper Repository
+
+Already-initialized paper repositories must not silently track the latest
+`academic` branch heads. Updates are reviewable repository changes, not
+background maintenance.
+
+Use this sequence for a paper repository that already contains `_ops/devctl`
+and `_ops/workflow`:
+
+```text
+fetch -> pin reviewed SHA -> test -> human review -> commit
+```
+
+Recommended local branch:
+
+```bash
+git switch -c chore/update-academic-xflow-<date>
+```
+
+Fetch the two tool repositories without changing the parent repository yet:
+
+```bash
+git -C _ops/devctl fetch origin academic
+git -C _ops/workflow fetch origin academic
+```
+
+Pin reviewed SHA values, not whatever happens to be latest at execution time:
+
+```bash
+git -C _ops/devctl checkout <reviewed-devctl-sha>
+git -C _ops/workflow checkout <reviewed-workflow-sha>
+```
+
+After pinning, sync generated or copied guardrail files from the workflow
+submodule:
+
+```bash
+cp _ops/workflow/SKILL.md ./SKILL.md
+cp _ops/workflow/templates/cursorrules.academic ./.cursorrules
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item _ops\workflow\SKILL.md .\SKILL.md -Force
+Copy-Item _ops\workflow\templates\cursorrules.academic .\.cursorrules -Force
+New-Item -ItemType Directory -Force .\.xflow\tools | Out-Null
+Copy-Item _ops\workflow\templates\xflow-powershell-native.ps1 .\.xflow\tools\xflow-powershell-native.ps1 -Force
+```
+
+Run local checks before requesting review:
+
+```bash
+./devctl preflight
+./devctl help
+./devctl claude doctor
+./devctl check tdd-result --issue <id>
+```
+
+On Windows PowerShell:
+
+```powershell
+.\devctl.ps1 preflight
+.\devctl.ps1 help
+.\devctl.ps1 claude doctor
+.\devctl.ps1 check tdd-result --issue <id>
+```
+
+The update commit in the paper repository should contain only intentional
+update surfaces:
+
+- `_ops/devctl`: commit the submodule pointer to the reviewed devctl SHA.
+- `_ops/workflow`: commit the submodule pointer to the reviewed workflow SHA.
+- `SKILL.md`: commit the synced workflow entrypoint when it changed.
+- `.cursorrules`: commit the synced Cursor guardrail when it changed.
+- `devctl` and `devctl.ps1`: commit wrapper changes only when the update
+  explicitly requires wrapper changes.
+- `.xflow/`: commit or archive local review evidence according to the paper
+  repository policy.
+
+If any check fails, do not continue to remote writes. Either fix the update on a
+new local task branch or restore the previous reviewed submodule pointers.
+
+## PowerShell Native Git Rule
+
+Windows PowerShell can misreport native command stderr as `NativeCommandError`.
+Git also writes ordinary progress and status messages to stderr during commands
+such as clone, fetch, checkout, and submodule add. Therefore, AI assistants must
+judge native Git success by process exit code, not by the presence of stderr
+text.
+
+Use the workflow helper for reusable PowerShell scripts:
+
+```powershell
+. .\.xflow\tools\xflow-powershell-native.ps1
+
+Invoke-XFlowGit -GitArguments @(
+    "submodule", "add",
+    "-b", "academic",
+    "git@github.com:Linkk2000/xflow-skills.git",
+    "_ops/workflow"
+)
+```
+
+Do not use `2>&1 | Out-String` for `git submodule add`, `git clone`, `git fetch`, or `git checkout`.
+
+Do not combine multiple native commands in one PowerShell line. Run one native
+command, store its result object or exit code, inspect it, then run the next
+command.
+
+Preferred pattern:
+
+```powershell
+. .\.xflow\tools\xflow-powershell-native.ps1
+
+$result = Invoke-XFlowGit -GitArguments @(
+    "submodule", "add",
+    "-b", "academic",
+    "git@github.com:Linkk2000/xflow-skills.git",
+    "_ops/workflow"
+) -CaptureOutput
+```
+
+When logs are needed, use the structured result returned by the helper:
+
+```powershell
+$result = Invoke-XFlowGit -GitArguments @("submodule", "status") -CaptureOutput -AllowFailure
+if ($result.ExitCode -ne 0) {
+    throw "git submodule status failed with exit code $($result.ExitCode)`n$($result.Stdout)`n$($result.Stderr)"
+}
+```
+
+Messages like `Cloning into ...` are not failures by themselves. After Git
+submodule operations, verify the state with:
+
+```powershell
+git submodule status
+git status --short
+Test-Path .\_ops\workflow
+Test-Path .\.gitmodules
 ```
 
 ## Required Local Artifacts

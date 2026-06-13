@@ -129,3 +129,22 @@ description: 通用型 Git & Issue TDD 开发工作流。适用于在本地通�
 2. **等待评审**：在远端 PR/MR 审核及合并前，禁止手动关闭 Issue。
 3. **合流同步**：一旦远端 PR/MR 完成合并，Issue 亦会被自动关闭。若未自动关闭，则手工运行 `devctl issue close <number>`。
 4. **本地清理**：运行 `devctl git done` 自动将本地工作区切回主干、拉取最新代码并安全删除本地已合并的开发分支，恢复工作区绝对纯净。
+
+---
+
+## PowerShell Native Command Safety
+
+When running on Windows PowerShell, avoid composing multiple native commands in
+one line. Do not combine native commands with `;`, `&&`, pipelines,
+`2>&1 | Out-String`, or `powershell.exe -Command "A; B"` when the result needs
+to be audited.
+
+For reusable PowerShell scripts, copy and dot-source:
+
+```powershell
+. .\.xflow\tools\xflow-powershell-native.ps1
+```
+
+Use `Invoke-XFlowNative` or `Invoke-XFlowGit -GitArguments @(...)` so each
+native command returns a structured result with `ExitCode`, `Stdout`, and
+`Stderr`. Run one native command, inspect the result, then run the next command.

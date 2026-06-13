@@ -28,6 +28,24 @@ Runtime rules:
   workflow execution. Prepare `.xflow/issue-<id>/claude-task.md` and run
   `devctl claude run --issue <id>`.
 
+Update rules:
+
+- Already-initialized paper repositories must update by this chain: fetch, pin reviewed SHA, test, human review, then commit.
+- Do not silently track the latest `academic` branch head.
+- Fetch tool updates without changing the parent repository first:
+  `git -C _ops/devctl fetch origin academic` and
+  `git -C _ops/workflow fetch origin academic`.
+- Checkout only human-reviewed commits:
+  `git -C _ops/devctl checkout <reviewed-devctl-sha>` and
+  `git -C _ops/workflow checkout <reviewed-workflow-sha>`.
+- After pinning `_ops/workflow`, sync `SKILL.md` and `.cursorrules` from the
+  reviewed workflow commit.
+- Run `devctl preflight`, `devctl help`, `devctl claude doctor`, and relevant
+  `devctl check ...` commands before asking the human reviewer to approve the
+  update.
+- Commit the paper repository update only after human review of the exact
+  submodule pointer changes and copied guardrail changes.
+
 Remote-write rules:
 
 - Never create, comment, close, push, or create MR/PR without local human
@@ -45,6 +63,20 @@ Shell safety rules:
 - Write complex Issue, comment, and MR bodies to `.xflow-local/*.md` or
   `.xflow/issue-<id>/*.md`, then pass them with `--body-file`.
 - Prefer short commands over nested PowerShell/WSL/Bash one-liners.
+- For PowerShell scripts that invoke native commands, dot-source
+  `.xflow/tools/xflow-powershell-native.ps1` and use `Invoke-XFlowNative` or
+  `Invoke-XFlowGit -GitArguments @(...)`.
+- Do not combine multiple native commands in one PowerShell line. Run one
+  native command, store its result object or exit code, inspect it, then run the
+  next command.
+- Do not pipe native Git commands through `2>&1 | Out-String`; Git may write
+  non-error progress to stderr and Windows PowerShell may surface it as
+  `NativeCommandError`.
+- Invoke native Git commands directly, then check `$LASTEXITCODE`.
+- If command output must be captured, write it to a temporary log file and
+  check `$LASTEXITCODE` immediately after the native command.
+- Treat Git stderr text such as `Cloning into ...` as diagnostic output unless
+  the native process exit code is non-zero.
 
 Expected initialization outputs:
 
@@ -55,3 +87,4 @@ Expected initialization outputs:
 - `SKILL.md`
 - `.cursorrules`
 - `.xflow/`
+- `.xflow/tools/xflow-powershell-native.ps1`

@@ -43,6 +43,54 @@ _ops/workflow/templates/cursorrules.academic -> .cursorrules
 The `.cursorrules` file is a Cursor guardrail, not a replacement for executable
 `devctl` checks.
 
+## Pinned Update Contract
+
+Already-initialized paper repositories must update Academic XFlow by pinned
+submodule commits, not by silently following latest remote branch heads.
+
+The required update chain is:
+
+```text
+fetch -> pin reviewed SHA -> test -> human review -> commit
+```
+
+The parent paper repository update is valid only when:
+
+- `_ops/devctl` points to a human-reviewed `xflow-devctl@academic` commit.
+- `_ops/workflow` points to a human-reviewed `xflow-skills@academic` commit.
+- copied guardrails such as `SKILL.md` and `.cursorrules` are synced from the
+  reviewed `_ops/workflow` commit.
+- local checks have been run and recorded in the task's TDD result or update
+  review record.
+- the human reviewer approves the exact submodule pointer changes and copied
+  guardrail changes before any remote paper-repository push.
+
+AI assistants must not run silent update commands such as automatic submodule
+tracking, recursive checkout to an unreviewed HEAD, or installer-like update
+steps without a local human review gate.
+
+## PowerShell Native Command Contract
+
+A native Git command is failed only when its process exit code is non-zero.
+AI assistants must not classify Git stderr text alone as a failure.
+
+On Windows PowerShell:
+
+- the PowerShell helper template must be copied from
+  `templates/xflow-powershell-native.ps1` to
+  `.xflow/tools/xflow-powershell-native.ps1` during initialization;
+- reusable scripts should dot-source the PowerShell helper template and use
+  `Invoke-XFlowNative` or `Invoke-XFlowGit`;
+- native command composition must be explicit: run one native command, store
+  its result object or exit code, inspect it, and only then run the next native
+  command;
+- do not pipe native Git commands through `2>&1 | Out-String`;
+- invoke Git directly and inspect `$LASTEXITCODE`;
+- when output capture is needed, write to a temporary log file and inspect
+  `$LASTEXITCODE` immediately after the native command;
+- verify Git side effects with `git status --short`, `git submodule status`,
+  `Test-Path .\.gitmodules`, and the expected `_ops/*` paths.
+
 ## Claude Delegation Contract
 
 Claude delegation is exposed through:
