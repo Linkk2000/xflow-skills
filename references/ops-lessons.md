@@ -30,8 +30,8 @@
 - **项目专用启动入口**：例如 `./devctl app start-frontend`、日志位置、pid 位置、端口。
 - **项目专用 Vite 配置**：例如根级 WSL 轻量配置文件、为什么不用默认插件链。
 - **项目专用账号/端口**：例如本地测试账号、后端端口、代理路径。
-- **项目专用忽略规则**：例如 `.tmp/`、`_ops/.run/` 不入库。
-- **项目专用故障处理顺序**：例如先 `devctl app status`，再看 `_ops/.run/frontend.log`，最后才排查 Vite 配置。
+- **项目专用忽略规则**：例如 `.tmp/`、`.xflow/ops/.run/` 不入库。
+- **项目专用故障处理顺序**：例如先 `devctl app status`，再看 `.xflow/ops/.run/frontend.log`，最后才排查 Vite 配置。
 
 ### 不适合放入 Skill 的内容
 

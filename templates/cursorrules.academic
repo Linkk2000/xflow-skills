@@ -5,10 +5,10 @@ You are operating an Academic XFlow paper repository.
 Read these files before acting:
 
 - `SKILL.md`
-- `_ops/workflow/references/academic-workflow.md`
-- `_ops/workflow/references/academic-templates.md`
-- `_ops/workflow/references/academic-schema-contract.md`
-- `_ops/workflow/references/ops-lessons.md`
+- `.xflow/ops/workflow/references/academic-workflow.md`
+- `.xflow/ops/workflow/references/academic-templates.md`
+- `.xflow/ops/workflow/references/academic-schema-contract.md`
+- `.xflow/ops/workflow/references/ops-lessons.md`
 - `AGENTS.md` and `README.md` when present
 
 Runtime rules:
@@ -16,8 +16,19 @@ Runtime rules:
 - Do not require Codex. Use repository files and `devctl` commands as the
   source of truth.
 - Use `devctl` or `devctl.ps1` from the paper repository root.
+- Treat `academic` as the XFlow product line for `.xflow/ops/devctl` and
+  `.xflow/ops/workflow`, not as the paper repository base or task branch.
+- Do not create or push an `academic` branch in the paper repository unless the
+  human reviewer explicitly approves that repository policy.
+- Academic issue and MR drafts must declare `Workflow Product Line`,
+  `Paper Base Branch`, and `Task Branch`; do not use the obsolete
+  target-branch field to point at the tool product line.
 - Run `devctl preflight` or `.\devctl.ps1 preflight` before remote writes,
   installer-like actions, or Claude delegation.
+- For GitHub remote Issue creation, ensure `GITHUB_TOKEN` is present, prepare
+  the Issue body as a file, obtain human approval for that exact file, then run
+  `devctl issue create "<title>" --body-file <file>`.
+- Do not assume Gitee Issue creation is available in academic Python mode.
 - Do not silently install Python.
 - Do not silently run `git submodule update`.
 - Do not silently register or install AcademicForge.
@@ -25,7 +36,7 @@ Runtime rules:
   show the recommended command, and wait for explicit human approval before
   executing any global Claude configuration write.
 - Do not ask the user to manually copy prompts into Claude during normal
-  workflow execution. Prepare `.xflow/issue-<id>/claude-task.md` and run
+  workflow execution. Prepare `.xflow/issues/issue-<id>/claude-task.md` and run
   `devctl claude run --issue <id>`.
 
 Update rules:
@@ -33,29 +44,29 @@ Update rules:
 - Already-initialized paper repositories must update by this chain: fetch, pin reviewed SHA, test, human review, then commit.
 - Do not silently track the latest `academic` branch head.
 - Fetch tool updates without changing the parent repository first:
-  `git -C _ops/devctl fetch origin academic` and
-  `git -C _ops/workflow fetch origin academic`.
+  `git -C .xflow/ops/devctl fetch origin academic` and
+  `git -C .xflow/ops/workflow fetch origin academic`.
 - Checkout only human-reviewed commits:
-  `git -C _ops/devctl checkout <reviewed-devctl-sha>` and
-  `git -C _ops/workflow checkout <reviewed-workflow-sha>`.
-- After pinning `_ops/workflow`, sync `SKILL.md` and `.cursorrules` from the
+  `git -C .xflow/ops/devctl checkout <reviewed-devctl-sha>` and
+  `git -C .xflow/ops/workflow checkout <reviewed-workflow-sha>`.
+- After pinning `.xflow/ops/workflow`, sync `SKILL.md` and `.cursorrules` from the
   reviewed workflow commit.
 - Run `devctl preflight`, `devctl help`, `devctl claude doctor`, and relevant
   `devctl check ...` commands before asking the human reviewer to approve the
   update.
-- Ensure `.gitmodules` uses `ignore = untracked` for `_ops/devctl` and
-  `_ops/workflow`. Do not use `ignore = all`.
+- Ensure `.gitmodules` uses `ignore = untracked` for `.xflow/ops/devctl` and
+  `.xflow/ops/workflow`. Do not use `ignore = all`.
 - Run `devctl check submodule-hygiene` before asking for human review.
 - Commit the paper repository update only after human review of the exact
   submodule pointer changes and copied guardrail changes.
 
 Submodule hygiene rules:
 
-- Treat `_ops/devctl` and `_ops/workflow` as read-only tool submodules.
+- Treat `.xflow/ops/devctl` and `.xflow/ops/workflow` as read-only tool submodules.
 - Do not write logs, caches, TDD results, Claude outputs, or review artifacts
-  inside `_ops/*`.
-- Write workflow artifacts to `.xflow/` or `.xflow-local/`.
-- If `_ops/*` contains byproducts such as `__pycache__/`, `*.pyc`,
+  inside `.xflow/ops/*`.
+- Write workflow artifacts to `.xflow/` or `.xflow/local/`.
+- If `.xflow/ops/*` contains byproducts such as `__pycache__/`, `*.pyc`,
   `.pytest_cache/`, `*.tmp`, or `*.log`, remove them before local review.
 
 Remote-write rules:
@@ -64,7 +75,7 @@ Remote-write rules:
   review of the exact artifact and command.
 - TDD output is required but never replaces human judgement.
 - Approval for one action authorizes only that next action.
-- Use `.xflow/issue-<id>/approvals/local-review.md` to bind the approved file,
+- Use `.xflow/issues/issue-<id>/approvals/local-review.md` to bind the approved file,
   approved action, and SHA256.
 
 Shell safety rules:
@@ -72,8 +83,8 @@ Shell safety rules:
 - Use body files for long or shell-sensitive content.
 - Do not pass multiline Markdown, fenced code, inline backticks, JSON, shell
   snippets, or text containing `$()` through inline `--body`.
-- Write complex Issue, comment, and MR bodies to `.xflow-local/*.md` or
-  `.xflow/issue-<id>/*.md`, then pass them with `--body-file`.
+- Write complex Issue, comment, and MR bodies to `.xflow/local/*.md` or
+  `.xflow/issues/issue-<id>/*.md`, then pass them with `--body-file`.
 - Prefer short commands over nested PowerShell/WSL/Bash one-liners.
 - For PowerShell scripts that invoke native commands, dot-source
   `.xflow/tools/xflow-powershell-native.ps1` and use `Invoke-XFlowNative` or
@@ -92,8 +103,10 @@ Shell safety rules:
 
 Expected initialization outputs:
 
-- `_ops/devctl`
-- `_ops/workflow`
+- `.xflow/ops/devctl`
+- `.xflow/ops/workflow`
+- `manuscript/`
+- `assets/`
 - `devctl`
 - `devctl.ps1`
 - `SKILL.md`

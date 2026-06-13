@@ -21,7 +21,25 @@ This contract links `xflow-skills@academic` and `xflow-devctl@academic`.
   recommendation.
 - Python bytecode policy: launchers must set `PYTHONDONTWRITEBYTECODE=1` before
   invoking the Python core.
-- Pre-Issue draft location: `.xflow/issue-draft/`.
+- Pre-Issue draft location: `.xflow/issues/issue-draft/`.
+- Workflow-local scratch location: `.xflow/local/`.
+- Tool submodule locations: `.xflow/ops/devctl` and `.xflow/ops/workflow`.
+- Task artifact location: `.xflow/issues/issue-<id>/`.
+
+## Branch Semantics Contract
+
+`academic` identifies the XFlow product line for the tool repositories. It must
+not be used as the default paper repository branch by template convention.
+
+Academic issue and MR templates must include:
+
+- `Workflow Product Line: academic`
+- `Paper Base Branch:`
+- `Task Branch:`
+
+`Target Branch: academic` is invalid because it conflates the tool product line
+with the paper repository's base or task branch. `xflow-devctl@academic` must
+reject that obsolete field in academic issue and MR checks.
 
 ## Cursor Compatibility Contract
 
@@ -38,7 +56,7 @@ source of truth. It must not require Codex skill installation.
 Cursor initialization must copy:
 
 ```text
-_ops/workflow/templates/cursorrules.academic -> .cursorrules
+.xflow/ops/workflow/templates/cursorrules.academic -> .cursorrules
 ```
 
 The `.cursorrules` file is a Cursor guardrail, not a replacement for executable
@@ -57,12 +75,12 @@ fetch -> pin reviewed SHA -> test -> human review -> commit
 
 The parent paper repository update is valid only when:
 
-- `_ops/devctl` points to a human-reviewed `xflow-devctl@academic` commit.
-- `_ops/workflow` points to a human-reviewed `xflow-skills@academic` commit.
-- `.gitmodules` uses `ignore = untracked` for `_ops/devctl` and
-  `_ops/workflow`.
+- `.xflow/ops/devctl` points to a human-reviewed `xflow-devctl@academic` commit.
+- `.xflow/ops/workflow` points to a human-reviewed `xflow-skills@academic` commit.
+- `.gitmodules` uses `ignore = untracked` for `.xflow/ops/devctl` and
+  `.xflow/ops/workflow`.
 - copied guardrails such as `SKILL.md` and `.cursorrules` are synced from the
-  reviewed `_ops/workflow` commit.
+  reviewed `.xflow/ops/workflow` commit.
 - local checks have been run and recorded in the task's TDD result or update
   review record.
 - the human reviewer approves the exact submodule pointer changes and copied
@@ -75,15 +93,15 @@ steps without a local human review gate.
 ## Submodule Hygiene Contract
 
 Tool submodules are read-only from the parent paper repository. Generated
-artifacts must not be written under `_ops/devctl` or `_ops/workflow`.
+artifacts must not be written under `.xflow/ops/devctl` or `.xflow/ops/workflow`.
 
 `devctl check submodule-hygiene` is responsible for checking that:
 
-- `_ops/devctl` and `_ops/workflow` do not contain tracked modifications.
+- `.xflow/ops/devctl` and `.xflow/ops/workflow` do not contain tracked modifications.
 - common byproducts such as `__pycache__/`, `*.pyc`, `.pytest_cache/`, `*.tmp`,
   and `*.log` are absent from tool submodules.
-- `.gitmodules` sets `ignore = untracked` for `_ops/devctl` and
-  `_ops/workflow`.
+- `.gitmodules` sets `ignore = untracked` for `.xflow/ops/devctl` and
+  `.xflow/ops/workflow`.
 
 The parent repository may intentionally commit submodule pointer changes after
 human review, but it must not hide tracked tool modifications with
@@ -109,7 +127,7 @@ On Windows PowerShell:
 - when output capture is needed, write to a temporary log file and inspect
   `$LASTEXITCODE` immediately after the native command;
 - verify Git side effects with `git status --short`, `git submodule status`,
-  `Test-Path .\.gitmodules`, and the expected `_ops/*` paths.
+  `Test-Path .\.gitmodules`, and the expected `.xflow/ops/*` paths.
 
 ## Claude Delegation Contract
 
@@ -166,6 +184,21 @@ Remote writes include:
 - MR/PR creation
 - issue close
 - branch cleanup when tied to a closed remote task
+
+## GitHub Issue Provider Contract
+
+`devctl issue create` in academic Python mode must:
+
+- require `--body-file`;
+- validate the local review approval before any network request;
+- read `GITHUB_TOKEN` or one of its supported aliases;
+- resolve the repository from `DEVCTL_OWNER`/`DEVCTL_REPO` or `origin`;
+- create the GitHub Issue with the reviewed body file and comma-separated
+  labels;
+- print the remote Issue number and URL returned by GitHub.
+
+If `XFLOW_PLATFORM=gitee`, the Python academic provider must fail closed until
+Gitee is explicitly ported.
 
 ## Approved Action Values
 

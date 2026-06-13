@@ -9,7 +9,9 @@ tasks. Keep headings stable because `devctl check` validates them.
 # Academic Issue Draft
 
 Task Type: <translation|polish|review|survey|submission|tooling>
-Target Branch: academic
+Workflow Product Line: academic
+Paper Base Branch: <main|master|user-defined>
+Task Branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic-xflow-<date>>
 Target Artifacts:
 - <paper.md or tool path>
 
@@ -133,15 +135,17 @@ Retry Count: <number>
 # MR Draft
 
 Issue: <id>
-Target Branch: academic
+Workflow Product Line: academic
+Paper Base Branch: <main|master|user-defined>
+Task Branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic-xflow-<date>>
 
 ## Summary
 - <change summary>
 
 ## Evidence
-- TDD Result: .xflow/issue-<id>/tdd-result.md
-- Claude Result: .xflow/issue-<id>/claude-result.md
-- Local Review: .xflow/issue-<id>/approvals/local-review.md
+- TDD Result: .xflow/issues/issue-<id>/tdd-result.md
+- Claude Result: .xflow/issues/issue-<id>/claude-result.md
+- Local Review: .xflow/issues/issue-<id>/approvals/local-review.md
 
 ## Verification
 - <commands run>

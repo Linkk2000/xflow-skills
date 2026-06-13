@@ -11,7 +11,7 @@ description: 通用型 Git & Issue TDD 开发工作流。适用于在本地通�
 
 ## 目的 (Purpose)
 
-本 Skill 用于引导 AI 助手遵循高标准、高品质的项目闭环开发工作流。AI 助手将遵循本地 `devctl` 工作流工具（一般以子模块形式挂载在项目根目录下的 `_ops` 目录或直接存放在根目录下），执行包含：原始需求梳理、远程 issue 创建、开发分支检出、测试先行开发（TDD）、Planning with Files 进度落盘、Pull Request 发起及本地关闭分支与 Issue 的闭环控制。
+本 Skill 用于引导 AI 助手遵循高标准、高品质的项目闭环开发工作流。AI 助手将遵循本地 `devctl` 工作流工具（一般以子模块形式挂载在项目根目录下的 `.xflow/ops` 目录或直接存放在根目录下），执行包含：原始需求梳理、远程 issue 创建、开发分支检出、测试先行开发（TDD）、Planning with Files 进度落盘、Pull Request 发起及本地关闭分支与 Issue 的闭环控制。
 
 本工作流通过**项目上下文自适应探查协议**，实现与具体项目结构、语言及路径的完全解耦。
 
@@ -85,9 +85,9 @@ description: 通用型 Git & Issue TDD 开发工作流。适用于在本地通�
 
 ## Planning with Files 规范 (去平台依赖与沙盒化归档)
 
-为了保证长周期开发的可打断性、多 AI 客户端（如 Cursor、Cline、Gpt 网页端）的绝对兼容，以及历史设计决策的永久可追溯性，AI 助手必须在当前项目根目录下的 `.xflow/issue-<number>/` 独立目录中创建和维护规划文件（其中 `<number>` 为当前 Issue 编号，如 `.xflow/issue-12/task.md`）。禁止依赖任何特定 AI 平台的内置 Artifact 机制或在根目录下直接写入单一文件：
+为了保证长周期开发的可打断性、多 AI 客户端（如 Cursor、Cline、Gpt 网页端）的绝对兼容，以及历史设计决策的永久可追溯性，AI 助手必须在当前项目根目录下的 `.xflow/issues/issue-<number>/` 独立目录中创建和维护规划文件（其中 `<number>` 为当前 Issue 编号，如 `.xflow/issues/issue-12/task.md`）。禁止依赖任何特定 AI 平台的内置 Artifact 机制或在根目录下直接写入单一文件：
 
-1. **方案设计（.xflow/issue-<number>/implementation_plan.md）**：
+1. **方案设计（.xflow/issues/issue-<number>/implementation_plan.md）**：
    在开始任何任务或重大修改前，必须先在项目内的 issue 文件夹中创建此文件。内容应包括：
    - 目标描述与背景
    - 待澄清的开放性问题
@@ -95,13 +95,13 @@ description: 通用型 Git & Issue TDD 开发工作流。适用于在本地通�
    - 依赖关系评估（确认无循环依赖、无反向越界依赖）
    - 该方案被用户确认后，方可进入开发。
 
-2. **待办追踪（.xflow/issue-<number>/task.md）**：
+2. **待办追踪（.xflow/issues/issue-<number>/task.md）**：
    这是开发过程中的活性进度看板。
    - 每一项功能或重构任务之前，必须包含一个 `- [ ] 先编写/确认对应的失败测试` 的子待办项。
    - 必须确保该失败测试子项变为已完成 `[x]` 后，方可开始实现对应的业务功能代码（恪守 TDD 原则）。
    - 随着进度，AI 助手需要增量更新此文件的状态，并及时提交到 Git。
 
-3. **变更交付（.xflow/issue-<number>/walkthrough.md）**：
+3. **变更交付（.xflow/issues/issue-<number>/walkthrough.md）**：
    - 在任务结束且测试全部通过后更新，记录修改的文件、测试命令和运行通过的验证证据。
 
 这些文件是项目仓库本身历史的一部分，应被纳入 Git 版本控制，使任何人在任何机器克隆代码后，均能立即通过读取对应的 issue 目录，还原和接管开发进度。

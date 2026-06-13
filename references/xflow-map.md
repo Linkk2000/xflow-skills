@@ -10,7 +10,7 @@ preparing MR/PR content, or performing remote writes:
 - `references/academic-templates.md`
 - `references/academic-schema-contract.md`
 
-Academic tasks use local template artifacts under `.xflow/issue-<id>/`.
+Academic tasks use local template artifacts under `.xflow/issues/issue-<id>/`.
 TDD/verify output is recorded in `tdd-result.md` and is a required local review
 input. It proves only machine-checkable readiness; it does not replace human
 review.
@@ -46,7 +46,7 @@ Run from the owning repository.
 
 ```bash
 ./devctl help
-./devctl issue create "<title>" --body-file .xflow-local/issue-body.md --labels "tdd,frontend"
+./devctl issue create "<title>" --body-file .xflow/local/issue-body.md --labels "tdd,frontend"
 ./devctl issue close <number> --comment "<confirmed summary>"
 ./devctl issue list --state open --limit 20
 ./devctl issue show <number>
@@ -56,7 +56,7 @@ Run from the owning repository.
 ./devctl git status
 ./devctl git commit-msg -a
 ./devctl git commit-msg -ac
-./devctl git mr --title "<title>" --body-file .xflow/issue-<id>/mr-draft.md --issue <number>
+./devctl git mr --title "<title>" --body-file .xflow/issues/issue-<id>/mr-draft.md --issue <number>
 ./devctl git done
 ```
 

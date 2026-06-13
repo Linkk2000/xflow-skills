@@ -18,6 +18,29 @@ Academic XFlow uses two review layers:
 TDD or verification output never replaces human judgement. It only proves
 that the basic, machine-checkable target has been reached.
 
+## Branch Semantics Rule
+
+`academic` is the XFlow tool product line branch for `xflow-devctl` and
+`xflow-skills`. It is not the paper repository's default branch and not the
+normal task branch for paper work.
+
+Paper repositories keep their own base branch, usually `main`, `master`, or a
+human-defined branch. Academic tasks run on ordinary task branches such as
+`feature/<issue>-<slug>`, `review/<issue>-<slug>`, or
+`chore/update-academic-xflow-<date>`.
+
+Every academic issue and MR draft must declare these three fields:
+
+```text
+Workflow Product Line: academic
+Paper Base Branch: <main|master|user-defined>
+Task Branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic-xflow-<date>>
+```
+
+Do not create or push an `academic` branch in the paper repository unless the
+human reviewer explicitly approves that repository policy. A paper repository
+MR/PR should target the paper base branch, not the tool product line branch.
+
 ## Python Runtime Preflight
 
 Academic devctl uses a Python 3.10+ core for UTF-8, path, template, and approval
@@ -41,33 +64,41 @@ can initialize and operate the workflow if it can see these three repositories:
 3. The user's paper repository: the Markdown, LaTeX, data, and `.xflow/`
    artifacts for a specific research project.
 
-The paper repository should mount the two XFlow repositories under `_ops/`:
+The paper repository should keep paper materials and workflow machinery in
+separate areas. The recommended v2 layout is:
 
 ```text
 <paper-repo>/
-  _ops/devctl/      -> xflow-devctl academic
-  _ops/workflow/    -> xflow-skills academic
-  devctl            -> project wrapper
-  devctl.ps1        -> project wrapper
-  SKILL.md          -> synced workflow entrypoint
-  .cursorrules      -> Cursor-specific guardrail template
-  .xflow/tools/xflow-powershell-native.ps1
-                    -> composable PowerShell native command helper
-  .xflow/           -> local task artifacts
+  manuscript/             -> paper text, LaTeX, Markdown, chapters
+  assets/                 -> figures, tables, appendix media
+  data/                   -> research or experiment data when tracked
+  references/             -> bibliography, notes, citation materials
+
+  .xflow/
+    ops/devctl/           -> xflow-devctl academic
+    ops/workflow/         -> xflow-skills academic
+    issues/issue-<id>/    -> task, TDD, Claude, MR, review artifacts
+    tools/                -> local workflow helpers
+    local/                -> temporary body files, logs, scratch outputs
+
+  devctl                  -> project wrapper
+  devctl.ps1              -> project wrapper
+  SKILL.md                -> synced workflow entrypoint
+  .cursorrules            -> Cursor-specific guardrail template
 ```
 
 The paper repository `.gitmodules` must keep tool submodules on SSH URLs and
 set `ignore = untracked` for both tool paths:
 
 ```ini
-[submodule "_ops/devctl"]
-    path = _ops/devctl
+[submodule ".xflow/ops/devctl"]
+    path = .xflow/ops/devctl
     url = git@github.com:Linkk2000/xflow-devctl.git
     branch = academic
     ignore = untracked
 
-[submodule "_ops/workflow"]
-    path = _ops/workflow
+[submodule ".xflow/ops/workflow"]
+    path = .xflow/ops/workflow
     url = git@github.com:Linkk2000/xflow-skills.git
     branch = academic
     ignore = untracked
@@ -81,10 +112,10 @@ Cursor or another upper AI must read the paper repository's `AGENTS.md`,
 `SKILL.md`, and relevant `references/*.md` files, then use `devctl` commands
 instead of relying on Codex-specific skill installation.
 
-When Cursor is the upper AI, copy `_ops/workflow/templates/cursorrules.academic`
+When Cursor is the upper AI, copy `.xflow/ops/workflow/templates/cursorrules.academic`
 to `<paper-repo>/.cursorrules` during initialization.
 
-Also copy `_ops/workflow/templates/xflow-powershell-native.ps1` to
+Also copy `.xflow/ops/workflow/templates/xflow-powershell-native.ps1` to
 `<paper-repo>/.xflow/tools/xflow-powershell-native.ps1`. PowerShell scripts
 that run native commands should dot-source this helper.
 
@@ -100,14 +131,39 @@ On Windows, PowerShell users may run:
 .\devctl.ps1 preflight
 ```
 
+## GitHub Issue Provider
+
+In Academic XFlow, remote Issue creation is handled by the Python devctl core
+after the local approval gate passes. For GitHub repositories, set
+`GITHUB_TOKEN` in the environment before running:
+
+```bash
+./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --labels "academic"
+```
+
+On Windows PowerShell:
+
+```powershell
+.\devctl.ps1 issue create "<title>" --body-file .\.xflow\issues\issue-draft\issue-draft.md --labels "academic"
+```
+
+The command must not be run until the human reviewer has approved the exact
+issue draft file and `.xflow/issues/issue-draft/approvals/local-review.md`
+contains the matching SHA256. If the repository has no detectable GitHub
+origin, set `DEVCTL_OWNER` and `DEVCTL_REPO` explicitly.
+
+The Python academic provider currently supports GitHub Issue creation. Gitee
+Issue creation remains available only through the legacy shell provider path
+and must not be assumed available in academic Python mode until it is ported.
+
 ## Updating An Initialized Paper Repository
 
 Already-initialized paper repositories must not silently track the latest
 `academic` branch heads. Updates are reviewable repository changes, not
 background maintenance.
 
-Use this sequence for a paper repository that already contains `_ops/devctl`
-and `_ops/workflow`:
+Use this sequence for a paper repository that already contains `.xflow/ops/devctl`
+and `.xflow/ops/workflow`:
 
 ```text
 fetch -> pin reviewed SHA -> test -> human review -> commit
@@ -122,32 +178,32 @@ git switch -c chore/update-academic-xflow-<date>
 Fetch the two tool repositories without changing the parent repository yet:
 
 ```bash
-git -C _ops/devctl fetch origin academic
-git -C _ops/workflow fetch origin academic
+git -C .xflow/ops/devctl fetch origin academic
+git -C .xflow/ops/workflow fetch origin academic
 ```
 
 Pin reviewed SHA values, not whatever happens to be latest at execution time:
 
 ```bash
-git -C _ops/devctl checkout <reviewed-devctl-sha>
-git -C _ops/workflow checkout <reviewed-workflow-sha>
+git -C .xflow/ops/devctl checkout <reviewed-devctl-sha>
+git -C .xflow/ops/workflow checkout <reviewed-workflow-sha>
 ```
 
 After pinning, sync generated or copied guardrail files from the workflow
 submodule:
 
 ```bash
-cp _ops/workflow/SKILL.md ./SKILL.md
-cp _ops/workflow/templates/cursorrules.academic ./.cursorrules
+cp .xflow/ops/workflow/SKILL.md ./SKILL.md
+cp .xflow/ops/workflow/templates/cursorrules.academic ./.cursorrules
 ```
 
 On Windows PowerShell:
 
 ```powershell
-Copy-Item _ops\workflow\SKILL.md .\SKILL.md -Force
-Copy-Item _ops\workflow\templates\cursorrules.academic .\.cursorrules -Force
+Copy-Item .\.xflow\ops\workflow\SKILL.md .\SKILL.md -Force
+Copy-Item .\.xflow\ops\workflow\templates\cursorrules.academic .\.cursorrules -Force
 New-Item -ItemType Directory -Force .\.xflow\tools | Out-Null
-Copy-Item _ops\workflow\templates\xflow-powershell-native.ps1 .\.xflow\tools\xflow-powershell-native.ps1 -Force
+Copy-Item .\.xflow\ops\workflow\templates\xflow-powershell-native.ps1 .\.xflow\tools\xflow-powershell-native.ps1 -Force
 ```
 
 Run local checks before requesting review:
@@ -173,8 +229,8 @@ On Windows PowerShell:
 The update commit in the paper repository should contain only intentional
 update surfaces:
 
-- `_ops/devctl`: commit the submodule pointer to the reviewed devctl SHA.
-- `_ops/workflow`: commit the submodule pointer to the reviewed workflow SHA.
+- `.xflow/ops/devctl`: commit the submodule pointer to the reviewed devctl SHA.
+- `.xflow/ops/workflow`: commit the submodule pointer to the reviewed workflow SHA.
 - `SKILL.md`: commit the synced workflow entrypoint when it changed.
 - `.cursorrules`: commit the synced Cursor guardrail when it changed.
 - `devctl` and `devctl.ps1`: commit wrapper changes only when the update
@@ -187,10 +243,10 @@ new local task branch or restore the previous reviewed submodule pointers.
 
 ## Submodule Hygiene Rule
 
-`_ops/devctl` and `_ops/workflow` are read-only tool submodules from the paper
+`.xflow/ops/devctl` and `.xflow/ops/workflow` are read-only tool submodules from the paper
 repository point of view. Workflow artifacts, logs, Claude outputs, TDD
-results, and review files must be written to `.xflow/` or `.xflow-local/`, not
-inside `_ops/*`.
+results, and review files must be written to `.xflow/` or `.xflow/local/`, not
+inside `.xflow/ops/*`.
 
 Before local review, run:
 
@@ -206,10 +262,10 @@ On Windows PowerShell:
 
 The hygiene check verifies:
 
-- `_ops/devctl` has no tracked modifications.
-- `_ops/workflow` has no tracked modifications.
+- `.xflow/ops/devctl` has no tracked modifications.
+- `.xflow/ops/workflow` has no tracked modifications.
 - common byproducts such as `__pycache__/`, `*.pyc`, `.pytest_cache/`, `*.tmp`,
-  and `*.log` are not present under `_ops/*`.
+  and `*.log` are not present under `.xflow/ops/*`.
 - `.gitmodules` uses `ignore = untracked` for both tool submodules.
 
 If the check fails, remove the byproduct or restore the tool submodule before
@@ -233,7 +289,7 @@ Invoke-XFlowGit -GitArguments @(
     "submodule", "add",
     "-b", "academic",
     "git@github.com:Linkk2000/xflow-skills.git",
-    "_ops/workflow"
+    ".xflow/ops/workflow"
 )
 ```
 
@@ -252,7 +308,7 @@ $result = Invoke-XFlowGit -GitArguments @(
     "submodule", "add",
     "-b", "academic",
     "git@github.com:Linkk2000/xflow-skills.git",
-    "_ops/workflow"
+    ".xflow/ops/workflow"
 ) -CaptureOutput
 ```
 
@@ -271,7 +327,7 @@ submodule operations, verify the state with:
 ```powershell
 git submodule status
 git status --short
-Test-Path .\_ops\workflow
+Test-Path .\.xflow\ops\workflow
 Test-Path .\.gitmodules
 ```
 
@@ -280,7 +336,7 @@ Test-Path .\.gitmodules
 Each academic task must keep auditable files under:
 
 ```text
-.xflow/issue-<id>/
+.xflow/issues/issue-<id>/
   issue-draft.md
   implementation_plan.md
   task.md
@@ -304,7 +360,7 @@ S1_LOCAL_ISSUE_DRAFT
 G1_LOCAL_APPROVE_ISSUE
 S2_CREATE_REMOTE_ISSUE
 G2_APPROVE_DEVELOPMENT
-S3_START_ACADEMIC_BRANCH
+S3_START_TASK_BRANCH
 S4_EXECUTE_AI_OR_CLAUDE_TASK
 S5_WRITE_TDD_RESULT
 G3_LOCAL_REVIEW_RESULT
@@ -361,7 +417,7 @@ Use this command for controlled delegation:
 devctl claude run --issue <id>
 ```
 
-The command validates `.xflow/issue-<id>/claude-task.md`, passes its full
+The command validates `.xflow/issues/issue-<id>/claude-task.md`, passes its full
 content to the local Claude CLI, and writes the result to the task package's
 `Output File`. The default Claude command is `claude -p <task-package-content>`.
 Advanced users may override the command prefix with `DEVCTL_CLAUDE_COMMAND`.
@@ -393,8 +449,8 @@ passed with `--body-file`.
 Preferred locations:
 
 ```text
-.xflow-local/<purpose>.md
-.xflow/issue-<id>/<purpose>.md
+.xflow/local/<purpose>.md
+.xflow/issues/issue-<id>/<purpose>.md
 ```
 
 ## Required Checks
