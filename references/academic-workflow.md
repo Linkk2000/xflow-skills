@@ -18,6 +18,16 @@ Academic XFlow uses two review layers:
 TDD or verification output never replaces human judgement. It only proves
 that the basic, machine-checkable target has been reached.
 
+## Python Runtime Preflight
+
+Academic devctl uses a Python 3.10+ core for UTF-8, path, template, and approval
+gate handling. Before remote writes or local installer actions, AI assistants
+must run `devctl preflight` and record the result in the TDD result sheet.
+
+If Python 3.10+ is missing, devctl must fail closed. AI assistants must not
+silently install Python. Installation requires a local human review approval
+that names the installer command and the reason it is needed.
+
 ## Required Local Artifacts
 
 Each academic task must keep auditable files under:

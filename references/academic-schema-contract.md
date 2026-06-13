@@ -12,6 +12,14 @@ This contract links `xflow-skills@academic` and `xflow-devctl@academic`.
   - `devctl check academic-mr`
   - `devctl check local-review`
 
+## Runtime Contract
+
+- Required runtime: Python 3.10 or newer.
+- Initial dependency policy: Python standard library only.
+- Missing Python behavior: fail closed and provide a reviewable installation
+  recommendation.
+- Pre-Issue draft location: `.xflow/issue-draft/`.
+
 ## Compatibility Rule
 
 Any change to required template headings must update:
