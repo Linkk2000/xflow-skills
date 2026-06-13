@@ -18,7 +18,33 @@ This contract links `xflow-skills@academic` and `xflow-devctl@academic`.
 - Initial dependency policy: Python standard library only.
 - Missing Python behavior: fail closed and provide a reviewable installation
   recommendation.
+- Python bytecode policy: launchers must set `PYTHONDONTWRITEBYTECODE=1` before
+  invoking the Python core.
 - Pre-Issue draft location: `.xflow/issue-draft/`.
+
+## Cursor Compatibility Contract
+
+Codex is not a runtime dependency. Cursor or another upper AI may operate the
+academic workflow when it can access:
+
+- `xflow-devctl@academic`
+- `xflow-skills@academic`
+- the user's paper repository
+
+The upper AI must use repository-local files and `devctl` commands as the
+source of truth. It must not require Codex skill installation.
+
+## Claude Delegation Contract
+
+Claude delegation is exposed through:
+
+```bash
+devctl claude run --issue <id> [--file F] [--output F] [--dry-run]
+```
+
+The command must validate the Claude task package before execution, use the
+local Claude CLI, write the result to a repository-local output file, and leave
+remote-write approval gates unchanged.
 
 ## Compatibility Rule
 

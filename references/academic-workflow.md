@@ -28,6 +28,47 @@ If Python 3.10+ is missing, devctl must fail closed. AI assistants must not
 silently install Python. Installation requires a local human review approval
 that names the installer command and the reason it is needed.
 
+Python bytecode caches must not pollute workflow repositories. Academic devctl
+launchers set `PYTHONDONTWRITEBYTECODE=1` before invoking the Python core.
+
+## Cursor And Three-Repository Setup
+
+Academic users do not need Codex to use this workflow. A Cursor-like upper AI
+can initialize and operate the workflow if it can see these three repositories:
+
+1. `xflow-devctl@academic`: the executable local workflow tool.
+2. `xflow-skills@academic`: the academic workflow rules and templates.
+3. The user's paper repository: the Markdown, LaTeX, data, and `.xflow/`
+   artifacts for a specific research project.
+
+The paper repository should mount the two XFlow repositories under `_ops/`:
+
+```text
+<paper-repo>/
+  _ops/devctl/      -> xflow-devctl academic
+  _ops/workflow/    -> xflow-skills academic
+  devctl            -> project wrapper
+  devctl.ps1        -> project wrapper
+  SKILL.md          -> synced workflow entrypoint
+  .xflow/           -> local task artifacts
+```
+
+Cursor or another upper AI must read the paper repository's `AGENTS.md`,
+`SKILL.md`, and relevant `references/*.md` files, then use `devctl` commands
+instead of relying on Codex-specific skill installation.
+
+The first local check in a paper repository is:
+
+```bash
+./devctl preflight
+```
+
+On Windows, PowerShell users may run:
+
+```powershell
+.\devctl.ps1 preflight
+```
+
 ## Required Local Artifacts
 
 Each academic task must keep auditable files under:
@@ -107,6 +148,22 @@ local Claude installation automatically, but only through a task package.
 Claude output is never final by itself. It must be archived as a reviewable
 artifact, checked by `devctl`, and approved by the human reviewer before it can
 be used in final documents or remote MR/PRs.
+
+Use this command for controlled delegation:
+
+```bash
+devctl claude run --issue <id>
+```
+
+The command validates `.xflow/issue-<id>/claude-task.md`, passes its full
+content to the local Claude CLI, and writes the result to the task package's
+`Output File`. The default Claude command is `claude -p <task-package-content>`.
+Advanced users may override the command prefix with `DEVCTL_CLAUDE_COMMAND`.
+
+Upper AIs must not ask users to manually copy prompts into Claude for normal
+workflow execution. The upper AI should prepare the task package, run
+`devctl claude run`, inspect the result file, run the required checks, and then
+ask for human review.
 
 ## Required Checks
 
