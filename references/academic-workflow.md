@@ -131,11 +131,11 @@ On Windows, PowerShell users may run:
 .\devctl.ps1 preflight
 ```
 
-## GitHub Issue Provider
+## GitHub Issue And PR Provider
 
-In Academic XFlow, remote Issue creation is handled by the Python devctl core
-after the local approval gate passes. For GitHub repositories, set
-`GITHUB_TOKEN` in the environment before running:
+In Academic XFlow, GitHub Issue creation and PR creation are handled by the
+Python devctl core after the local approval gate passes. For GitHub
+repositories, set `GITHUB_TOKEN` in the environment before running:
 
 ```bash
 ./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --labels "academic"
@@ -152,9 +152,26 @@ issue draft file and `.xflow/issues/issue-draft/approvals/local-review.md`
 contains the matching SHA256. If the repository has no detectable GitHub
 origin, set `DEVCTL_OWNER` and `DEVCTL_REPO` explicitly.
 
-The Python academic provider currently supports GitHub Issue creation. Gitee
-Issue creation remains available only through the legacy shell provider path
-and must not be assumed available in academic Python mode until it is ported.
+For GitHub PR creation, prepare and approve the MR draft first:
+
+```bash
+./devctl git mr --title "<title>" --body-file .xflow/issues/issue-<id>/mr-draft.md --base main --issue <id>
+```
+
+On Windows PowerShell:
+
+```powershell
+.\devctl.ps1 git mr --title "<title>" --body-file .\.xflow\issues\issue-<id>\mr-draft.md --base main --issue <id>
+```
+
+The command validates `.xflow/issues/issue-<id>/approvals/local-review.md`
+before pushing or creating the PR. Inline `--body` is rejected in academic
+Python mode; use `--body-file` or the default issue MR draft.
+
+The Python academic provider currently supports GitHub Issue and PR creation.
+Gitee Issue/PR creation remains available only through the legacy shell
+provider path and must not be assumed available in academic Python mode until
+it is ported.
 
 ## Updating An Initialized Paper Repository
 

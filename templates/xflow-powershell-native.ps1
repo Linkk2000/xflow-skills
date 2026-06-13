@@ -7,6 +7,37 @@
 
 Set-StrictMode -Version 3.0
 
+function Initialize-XFlowPowerShellEncoding {
+    $utf8 = [System.Text.UTF8Encoding]::new($false)
+    [Console]::InputEncoding = $utf8
+    [Console]::OutputEncoding = $utf8
+    $script:OutputEncoding = $utf8
+    $global:OutputEncoding = $utf8
+}
+
+function Assert-XFlowAsciiText {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text,
+        [string]$FieldName = "text"
+    )
+
+    if ($Text -match '[^\x00-\x7F]') {
+        throw "XFlow $FieldName must use ASCII terminal output. Write non-ASCII details to a file instead."
+    }
+}
+
+function Write-XFlowStatus {
+    param(
+        [Parameter(Mandatory = $true)]
+        [ValidateSet("PASS", "FAIL", "INFO", "WARN")]
+        [string]$Level,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Message
+    )
+
+    Assert-XFlowAsciiText -Text $Message -FieldName "status message"
+    [Console]::Out.WriteLine("[$Level] $Message")
+}
+
 function ConvertTo-XFlowNativeArgument {
     param([AllowNull()][string]$Argument)
 

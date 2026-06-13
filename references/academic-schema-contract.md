@@ -185,7 +185,7 @@ Remote writes include:
 - issue close
 - branch cleanup when tied to a closed remote task
 
-## GitHub Issue Provider Contract
+## GitHub Issue And PR Provider Contract
 
 `devctl issue create` in academic Python mode must:
 
@@ -199,6 +199,17 @@ Remote writes include:
 
 If `XFLOW_PLATFORM=gitee`, the Python academic provider must fail closed until
 Gitee is explicitly ported.
+
+`devctl git mr` in academic Python mode must:
+
+- reject inline `--body`;
+- use `--body-file` or `.xflow/issues/issue-<id>/mr-draft.md`;
+- validate the local review approval before push or network request;
+- push the current task branch unless `DEVCTL_SKIP_PUSH=1`;
+- create the GitHub PR with the reviewed body file, current branch as `head`,
+  and requested or detected paper base branch as `base`;
+- write the returned PR number to local git config `devctl.pr`;
+- print the remote PR number and URL returned by GitHub.
 
 ## Approved Action Values
 

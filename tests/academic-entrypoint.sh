@@ -42,6 +42,9 @@ require_ref "templates/cursorrules.academic" 'Do not pipe native Git commands th
 require_ref "templates/cursorrules.academic" '$LASTEXITCODE'
 require_ref "templates/cursorrules.academic" ".xflow/tools/xflow-powershell-native.ps1"
 require_ref "templates/cursorrules.academic" "Do not combine multiple native commands in one PowerShell line"
+require_ref "templates/cursorrules.academic" "PowerShell check scripts must use ASCII terminal output"
+require_ref "templates/cursorrules.academic" "Initialize-XFlowPowerShellEncoding"
+require_ref "templates/cursorrules.academic" "Write-XFlowStatus"
 require_ref "templates/cursorrules.academic" "Git-facing text only"
 require_ref "templates/cursorrules.academic" "commit messages, remote Issue titles/bodies, and MR/PR"
 require_ref "templates/cursorrules.academic" "titles/bodies should follow the user's language"
@@ -55,6 +58,8 @@ require_ref "templates/cursorrules.academic" "Task Branch"
 require_ref "templates/cursorrules.academic" 'Do not create or push an `academic` branch in the paper repository'
 require_ref "templates/xflow-powershell-native.ps1" "function Invoke-XFlowNative"
 require_ref "templates/xflow-powershell-native.ps1" "function Invoke-XFlowGit"
+require_ref "templates/xflow-powershell-native.ps1" "function Initialize-XFlowPowerShellEncoding"
+require_ref "templates/xflow-powershell-native.ps1" "function Write-XFlowStatus"
 require_ref "templates/xflow-powershell-native.ps1" "GitArguments"
 require_ref "templates/xflow-powershell-native.ps1" "Start-Process"
 require_ref "templates/xflow-powershell-native.ps1" "ExitCode"
@@ -73,8 +78,9 @@ require_ref "references/academic-workflow.md" "commit the submodule pointer"
 require_ref "references/academic-workflow.md" "ignore = untracked"
 require_ref "references/academic-workflow.md" "devctl check submodule-hygiene"
 require_ref "references/academic-workflow.md" "PowerShell Native Git Rule"
-require_ref "references/academic-workflow.md" "GitHub Issue Provider"
+require_ref "references/academic-workflow.md" "GitHub Issue And PR Provider"
 require_ref "references/academic-workflow.md" "GITHUB_TOKEN"
+require_ref "references/academic-workflow.md" "devctl git mr --title"
 require_ref "references/academic-workflow.md" 'Do not use `2>&1 | Out-String` for `git submodule add`, `git clone`, `git fetch`, or `git checkout`'
 require_ref "references/academic-workflow.md" "Do not combine multiple native commands in one PowerShell line"
 require_ref "references/academic-workflow.md" "Branch Semantics Rule"
@@ -94,7 +100,10 @@ require_ref "references/academic-schema-contract.md" ".xflow/ops/devctl"
 require_ref "references/academic-schema-contract.md" ".xflow/ops/workflow"
 require_ref "references/academic-schema-contract.md" ".xflow/issues/issue-<id>/"
 require_ref "references/academic-schema-contract.md" "Branch Semantics Contract"
-require_ref "references/academic-schema-contract.md" "GitHub Issue Provider Contract"
+require_ref "references/academic-schema-contract.md" "GitHub Issue And PR Provider Contract"
+require_ref "references/academic-schema-contract.md" '`devctl git mr` in academic Python mode must'
+require_ref "templates/cursorrules.academic" "For GitHub PR creation"
+require_ref "templates/cursorrules.academic" 'devctl git mr --title "<title>" --body-file <file> --base <paper-base> --issue <id>'
 require_ref "references/academic-schema-contract.md" 'If `XFLOW_PLATFORM=gitee`, the Python academic provider must fail closed'
 require_ref "references/academic-schema-contract.md" '`Target Branch: academic` is invalid'
 require_ref "references/academic-templates.md" "Workflow Product Line: academic"

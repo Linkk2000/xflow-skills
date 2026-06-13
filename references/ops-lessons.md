@@ -49,7 +49,7 @@
 
 ## GitHub PR / Gitee MR
 
-- PR/MR 标题不要手工包含 `[#ISSUE]`。`./devctl git mr --issue <issue>` 会自动加一次 issue 前缀，避免标题重复。
+- PR/MR 标题属于 Git-facing text。若命令显式传入 `--title`，标题应按人工审核过的内容原样使用；是否包含 issue 前缀由用户和模板决定。
 - PR/MR body 必须包含：
   - 关联 issue (使用 `Closes #<issue>` 格式以便合并后联动自动关闭)
   - 本次实际实现内容

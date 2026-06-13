@@ -28,7 +28,10 @@ Runtime rules:
 - For GitHub remote Issue creation, ensure `GITHUB_TOKEN` is present, prepare
   the Issue body as a file, obtain human approval for that exact file, then run
   `devctl issue create "<title>" --body-file <file>`.
-- Do not assume Gitee Issue creation is available in academic Python mode.
+- For GitHub PR creation, prepare `.xflow/issues/issue-<id>/mr-draft.md`,
+  obtain human approval for that exact file, then run
+  `devctl git mr --title "<title>" --body-file <file> --base <paper-base> --issue <id>`.
+- Do not assume Gitee Issue/PR creation is available in academic Python mode.
 - Do not silently install Python.
 - Do not silently run `git submodule update`.
 - Do not silently register or install AcademicForge.
@@ -93,6 +96,11 @@ Shell safety rules:
 - For PowerShell scripts that invoke native commands, dot-source
   `.xflow/tools/xflow-powershell-native.ps1` and use `Invoke-XFlowNative` or
   `Invoke-XFlowGit -GitArguments @(...)`.
+- PowerShell check scripts must use ASCII terminal output for PASS/FAIL/INFO
+  lines. Dot-source `.xflow/tools/xflow-powershell-native.ps1`, call
+  `Initialize-XFlowPowerShellEncoding`, and emit status lines with
+  `Write-XFlowStatus`. Write Chinese or other non-ASCII details to Markdown
+  files instead of stdout/stderr.
 - Do not combine multiple native commands in one PowerShell line. Run one
   native command, store its result object or exit code, inspect it, then run the
   next command.
