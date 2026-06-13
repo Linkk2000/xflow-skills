@@ -31,6 +31,10 @@ require_ref "references/xflow-map.md" 'devctl git mr --title "<title>" --body-fi
 require_ref "SKILL.md" "Core Remote Write Review Gate"
 require_ref "SKILL.md" "issue-create"
 require_ref "SKILL.md" "git-mr"
+require_ref "SKILL.md" "Do not add Cursor co-author trailers"
+require_ref "templates/cursorrules.main" "Do not add Cursor co-author trailers"
+require_ref "templates/cursorrules.main" "Co-authored-by: Cursor <cursoragent@cursor.com>"
+require_ref "templates/cursorrules.main" "git commit"
 
 reject_ref "references/xflow-map.md" 'devctl git mr --title "<title>" --body "<body>"'
 
