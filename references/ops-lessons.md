@@ -44,8 +44,8 @@
 - 创建 issue 必须使用完整 Markdown 正文，不允许只创建标题。
 - 多行 issue 正文必须落到临时文件，通过仓库 devctl 的 `--body-file` 能力传递，避免在 WSL 命令行发生多重嵌套转义灾难。
 - issue 在 PR/MR 审批/合并前不要关闭。开发完成后先发 PR/MR，等待评审。
-- 开发分支开发完成后，必须使用 `devctl issue comment <number> --body "开发已完成。开发分支为 feature/<number>-<slug>"` 在 Issue 评论中进行状态反馈。
-- issue 评论也可以通过文件传递：`./devctl issue comment <issue> --body-file <file>`。评论中的图片若不是平台已上传附件，应使用分支内版本化证据文件的 raw 链接。
+- 开发分支开发完成后，必须先写入 `.xflow/issues/issue-<number>/comment-draft.md`，经人工审核后使用 `devctl issue comment <number> --body-file <file>` 在 Issue 评论中进行状态反馈。
+- academic Python 模式拒绝 issue 评论的 inline `--body`。评论中的图片若不是平台已上传附件，应使用分支内版本化证据文件的 raw 链接。
 
 ## GitHub PR / Gitee MR
 

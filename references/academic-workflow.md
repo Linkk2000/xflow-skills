@@ -133,9 +133,18 @@ On Windows, PowerShell users may run:
 
 ## GitHub Issue And PR Provider
 
-In Academic XFlow, GitHub Issue creation and PR creation are handled by the
-Python devctl core after the local approval gate passes. For GitHub
-repositories, set `GITHUB_TOKEN` in the environment before running:
+In Academic XFlow, GitHub Issue and PR operations are handled by the Python
+devctl core in academic mode. For GitHub repositories, set `GITHUB_TOKEN` in
+the environment before running remote commands.
+
+Read-only Issue commands do not require local approval:
+
+```bash
+./devctl issue list --state open --limit 20
+./devctl issue show <id>
+```
+
+Issue creation requires an approved body file:
 
 ```bash
 ./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --labels "academic"
@@ -151,6 +160,20 @@ The command must not be run until the human reviewer has approved the exact
 issue draft file and `.xflow/issues/issue-draft/approvals/local-review.md`
 contains the matching SHA256. If the repository has no detectable GitHub
 origin, set `DEVCTL_OWNER` and `DEVCTL_REPO` explicitly.
+
+Issue comments and close operations are remote writes. Prepare the exact file,
+obtain local human approval, then run:
+
+```bash
+./devctl issue comment <id> --body-file .xflow/issues/issue-<id>/comment-draft.md
+./devctl issue close <id>
+```
+
+For `issue close`, the default approved file is
+`.xflow/issues/issue-<id>/walkthrough.md`. Use
+`DEVCTL_ACADEMIC_APPROVED_FILE` only when the reviewer intentionally approves a
+different evidence file. Inline `--body` is rejected for issue comments in
+academic Python mode.
 
 For GitHub PR creation, prepare and approve the MR draft first:
 
@@ -168,10 +191,16 @@ The command validates `.xflow/issues/issue-<id>/approvals/local-review.md`
 before pushing or creating the PR. Inline `--body` is rejected in academic
 Python mode; use `--body-file` or the default issue MR draft.
 
-The Python academic provider currently supports GitHub Issue and PR creation.
-Gitee Issue/PR creation remains available only through the legacy shell
-provider path and must not be assumed available in academic Python mode until
-it is ported.
+PR inspection is read-only and does not require local approval:
+
+```bash
+./devctl git pr-get <number>
+```
+
+The Python academic provider currently supports GitHub Issue
+create/list/show/comment/close, PR creation, and PR lookup. Gitee Issue/PR
+creation remains available only through the legacy shell provider path and must
+not be assumed available in academic Python mode until it is ported.
 
 ## Updating An Initialized Paper Repository
 

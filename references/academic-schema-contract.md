@@ -197,6 +197,29 @@ Remote writes include:
   labels;
 - print the remote Issue number and URL returned by GitHub.
 
+`devctl issue list` and `devctl issue show` in academic Python mode must:
+
+- read `GITHUB_TOKEN` or one of its supported aliases;
+- resolve the repository from `DEVCTL_OWNER`/`DEVCTL_REPO` or `origin`;
+- perform read-only GitHub API requests;
+- require no local approval gate because they do not write remote state.
+
+`devctl issue comment` in academic Python mode must:
+
+- reject inline `--body`;
+- use `--body-file` or `.xflow/issues/issue-<id>/comment-draft.md`;
+- validate `Approved Action: issue-comment` before any network request;
+- post the reviewed body as a GitHub Issue comment;
+- print the remote comment URL when GitHub returns one.
+
+`devctl issue close` in academic Python mode must:
+
+- validate `Approved Action: issue-close` against
+  `.xflow/issues/issue-<id>/walkthrough.md` unless
+  `DEVCTL_ACADEMIC_APPROVED_FILE` is set;
+- close the GitHub Issue only after the approval gate passes;
+- print the remote Issue number and URL returned by GitHub.
+
 If `XFLOW_PLATFORM=gitee`, the Python academic provider must fail closed until
 Gitee is explicitly ported.
 
@@ -210,6 +233,12 @@ Gitee is explicitly ported.
   and requested or detected paper base branch as `base`;
 - write the returned PR number to local git config `devctl.pr`;
 - print the remote PR number and URL returned by GitHub.
+
+`devctl git pr-get` in academic Python mode must:
+
+- read a GitHub PR by number;
+- perform no remote write;
+- require no local approval gate.
 
 ## Approved Action Values
 

@@ -47,9 +47,10 @@ Run from the owning repository.
 ```bash
 ./devctl help
 ./devctl issue create "<title>" --body-file .xflow/local/issue-body.md --labels "tdd,frontend"
-./devctl issue close <number> --comment "<confirmed summary>"
 ./devctl issue list --state open --limit 20
 ./devctl issue show <number>
+./devctl issue comment <number> --body-file .xflow/issues/issue-<number>/comment-draft.md
+./devctl issue close <number>
 ./devctl git start <slug> --issue <number>
 ./devctl git start-issue feature <issue-id> <slug>
 ./devctl git start-issue fix <issue-id> <slug>
@@ -57,13 +58,15 @@ Run from the owning repository.
 ./devctl git commit-msg -a
 ./devctl git commit-msg -ac
 ./devctl git mr --title "<title>" --body-file .xflow/issues/issue-<id>/mr-draft.md --issue <number>
+./devctl git pr-get <number>
 ./devctl git done
 ```
 
-For issue creation, comments, and MR/PR descriptions, use `--body` only for
-short single-line text. Multi-line Markdown, fenced code, inline backticks,
-JSON, shell snippets, or text containing `$()` must be written to a file and
-passed with `--body-file` so shells do not reinterpret the content.
+For issue creation, comments, and MR/PR descriptions, prefer `--body-file`.
+Academic Python mode rejects inline `--body` for issue comments and PR/MR
+descriptions. Multi-line Markdown, fenced code, inline backticks, JSON, shell
+snippets, or text containing `$()` must be written to a file and passed with
+`--body-file` so shells do not reinterpret the content.
 
 Remote issue/MR commands require `GITEE_TOKEN` through `~/gitee.env.local` or the environment.
 

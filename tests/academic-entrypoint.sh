@@ -81,6 +81,9 @@ require_ref "references/academic-workflow.md" "PowerShell Native Git Rule"
 require_ref "references/academic-workflow.md" "GitHub Issue And PR Provider"
 require_ref "references/academic-workflow.md" "GITHUB_TOKEN"
 require_ref "references/academic-workflow.md" "devctl git mr --title"
+require_ref "references/academic-workflow.md" "devctl issue list --state open --limit 20"
+require_ref "references/academic-workflow.md" "devctl issue comment <id> --body-file"
+require_ref "references/academic-workflow.md" "devctl git pr-get <number>"
 require_ref "references/academic-workflow.md" 'Do not use `2>&1 | Out-String` for `git submodule add`, `git clone`, `git fetch`, or `git checkout`'
 require_ref "references/academic-workflow.md" "Do not combine multiple native commands in one PowerShell line"
 require_ref "references/academic-workflow.md" "Branch Semantics Rule"
@@ -102,8 +105,15 @@ require_ref "references/academic-schema-contract.md" ".xflow/issues/issue-<id>/"
 require_ref "references/academic-schema-contract.md" "Branch Semantics Contract"
 require_ref "references/academic-schema-contract.md" "GitHub Issue And PR Provider Contract"
 require_ref "references/academic-schema-contract.md" '`devctl git mr` in academic Python mode must'
+require_ref "references/academic-schema-contract.md" '`devctl issue list` and `devctl issue show` in academic Python mode must'
+require_ref "references/academic-schema-contract.md" '`devctl issue comment` in academic Python mode must'
+require_ref "references/academic-schema-contract.md" '`devctl issue close` in academic Python mode must'
+require_ref "references/academic-schema-contract.md" '`devctl git pr-get` in academic Python mode must'
 require_ref "templates/cursorrules.academic" "For GitHub PR creation"
 require_ref "templates/cursorrules.academic" 'devctl git mr --title "<title>" --body-file <file> --base <paper-base> --issue <id>'
+require_ref "templates/cursorrules.academic" "For GitHub Issue list/show"
+require_ref "templates/cursorrules.academic" "devctl issue comment <id> --body-file <file>"
+require_ref "templates/cursorrules.academic" "For GitHub PR lookup"
 require_ref "references/academic-schema-contract.md" 'If `XFLOW_PLATFORM=gitee`, the Python academic provider must fail closed'
 require_ref "references/academic-schema-contract.md" '`Target Branch: academic` is invalid'
 require_ref "references/academic-templates.md" "Workflow Product Line: academic"

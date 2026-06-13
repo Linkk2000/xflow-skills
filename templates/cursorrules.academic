@@ -28,9 +28,19 @@ Runtime rules:
 - For GitHub remote Issue creation, ensure `GITHUB_TOKEN` is present, prepare
   the Issue body as a file, obtain human approval for that exact file, then run
   `devctl issue create "<title>" --body-file <file>`.
+- For GitHub Issue list/show, use `devctl issue list` and `devctl issue show`
+  as read-only commands; no local approval gate is needed because they do not
+  write remote state.
+- For GitHub Issue comments and close operations, prepare
+  `.xflow/issues/issue-<id>/comment-draft.md` or
+  `.xflow/issues/issue-<id>/walkthrough.md`, obtain human approval for the exact
+  file, then run `devctl issue comment <id> --body-file <file>` or
+  `devctl issue close <id>`.
 - For GitHub PR creation, prepare `.xflow/issues/issue-<id>/mr-draft.md`,
   obtain human approval for that exact file, then run
   `devctl git mr --title "<title>" --body-file <file> --base <paper-base> --issue <id>`.
+- For GitHub PR lookup, use `devctl git pr-get <number>` as a read-only
+  command.
 - Do not assume Gitee Issue/PR creation is available in academic Python mode.
 - Do not silently install Python.
 - Do not silently run `git submodule update`.
