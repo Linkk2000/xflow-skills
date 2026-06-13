@@ -164,3 +164,10 @@ native command returns a structured result with `ExitCode`, `Stdout`, and
 - Use hidden `<!-- xflow: ... -->` comments for machine anchors.
 - Do not include internal-only visible titles such as `# Academic Issue Draft`, `# Issue Draft`, `# MR Draft`, or `# PR Draft` in remote-published body files.
 - Run `devctl check academic-issue` and `devctl check academic-mr` before asking for local human approval.
+
+## Git Commit Attribution Rule
+
+- Do not add Cursor co-author trailers.
+- Do not append `Co-authored-by: Cursor <cursoragent@cursor.com>` to commit messages.
+- Do not use `git commit --trailer` to add Cursor, cursoragent, or AI-client co-author metadata.
+- Keep commit attribution limited to the repository's configured Git author unless the human reviewer explicitly requests otherwise.

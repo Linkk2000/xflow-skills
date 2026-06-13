@@ -102,6 +102,11 @@ Remote-write rules:
   titles/bodies should follow the user's language; when the user works in
   Chinese, use Chinese as the primary language. This language rule does not
   apply to non-Git artifacts.
+- Do not add Cursor co-author trailers.
+- Do not append `Co-authored-by: Cursor <cursoragent@cursor.com>` to commit
+  messages.
+- Do not use `git commit --trailer` to add Cursor, cursoragent, or AI-client
+  co-author metadata.
 - TDD output is required but never replaces human judgement.
 - Approval for one action authorizes only that next action.
 - Use `.xflow/issues/issue-<id>/approvals/local-review.md` to bind the approved file,
