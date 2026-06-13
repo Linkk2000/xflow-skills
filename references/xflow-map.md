@@ -68,6 +68,11 @@ descriptions. Multi-line Markdown, fenced code, inline backticks, JSON, shell
 snippets, or text containing `$()` must be written to a file and passed with
 `--body-file` so shells do not reinterpret the content.
 
+Remote-published body files must be public-facing Markdown because `devctl`
+sends them verbatim. Use hidden `<!-- xflow: ... -->` anchors for machine
+checks, and do not include internal draft headings such as
+`# Academic Issue Draft` or `# MR Draft`.
+
 The active local approval file is always
 `.xflow/issues/issue-<id>/approvals/local-review.md`; archive old approvals
 under `.xflow/issues/issue-<id>/approvals/history/`. `Approved Action: git-mr`

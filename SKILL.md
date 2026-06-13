@@ -157,3 +157,10 @@ native command returns a structured result with `ExitCode`, `Stdout`, and
 - `Approved Action: git-mr` covers PR creation plus immediate PR number/URL metadata writeback to the same task branch.
 - After the PR is merged, seal the task board. Do not create another PR only to update local checklist records.
 - If automatic Issue close fails, treat `devctl issue close <id>` as a separate maintenance action with fresh `Approved Action: issue-close`.
+
+## Remote Published Body Safety
+
+- Issue, comment, and MR/PR body files are sent to remote platforms verbatim.
+- Use hidden `<!-- xflow: ... -->` comments for machine anchors.
+- Do not include internal-only visible titles such as `# Academic Issue Draft` or `# MR Draft` in remote-published body files.
+- Run `devctl check academic-issue` and `devctl check academic-mr` before asking for local human approval.

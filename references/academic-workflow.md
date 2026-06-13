@@ -29,12 +29,12 @@ human-defined branch. Academic tasks run on ordinary task branches such as
 `feature/<issue>-<slug>`, `review/<issue>-<slug>`, or
 `chore/update-academic-xflow-<date>`.
 
-Every academic issue and MR draft must declare these three fields:
+Every academic issue and MR draft must declare these three hidden fields:
 
 ```text
-Workflow Product Line: academic
-Paper Base Branch: <main|master|user-defined>
-Task Branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic-xflow-<date>>
+<!-- workflow-product-line: academic -->
+<!-- paper-base-branch: <main|master|user-defined> -->
+<!-- task-branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic-xflow-<date>> -->
 ```
 
 Do not create or push an `academic` branch in the paper repository unless the
@@ -511,6 +511,11 @@ For Issue, comment, and MR/PR bodies, inline `--body` is only allowed for short
 single-line plain text. Multi-line Markdown, fenced code, inline backticks,
 JSON, shell snippets, or text containing `$()` must be written to a file and
 passed with `--body-file`.
+
+Remote-published body files must be written as public-facing Markdown because
+`devctl` sends them to GitHub verbatim. Use hidden `<!-- xflow: ... -->`
+comments for machine anchors, and do not include internal-only visible titles
+such as `# Academic Issue Draft` or `# MR Draft` in Issue or PR bodies.
 
 Preferred locations:
 

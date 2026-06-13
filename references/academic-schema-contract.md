@@ -31,11 +31,11 @@ This contract links `xflow-skills@academic` and `xflow-devctl@academic`.
 `academic` identifies the XFlow product line for the tool repositories. It must
 not be used as the default paper repository branch by template convention.
 
-Academic issue and MR templates must include:
+Academic issue and MR templates must include hidden machine anchors:
 
-- `Workflow Product Line: academic`
-- `Paper Base Branch:`
-- `Task Branch:`
+- `<!-- workflow-product-line: academic -->`
+- `<!-- paper-base-branch:`
+- `<!-- task-branch:`
 
 `Target Branch: academic` is invalid because it conflates the tool product line
 with the paper repository's base or task branch. `xflow-devctl@academic` must
@@ -157,6 +157,12 @@ Remote-write commands that accept Markdown bodies must support file-based body
 input. Use inline `--body` only for short single-line plain text. Multi-line
 Markdown, fenced code, inline backticks, JSON, shell snippets, or text
 containing `$()` must be written to a file and passed with `--body-file`.
+
+Remote-published body files must be publish-ready Markdown. `issue-draft.md`
+must include `<!-- xflow: academic-issue-draft -->`; `mr-draft.md` must include
+`<!-- xflow: academic-mr-draft -->`. Internal-only visible headings such as
+`# Academic Issue Draft` and `# MR Draft` are invalid in remote-published
+bodies because they appear on GitHub Issue or PR pages.
 
 ## Compatibility Rule
 

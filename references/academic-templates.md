@@ -1,44 +1,50 @@
 # Academic XFlow Templates
 
 These templates are the canonical local artifacts for `academic` product-line
-tasks. Keep headings stable because `devctl check` validates them.
+tasks. Keep headings and hidden anchors stable because `devctl check` validates
+them.
+
+Remote-published body files such as `issue-draft.md` and `mr-draft.md` must be
+ready to publish as GitHub Issue or PR bodies. Do not include internal-only
+visible titles such as `Academic Issue Draft` or `MR Draft`; use hidden
+`xflow` comments for machine-readable anchors instead.
 
 ## issue-draft.md
 
 ```markdown
-# Academic Issue Draft
+<!-- xflow: academic-issue-draft -->
+<!-- task-type: <translation|polish|review|survey|submission|tooling> -->
+<!-- workflow-product-line: academic -->
+<!-- paper-base-branch: <main|master|user-defined> -->
+<!-- task-branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic-xflow-<date>> -->
 
-Task Type: <translation|polish|review|survey|submission|tooling>
-Workflow Product Line: academic
-Paper Base Branch: <main|master|user-defined>
-Task Branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic-xflow-<date>>
-Target Artifacts:
-- <paper.md or tool path>
-
-## Background
+## Background 🧩
 <why this academic task is needed>
 
-## Goal
+## Goal 🎯
 <what should be true when the task is complete>
 
-## Scope
+## Scope 📌
 - Includes:
 - Excludes:
 - Affected paths:
 
-## Acceptance Criteria
+## Target Artifacts 📁
+- <paper.md or tool path>
+
+## Acceptance Criteria ✅
 - [ ] <machine-checkable or human-reviewable criterion>
 
-## Verification Plan
+## Verification Plan 🧪
 - <commands or manual checks>
 
-## Claude Delegation
+## Claude Delegation 🤖
 - Required: <yes|no>
 - AcademicForge Skill:
 - Input files:
 - Output files:
 
-## Human Review Gate
+## Human Review Gate 🧑‍⚖️
 - Reviewer:
 - Review focus:
 - Remote action allowed after approval: <issue-create|issue-comment|issue-close|git-mr|remote-write|none>
@@ -132,27 +138,30 @@ Retry Count: <number>
 ## mr-draft.md
 
 ```markdown
-# MR Draft
+<!-- xflow: academic-mr-draft -->
+<!-- issue: <id> -->
+<!-- workflow-product-line: academic -->
+<!-- paper-base-branch: <main|master|user-defined> -->
+<!-- task-branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic-xflow-<date>> -->
 
-Issue: <id>
-Workflow Product Line: academic
-Paper Base Branch: <main|master|user-defined>
-Task Branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic-xflow-<date>>
+Closes #<id>
 
-## Summary
+## Summary 🧭
 - <change summary>
 
-## Evidence
+## Evidence 🔎
 - TDD Result: .xflow/issues/issue-<id>/tdd-result.md
 - Claude Result: .xflow/issues/issue-<id>/claude-result.md
 - Local Review: .xflow/issues/issue-<id>/approvals/local-review.md
 
-## Verification
+## Verification ✅
 - <commands run>
 
-## Remote Actions Requested
-- push current branch
-- create MR
+## Risks ⚠️
+- <remaining risk or "none">
+
+## Review Request 🚀
+- Please review scope, evidence, verification result, and local approval record.
 ```
 
 ## approvals/local-review.md

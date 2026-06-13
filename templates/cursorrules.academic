@@ -23,6 +23,10 @@ Runtime rules:
 - Academic issue and MR drafts must declare `Workflow Product Line`,
   `Paper Base Branch`, and `Task Branch`; do not use the obsolete
   target-branch field to point at the tool product line.
+- Remote-published body files such as `issue-draft.md`, `mr-draft.md`, and
+  `comment-draft.md` must be ready to publish as GitHub bodies. Do not include
+  internal-only visible titles such as `# Academic Issue Draft` or `# MR Draft`;
+  use hidden `<!-- xflow: ... -->` anchors and readable public headings instead.
 - Run `devctl preflight` or `.\devctl.ps1 preflight` before remote writes,
   installer-like actions, or Claude delegation.
 - For GitHub remote Issue creation, ensure `GITHUB_TOKEN` is present, prepare
