@@ -56,11 +56,14 @@ Run from the owning repository.
 ./devctl git status
 ./devctl git commit-msg -a
 ./devctl git commit-msg -ac
-./devctl git mr --title "<title>" --body "<body>" --issue <number>
+./devctl git mr --title "<title>" --body-file .xflow/issue-<id>/mr-draft.md --issue <number>
 ./devctl git done
 ```
 
-For issue creation and comments, use `--body` only for short single-line text. Multi-line Markdown, fenced code, inline backticks, JSON, or shell snippets must be written to a file and passed with `--body-file` so shells do not reinterpret the content.
+For issue creation, comments, and MR/PR descriptions, use `--body` only for
+short single-line text. Multi-line Markdown, fenced code, inline backticks,
+JSON, shell snippets, or text containing `$()` must be written to a file and
+passed with `--body-file` so shells do not reinterpret the content.
 
 Remote issue/MR commands require `GITEE_TOKEN` through `~/gitee.env.local` or the environment.
 

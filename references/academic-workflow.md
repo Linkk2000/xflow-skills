@@ -50,12 +50,16 @@ The paper repository should mount the two XFlow repositories under `_ops/`:
   devctl            -> project wrapper
   devctl.ps1        -> project wrapper
   SKILL.md          -> synced workflow entrypoint
+  .cursorrules      -> Cursor-specific guardrail template
   .xflow/           -> local task artifacts
 ```
 
 Cursor or another upper AI must read the paper repository's `AGENTS.md`,
 `SKILL.md`, and relevant `references/*.md` files, then use `devctl` commands
 instead of relying on Codex-specific skill installation.
+
+When Cursor is the upper AI, copy `_ops/workflow/templates/cursorrules.academic`
+to `<paper-repo>/.cursorrules` during initialization.
 
 The first local check in a paper repository is:
 
@@ -164,6 +168,32 @@ Upper AIs must not ask users to manually copy prompts into Claude for normal
 workflow execution. The upper AI should prepare the task package, run
 `devctl claude run`, inspect the result file, run the required checks, and then
 ask for human review.
+
+Before using Claude for academic work, run:
+
+```bash
+devctl claude doctor
+```
+
+If Claude is available but AcademicForge is missing, the command must report the
+reviewable registration command and perform no installation. The upper AI may
+execute the recommended `claude mcp add academicforge npx @hughyau/academicforge@latest`
+command only after explicit human approval, because it writes to global Claude
+configuration and may trigger package download.
+
+## Body File Rule
+
+For Issue, comment, and MR/PR bodies, inline `--body` is only allowed for short
+single-line plain text. Multi-line Markdown, fenced code, inline backticks,
+JSON, shell snippets, or text containing `$()` must be written to a file and
+passed with `--body-file`.
+
+Preferred locations:
+
+```text
+.xflow-local/<purpose>.md
+.xflow/issue-<id>/<purpose>.md
+```
 
 ## Required Checks
 

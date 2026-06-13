@@ -1,0 +1,57 @@
+# Academic XFlow Cursor Rules
+
+You are operating an Academic XFlow paper repository.
+
+Read these files before acting:
+
+- `SKILL.md`
+- `_ops/workflow/references/academic-workflow.md`
+- `_ops/workflow/references/academic-templates.md`
+- `_ops/workflow/references/academic-schema-contract.md`
+- `_ops/workflow/references/ops-lessons.md`
+- `AGENTS.md` and `README.md` when present
+
+Runtime rules:
+
+- Do not require Codex. Use repository files and `devctl` commands as the
+  source of truth.
+- Use `devctl` or `devctl.ps1` from the paper repository root.
+- Run `devctl preflight` or `.\devctl.ps1 preflight` before remote writes,
+  installer-like actions, or Claude delegation.
+- Do not silently install Python.
+- Do not silently run `git submodule update`.
+- Do not silently register or install AcademicForge.
+- If Claude exists but AcademicForge is missing, run `devctl claude doctor`,
+  show the recommended command, and wait for explicit human approval before
+  executing any global Claude configuration write.
+- Do not ask the user to manually copy prompts into Claude during normal
+  workflow execution. Prepare `.xflow/issue-<id>/claude-task.md` and run
+  `devctl claude run --issue <id>`.
+
+Remote-write rules:
+
+- Never create, comment, close, push, or create MR/PR without local human
+  review of the exact artifact and command.
+- TDD output is required but never replaces human judgement.
+- Approval for one action authorizes only that next action.
+- Use `.xflow/issue-<id>/approvals/local-review.md` to bind the approved file,
+  approved action, and SHA256.
+
+Shell safety rules:
+
+- Use body files for long or shell-sensitive content.
+- Do not pass multiline Markdown, fenced code, inline backticks, JSON, shell
+  snippets, or text containing `$()` through inline `--body`.
+- Write complex Issue, comment, and MR bodies to `.xflow-local/*.md` or
+  `.xflow/issue-<id>/*.md`, then pass them with `--body-file`.
+- Prefer short commands over nested PowerShell/WSL/Bash one-liners.
+
+Expected initialization outputs:
+
+- `_ops/devctl`
+- `_ops/workflow`
+- `devctl`
+- `devctl.ps1`
+- `SKILL.md`
+- `.cursorrules`
+- `.xflow/`

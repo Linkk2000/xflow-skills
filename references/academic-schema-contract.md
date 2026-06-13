@@ -34,6 +34,15 @@ academic workflow when it can access:
 The upper AI must use repository-local files and `devctl` commands as the
 source of truth. It must not require Codex skill installation.
 
+Cursor initialization must copy:
+
+```text
+_ops/workflow/templates/cursorrules.academic -> .cursorrules
+```
+
+The `.cursorrules` file is a Cursor guardrail, not a replacement for executable
+`devctl` checks.
+
 ## Claude Delegation Contract
 
 Claude delegation is exposed through:
@@ -45,6 +54,23 @@ devctl claude run --issue <id> [--file F] [--output F] [--dry-run]
 The command must validate the Claude task package before execution, use the
 local Claude CLI, write the result to a repository-local output file, and leave
 remote-write approval gates unchanged.
+
+Claude readiness is exposed through:
+
+```bash
+devctl claude doctor
+```
+
+If AcademicForge is missing, `doctor` must report the recommended registration
+command and perform no installation. Any global Claude configuration write
+requires explicit human approval.
+
+## Body File Contract
+
+Remote-write commands that accept Markdown bodies must support file-based body
+input. Use inline `--body` only for short single-line plain text. Multi-line
+Markdown, fenced code, inline backticks, JSON, shell snippets, or text
+containing `$()` must be written to a file and passed with `--body-file`.
 
 ## Compatibility Rule
 
