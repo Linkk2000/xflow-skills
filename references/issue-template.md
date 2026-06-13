@@ -1,46 +1,111 @@
-# XFlow Issue And MR Templates
+# XFlow Issue, MR, And Local Review Templates
 
-## Issue Draft Template
+These templates are for the generic `main` product line. They are not
+academic-specific and must not contain academic-only fields.
 
-Use this shape when converting an oral request into a remote issue.
+Remote-published body files are sent to GitHub or Gitee verbatim. Do not
+include internal-only visible titles such as `# Issue Draft`, `# MR Draft`,
+`# PR Draft`, or `# Merge Request Draft`. Use hidden `xflow` comments for
+machine anchors and public-facing Markdown headings for human reviewers.
+Do not include internal-only visible titles in files passed to `--body-file`.
 
-Before creation, also propose:
+## issue-draft.md
 
-- issue kind: `feature` or `fix`
-- issue key preview: `feature/<issue-id>-<short_slug>` or `fix/<issue-id>-<short_slug>`
-- final branch name after issue creation (`feature/<issue-id>-<slug>`)
+Use this shape when converting an oral request into a remote issue. Store the
+file at `.xflow/issues/issue-draft/issue-draft.md` before `devctl issue create`.
 
 ```markdown
-## 背景
-<为什么现在要做这个问题，用户遇到了什么阻碍。>
+<!-- xflow: issue-draft -->
 
-## 问题
-<当前行为或缺口。写成可验证的问题，不写泛泛愿望。>
+## Background
+<why this task is needed>
 
-## 目标
-<完成后用户/系统应该能做什么。>
+## Problem
+<current behavior, gap, or pain point>
 
-## 范围
-- 前端:
-- 后端:
-- 流程设计器:
-- 数据库/迁移:
-- 不包含:
+## Goal
+<what should be true when the task is complete>
 
-## TDD 验收标准
-- [ ] 先补充或确认一个失败用例/验收检查，覆盖 <核心行为>
-- [ ] 实现后 <具体行为> 通过
-- [ ] 回归 <相关风险点> 不被破坏
+## Scope
+- Includes:
+- Excludes:
+- Affected paths:
 
-## 建议测试
-- <最小测试命令或测试文件>
-- <需要浏览器验证时写清楚页面和动作>
+## Acceptance Criteria
+- [ ] <machine-checkable or human-reviewable criterion>
 
-## 影响路径
-- `<path>`
+## Verification Plan
+- <commands or manual checks>
+```
 
-## 备注
-<约束、兼容性、后续工作。>
+Before remote creation, also propose:
+
+- issue kind: `feature`, `fix`, `docs`, `test`, or `chore`
+- issue key preview: `feature/<issue-id>-<short-slug>` or `fix/<issue-id>-<short-slug>`
+- final branch name after issue creation
+- labels as comma-separated values for `devctl issue create --labels`
+
+## mr-draft.md
+
+Use this shape for PR/MR creation. Store the file at
+`.xflow/issues/issue-<id>/mr-draft.md` before `devctl git mr`.
+
+```markdown
+<!-- xflow: mr-draft -->
+
+Closes #<issue>
+
+## Summary
+- <what changed>
+
+## Test Plan
+- [x] <failing test or acceptance check first>
+- [x] <focused validation command>
+- [x] <manual/browser check if applicable>
+
+## Risk
+- <remaining risk or "low: ...">
+
+## Review Request
+- Please review the implementation, evidence, and local approval record.
+```
+
+## comment-draft.md
+
+Use this shape for remote issue comments. Store the file at
+`.xflow/issues/issue-<id>/comment-draft.md` before `devctl issue comment`.
+
+```markdown
+## Progress
+- <what changed or what was found>
+
+## Evidence
+- <command, commit, or file reference>
+
+## Next Step
+- <requested reviewer action or follow-up>
+```
+
+## approvals/local-review.md
+
+`approvals/local-review.md` is the active local approval file. It binds one
+approved action to one exact file hash.
+
+```markdown
+# Local Review Approval
+
+Issue: <draft|id>
+Reviewer: <human reviewer>
+Approved At: <ISO-8601 time>
+Approved Action: <issue-create|issue-comment|issue-close|git-mr|remote-write>
+Approved File: <path>
+Approved SHA256: <sha256>
+
+## Decision
+Approved: yes
+
+## Notes
+<review notes and constraints>
 ```
 
 ## Label Hints
@@ -49,8 +114,6 @@ Use comma-separated labels for `devctl issue create --labels`.
 
 - `frontend`
 - `backend`
-- `designer`
-- `warmflow`
 - `api`
 - `runtime`
 - `bug`
@@ -58,28 +121,13 @@ Use comma-separated labels for `devctl issue create --labels`.
 - `tdd`
 - `test`
 - `docs`
-
-## MR Body Template
-
-```markdown
-## Summary
-- Closes #<issue>
-- <what changed>
-
-## TDD / Test plan
-- [x] <failing test or acceptance check first>
-- [x] <focused validation command>
-- [x] <browser/manual check if applicable>
-
-## Risk
-- <remaining risk or "低: ...">
-```
+- `chore`
 
 ## Clarifying Questions
 
-仅在严重阻碍 Issue 质量和明确性时提问。优秀的通用澄清问题示例：
+Ask only when the issue would otherwise be unsafe or unclear:
 
-- 这是个缺陷修复（Bug Fix）还是属于新能力扩展（Feature）？
-- 我们是优先做最小可行性产品（MVP），还是需要一次性把完整功能、配置及边缘分支全部补全？
-- 这个问题应该落在哪个特定的核心模块（或子项目/子文件夹）？是否涉及跨系统/多仓库的协同？
-- 验收此功能时，你期望看到的验证证据是什么（例如：编译通过、单元测试输出、数据库状态变化，还是 UI 交互截图）？
+- Is this a bug fix or a new capability?
+- What is the smallest useful scope?
+- Which module or repository owns the change?
+- What verification evidence should reviewers expect?

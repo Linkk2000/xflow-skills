@@ -13,21 +13,38 @@ Run from the owning repository.
 
 ```bash
 ./devctl help
-./devctl issue create "<title>" --body-file .xflow-local/issue-body.md --labels "tdd,frontend"
-./devctl issue close <number> --comment "<confirmed summary>"
+./devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md
+./devctl check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create
+./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --labels "tdd,frontend"
 ./devctl issue list --state open --limit 20
 ./devctl issue show <number>
+./devctl issue comment <number> --body-file .xflow/issues/issue-<number>/comment-draft.md
+./devctl issue close <number>
 ./devctl git start <slug> --issue <number>
 ./devctl git start-issue feature <issue-id> <slug>
 ./devctl git start-issue fix <issue-id> <slug>
 ./devctl git status
 ./devctl git commit-msg -a
 ./devctl git commit-msg -ac
-./devctl git mr --title "<title>" --body "<body>" --issue <number>
+./devctl check mr-draft --issue <number>
+./devctl check local-review --issue <number> --file .xflow/issues/issue-<number>/mr-draft.md --action git-mr
+./devctl git mr --title "<title>" --body-file .xflow/issues/issue-<number>/mr-draft.md --issue <number>
 ./devctl git done
 ```
 
-For issue creation and comments, use `--body` only for short single-line text. Multi-line Markdown, fenced code, inline backticks, JSON, or shell snippets must be written to a file and passed with `--body-file` so shells do not reinterpret the content.
+Core remote writes require local review of the exact file being published or
+used as evidence. The active approval file is
+`.xflow/issues/issue-<id>/approvals/local-review.md`; for issue creation use
+`.xflow/issues/issue-draft/approvals/local-review.md`.
+
+For issue creation, comments, and MR/PR descriptions, use `--body-file`.
+Multi-line Markdown, fenced code, inline backticks, JSON, or shell snippets
+must be written to a file and passed with `--body-file` so shells do not
+reinterpret the content.
+
+Remote-published body files must be public-facing Markdown. Use hidden
+`<!-- xflow: ... -->` anchors for machine checks, and do not include internal
+draft headings such as `# Issue Draft`, `# MR Draft`, or `# PR Draft`.
 
 Remote issue/MR commands require `GITEE_TOKEN` through `~/gitee.env.local` or the environment.
 
