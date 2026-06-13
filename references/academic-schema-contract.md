@@ -185,6 +185,13 @@ Remote writes include:
 - issue close
 - branch cleanup when tied to a closed remote task
 
+The active approval file is always
+`.xflow/issues/issue-<id>/approvals/local-review.md`. AI clients must not
+invent alternate active approval filenames. Superseded approvals may be
+preserved under `.xflow/issues/issue-<id>/approvals/history/`, but history files
+are audit records and do not satisfy the active remote-write gate by
+themselves.
+
 ## GitHub Issue And PR Provider Contract
 
 `devctl issue create` in academic Python mode must:
@@ -233,6 +240,13 @@ Gitee is explicitly ported.
   and requested or detected paper base branch as `base`;
 - write the returned PR number to local git config `devctl.pr`;
 - print the remote PR number and URL returned by GitHub.
+
+`Approved Action: git-mr` covers the PR publication sequence: branch push, PR
+creation, PR number/URL metadata writeback, and one metadata-only follow-up
+push to the same task branch before remote review starts. The PR/MR number/URL
+metadata writeback must not require a second approval. After the PR is merged,
+the task is sealed; optional manual Issue close is a separate `issue-close` remote write
+and must not require another PR just to update local task-board records.
 
 `devctl git pr-get` in academic Python mode must:
 

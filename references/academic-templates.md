@@ -157,6 +157,10 @@ Task Branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic
 
 ## approvals/local-review.md
 
+`approvals/local-review.md` is the active approval file. Do not create alternate
+active approval names such as `local-review-mr.md`. Archive superseded approval
+records under `approvals/history/`.
+
 ```markdown
 # Local Review Approval
 

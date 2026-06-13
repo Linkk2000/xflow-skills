@@ -68,6 +68,12 @@ descriptions. Multi-line Markdown, fenced code, inline backticks, JSON, shell
 snippets, or text containing `$()` must be written to a file and passed with
 `--body-file` so shells do not reinterpret the content.
 
+The active local approval file is always
+`.xflow/issues/issue-<id>/approvals/local-review.md`; archive old approvals
+under `.xflow/issues/issue-<id>/approvals/history/`. `Approved Action: git-mr`
+covers immediate PR number/URL metadata writeback. After PR merge, seal the
+task board and do not create another PR only to update local checklist records.
+
 Remote issue/MR commands require `GITEE_TOKEN` through `~/gitee.env.local` or the environment.
 
 `devctl git start` keeps the original `feat/<issue>-<slug>` behavior. Use the additive `devctl git start-issue` command for exact branch names like `feature_<issue-id>_<slug>` and `fix_<issue-id>_<slug>`. Gitee IDs can be alphanumeric; branch names normalize them to lowercase.

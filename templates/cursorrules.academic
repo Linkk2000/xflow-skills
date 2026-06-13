@@ -39,6 +39,13 @@ Runtime rules:
 - For GitHub PR creation, prepare `.xflow/issues/issue-<id>/mr-draft.md`,
   obtain human approval for that exact file, then run
   `devctl git mr --title "<title>" --body-file <file> --base <paper-base> --issue <id>`.
+- `Approved Action: git-mr` covers PR creation plus immediate PR number/URL
+  metadata writeback to the same task branch. Do not ask for a second approval
+  only to record the PR number or URL.
+- After the PR is merged, seal the task board. Do not reopen the task branch or
+  create another PR only to check off post-merge local items. If automatic Issue
+  close fails, treat `devctl issue close <id>` as a separate maintenance action
+  with fresh `Approved Action: issue-close`.
 - For GitHub PR lookup, use `devctl git pr-get <number>` as a read-only
   command.
 - Do not assume Gitee Issue/PR creation is available in academic Python mode.
@@ -94,6 +101,9 @@ Remote-write rules:
 - Approval for one action authorizes only that next action.
 - Use `.xflow/issues/issue-<id>/approvals/local-review.md` to bind the approved file,
   approved action, and SHA256.
+- Do not invent active approval filenames such as `local-review-mr.md`. Archive
+  superseded approvals under `.xflow/issues/issue-<id>/approvals/history/`;
+  only `approvals/local-review.md` is the active gate file.
 
 Shell safety rules:
 

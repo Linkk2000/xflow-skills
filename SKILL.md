@@ -148,3 +148,12 @@ For reusable PowerShell scripts, copy and dot-source:
 Use `Invoke-XFlowNative` or `Invoke-XFlowGit -GitArguments @(...)` so each
 native command returns a structured result with `ExitCode`, `Stdout`, and
 `Stderr`. Run one native command, inspect the result, then run the next command.
+
+## Approval And PR Sealing Safety
+
+- The active approval file is always `.xflow/issues/issue-<id>/approvals/local-review.md`.
+- Do not invent active approval filenames such as `local-review-mr.md`.
+- Archive superseded approvals under `.xflow/issues/issue-<id>/approvals/history/`.
+- `Approved Action: git-mr` covers PR creation plus immediate PR number/URL metadata writeback to the same task branch.
+- After the PR is merged, seal the task board. Do not create another PR only to update local checklist records.
+- If automatic Issue close fails, treat `devctl issue close <id>` as a separate maintenance action with fresh `Approved Action: issue-close`.

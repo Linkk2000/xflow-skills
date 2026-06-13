@@ -55,6 +55,9 @@ require_ref "templates/cursorrules.academic" "devctl check submodule-hygiene"
 require_ref "templates/cursorrules.academic" "Workflow Product Line"
 require_ref "templates/cursorrules.academic" "Paper Base Branch"
 require_ref "templates/cursorrules.academic" "Task Branch"
+require_ref "templates/cursorrules.academic" "Do not invent active approval filenames"
+require_ref "templates/cursorrules.academic" "After the PR is merged, seal the task board"
+require_ref "templates/cursorrules.academic" "Approved Action: git-mr"
 require_ref "templates/cursorrules.academic" 'Do not create or push an `academic` branch in the paper repository'
 require_ref "templates/xflow-powershell-native.ps1" "function Invoke-XFlowNative"
 require_ref "templates/xflow-powershell-native.ps1" "function Invoke-XFlowGit"
@@ -90,6 +93,9 @@ require_ref "references/academic-workflow.md" "Branch Semantics Rule"
 require_ref "references/academic-workflow.md" "Workflow Product Line: academic"
 require_ref "references/academic-workflow.md" "Paper Base Branch:"
 require_ref "references/academic-workflow.md" "Task Branch:"
+require_ref "references/academic-workflow.md" "Approved Action: git-mr"
+require_ref "references/academic-workflow.md" "After the PR is merged, the task is sealed"
+require_ref "references/academic-workflow.md" "Do not invent active approval filenames"
 require_ref "references/academic-schema-contract.md" "templates/cursorrules.academic"
 require_ref "references/academic-schema-contract.md" "Pinned Update Contract"
 require_ref "references/academic-schema-contract.md" "fetch -> pin reviewed SHA -> test -> human review -> commit"
@@ -109,6 +115,8 @@ require_ref "references/academic-schema-contract.md" '`devctl issue list` and `d
 require_ref "references/academic-schema-contract.md" '`devctl issue comment` in academic Python mode must'
 require_ref "references/academic-schema-contract.md" '`devctl issue close` in academic Python mode must'
 require_ref "references/academic-schema-contract.md" '`devctl git pr-get` in academic Python mode must'
+require_ref "references/academic-schema-contract.md" "metadata writeback must not require a second approval"
+require_ref "references/academic-schema-contract.md" "the task is sealed"
 require_ref "templates/cursorrules.academic" "For GitHub PR creation"
 require_ref "templates/cursorrules.academic" 'devctl git mr --title "<title>" --body-file <file> --base <paper-base> --issue <id>'
 require_ref "templates/cursorrules.academic" "For GitHub Issue list/show"
@@ -119,11 +127,15 @@ require_ref "references/academic-schema-contract.md" '`Target Branch: academic` 
 require_ref "references/academic-templates.md" "Workflow Product Line: academic"
 require_ref "references/academic-templates.md" "Paper Base Branch: <main|master|user-defined>"
 require_ref "references/academic-templates.md" "Task Branch: <feature/<issue>-<slug>|review/<issue>-<slug>|chore/update-academic-xflow-<date>>"
+require_ref "references/academic-templates.md" "Do not create alternate"
+require_ref "SKILL.md" "Approval And PR Sealing Safety"
+require_ref "SKILL.md" "After the PR is merged, seal the task board"
 
 reject_ref "references/academic-templates.md" "Target Branch: academic"
 reject_ref "templates/cursorrules.academic" "Target Branch: academic"
 reject_ref "references/academic-workflow.md" "_ops/"
 reject_ref "templates/cursorrules.academic" "_ops/"
 reject_ref "references/academic-templates.md" ".xflow/issue-<id>/"
+reject_ref "templates/cursorrules.academic" 'local-review-mr.md` as the active'
 
 echo "academic entrypoint ok"

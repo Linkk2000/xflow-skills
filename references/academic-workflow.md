@@ -191,6 +191,19 @@ The command validates `.xflow/issues/issue-<id>/approvals/local-review.md`
 before pushing or creating the PR. Inline `--body` is rejected in academic
 Python mode; use `--body-file` or the default issue MR draft.
 
+`Approved Action: git-mr` covers the full PR publication sequence: pushing the
+task branch, creating the PR, recording the returned PR number/URL in local
+metadata or task artifacts, and pushing one metadata-only follow-up commit to
+the same task branch before remote review starts. This metadata writeback must
+not require a second approval file.
+
+After the PR is merged, the task is sealed. Do not reopen the task branch or
+create another PR only to check off a local task-board item, record that the PR
+merged, or rewrite the local checklist. If `Closes #<id>` did not close the
+remote Issue automatically, `devctl issue close <id>` is a separate maintenance
+remote write with a new `Approved Action: issue-close`; it is not part of the
+original PR completion criteria.
+
 PR inspection is read-only and does not require local approval:
 
 ```bash
@@ -393,6 +406,8 @@ Each academic task must keep auditable files under:
   walkthrough.md
   approvals/
     local-review.md
+    history/
+      local-review-<action>-<timestamp>.md
 ```
 
 `claude-task.md` and `claude-result.md` are required only when Claude or
@@ -434,6 +449,11 @@ later remote writes.
 
 Use machine-readable approval actions in `approvals/local-review.md`:
 `issue-create`, `issue-comment`, `issue-close`, `git-mr`, or `remote-write`.
+
+Do not invent active approval filenames such as `local-review-mr.md`. The
+active approval file is always `.xflow/issues/issue-<id>/approvals/local-review.md`.
+Superseded approvals should be archived under
+`.xflow/issues/issue-<id>/approvals/history/` for audit only.
 
 ## Approval Hash Rule
 
