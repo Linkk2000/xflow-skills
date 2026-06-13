@@ -42,6 +42,11 @@ require_ref "templates/cursorrules.academic" 'Do not pipe native Git commands th
 require_ref "templates/cursorrules.academic" '$LASTEXITCODE'
 require_ref "templates/cursorrules.academic" ".xflow/tools/xflow-powershell-native.ps1"
 require_ref "templates/cursorrules.academic" "Do not combine multiple native commands in one PowerShell line"
+require_ref "templates/cursorrules.academic" "Git-facing text only"
+require_ref "templates/cursorrules.academic" "commit messages, remote Issue titles/bodies, and MR/PR"
+require_ref "templates/cursorrules.academic" "titles/bodies should follow the user's language"
+require_ref "templates/cursorrules.academic" "Chinese, use Chinese as the primary language"
+require_ref "templates/cursorrules.academic" "apply to non-Git artifacts"
 require_ref "templates/cursorrules.academic" "ignore = untracked"
 require_ref "templates/cursorrules.academic" "devctl check submodule-hygiene"
 require_ref "templates/cursorrules.academic" "Workflow Product Line"

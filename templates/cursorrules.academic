@@ -73,6 +73,10 @@ Remote-write rules:
 
 - Never create, comment, close, push, or create MR/PR without local human
   review of the exact artifact and command.
+- Git-facing text only: commit messages, remote Issue titles/bodies, and MR/PR
+  titles/bodies should follow the user's language; when the user works in
+  Chinese, use Chinese as the primary language. This language rule does not
+  apply to non-Git artifacts.
 - TDD output is required but never replaces human judgement.
 - Approval for one action authorizes only that next action.
 - Use `.xflow/issues/issue-<id>/approvals/local-review.md` to bind the approved file,
