@@ -71,7 +71,7 @@ snippets, or text containing `$()` must be written to a file and passed with
 Remote-published body files must be public-facing Markdown because `devctl`
 sends them verbatim. Use hidden `<!-- xflow: ... -->` anchors for machine
 checks, and do not include internal draft headings such as
-`# Academic Issue Draft` or `# MR Draft`.
+`# Academic Issue Draft`, `# Issue Draft`, `# MR Draft`, or `# PR Draft`.
 
 The active local approval file is always
 `.xflow/issues/issue-<id>/approvals/local-review.md`; archive old approvals

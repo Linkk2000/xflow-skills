@@ -162,5 +162,5 @@ native command returns a structured result with `ExitCode`, `Stdout`, and
 
 - Issue, comment, and MR/PR body files are sent to remote platforms verbatim.
 - Use hidden `<!-- xflow: ... -->` comments for machine anchors.
-- Do not include internal-only visible titles such as `# Academic Issue Draft` or `# MR Draft` in remote-published body files.
+- Do not include internal-only visible titles such as `# Academic Issue Draft`, `# Issue Draft`, `# MR Draft`, or `# PR Draft` in remote-published body files.
 - Run `devctl check academic-issue` and `devctl check academic-mr` before asking for local human approval.

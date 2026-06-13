@@ -161,8 +161,9 @@ containing `$()` must be written to a file and passed with `--body-file`.
 Remote-published body files must be publish-ready Markdown. `issue-draft.md`
 must include `<!-- xflow: academic-issue-draft -->`; `mr-draft.md` must include
 `<!-- xflow: academic-mr-draft -->`. Internal-only visible headings such as
-`# Academic Issue Draft` and `# MR Draft` are invalid in remote-published
-bodies because they appear on GitHub Issue or PR pages.
+`# Academic Issue Draft`, `# Issue Draft`, `# MR Draft`, and `# PR Draft` are
+invalid in remote-published bodies because they appear on GitHub Issue or PR
+pages.
 
 ## Compatibility Rule
 

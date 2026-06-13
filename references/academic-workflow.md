@@ -515,7 +515,8 @@ passed with `--body-file`.
 Remote-published body files must be written as public-facing Markdown because
 `devctl` sends them to GitHub verbatim. Use hidden `<!-- xflow: ... -->`
 comments for machine anchors, and do not include internal-only visible titles
-such as `# Academic Issue Draft` or `# MR Draft` in Issue or PR bodies.
+such as `# Academic Issue Draft`, `# Issue Draft`, `# MR Draft`, or
+`# PR Draft` in Issue or PR bodies.
 
 Preferred locations:
 
