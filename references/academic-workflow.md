@@ -56,6 +56,27 @@ The paper repository should mount the two XFlow repositories under `_ops/`:
   .xflow/           -> local task artifacts
 ```
 
+The paper repository `.gitmodules` must keep tool submodules on SSH URLs and
+set `ignore = untracked` for both tool paths:
+
+```ini
+[submodule "_ops/devctl"]
+    path = _ops/devctl
+    url = git@github.com:Linkk2000/xflow-devctl.git
+    branch = academic
+    ignore = untracked
+
+[submodule "_ops/workflow"]
+    path = _ops/workflow
+    url = git@github.com:Linkk2000/xflow-skills.git
+    branch = academic
+    ignore = untracked
+```
+
+Use `ignore = untracked`, not `ignore = all`. This hides accidental untracked
+tool byproducts from the parent repository status while preserving visibility
+for tracked submodule modifications and reviewed submodule pointer updates.
+
 Cursor or another upper AI must read the paper repository's `AGENTS.md`,
 `SKILL.md`, and relevant `references/*.md` files, then use `devctl` commands
 instead of relying on Codex-specific skill installation.
@@ -136,6 +157,7 @@ Run local checks before requesting review:
 ./devctl help
 ./devctl claude doctor
 ./devctl check tdd-result --issue <id>
+./devctl check submodule-hygiene
 ```
 
 On Windows PowerShell:
@@ -145,6 +167,7 @@ On Windows PowerShell:
 .\devctl.ps1 help
 .\devctl.ps1 claude doctor
 .\devctl.ps1 check tdd-result --issue <id>
+.\devctl.ps1 check submodule-hygiene
 ```
 
 The update commit in the paper repository should contain only intentional
@@ -161,6 +184,37 @@ update surfaces:
 
 If any check fails, do not continue to remote writes. Either fix the update on a
 new local task branch or restore the previous reviewed submodule pointers.
+
+## Submodule Hygiene Rule
+
+`_ops/devctl` and `_ops/workflow` are read-only tool submodules from the paper
+repository point of view. Workflow artifacts, logs, Claude outputs, TDD
+results, and review files must be written to `.xflow/` or `.xflow-local/`, not
+inside `_ops/*`.
+
+Before local review, run:
+
+```bash
+./devctl check submodule-hygiene
+```
+
+On Windows PowerShell:
+
+```powershell
+.\devctl.ps1 check submodule-hygiene
+```
+
+The hygiene check verifies:
+
+- `_ops/devctl` has no tracked modifications.
+- `_ops/workflow` has no tracked modifications.
+- common byproducts such as `__pycache__/`, `*.pyc`, `.pytest_cache/`, `*.tmp`,
+  and `*.log` are not present under `_ops/*`.
+- `.gitmodules` uses `ignore = untracked` for both tool submodules.
+
+If the check fails, remove the byproduct or restore the tool submodule before
+asking for human review. Do not solve this by using `ignore = all`, because that
+would also hide real tracked modifications.
 
 ## PowerShell Native Git Rule
 

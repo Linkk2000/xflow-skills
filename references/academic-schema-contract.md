@@ -11,6 +11,7 @@ This contract links `xflow-skills@academic` and `xflow-devctl@academic`.
   - `devctl check claude-package`
   - `devctl check academic-mr`
   - `devctl check local-review`
+  - `devctl check submodule-hygiene`
 
 ## Runtime Contract
 
@@ -58,6 +59,8 @@ The parent paper repository update is valid only when:
 
 - `_ops/devctl` points to a human-reviewed `xflow-devctl@academic` commit.
 - `_ops/workflow` points to a human-reviewed `xflow-skills@academic` commit.
+- `.gitmodules` uses `ignore = untracked` for `_ops/devctl` and
+  `_ops/workflow`.
 - copied guardrails such as `SKILL.md` and `.cursorrules` are synced from the
   reviewed `_ops/workflow` commit.
 - local checks have been run and recorded in the task's TDD result or update
@@ -68,6 +71,23 @@ The parent paper repository update is valid only when:
 AI assistants must not run silent update commands such as automatic submodule
 tracking, recursive checkout to an unreviewed HEAD, or installer-like update
 steps without a local human review gate.
+
+## Submodule Hygiene Contract
+
+Tool submodules are read-only from the parent paper repository. Generated
+artifacts must not be written under `_ops/devctl` or `_ops/workflow`.
+
+`devctl check submodule-hygiene` is responsible for checking that:
+
+- `_ops/devctl` and `_ops/workflow` do not contain tracked modifications.
+- common byproducts such as `__pycache__/`, `*.pyc`, `.pytest_cache/`, `*.tmp`,
+  and `*.log` are absent from tool submodules.
+- `.gitmodules` sets `ignore = untracked` for `_ops/devctl` and
+  `_ops/workflow`.
+
+The parent repository may intentionally commit submodule pointer changes after
+human review, but it must not hide tracked tool modifications with
+`ignore = all`.
 
 ## PowerShell Native Command Contract
 

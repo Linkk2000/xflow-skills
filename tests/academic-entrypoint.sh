@@ -22,6 +22,10 @@ done
 
 require_ref "SKILL.md" "PowerShell Native Command Safety"
 require_ref "SKILL.md" "Invoke-XFlowGit -GitArguments @(...)"
+require_ref ".gitignore" "__pycache__/"
+require_ref ".gitignore" "*.py[cod]"
+require_ref ".gitignore" ".pytest_cache/"
+require_ref ".gitignore" "*.tmp"
 require_ref "templates/cursorrules.academic" "devctl claude doctor"
 require_ref "templates/cursorrules.academic" "devctl claude run --issue <id>"
 require_ref "templates/cursorrules.academic" "--body-file"
@@ -30,6 +34,8 @@ require_ref "templates/cursorrules.academic" 'Do not pipe native Git commands th
 require_ref "templates/cursorrules.academic" '$LASTEXITCODE'
 require_ref "templates/cursorrules.academic" ".xflow/tools/xflow-powershell-native.ps1"
 require_ref "templates/cursorrules.academic" "Do not combine multiple native commands in one PowerShell line"
+require_ref "templates/cursorrules.academic" "ignore = untracked"
+require_ref "templates/cursorrules.academic" "devctl check submodule-hygiene"
 require_ref "templates/xflow-powershell-native.ps1" "function Invoke-XFlowNative"
 require_ref "templates/xflow-powershell-native.ps1" "function Invoke-XFlowGit"
 require_ref "templates/xflow-powershell-native.ps1" "GitArguments"
@@ -41,6 +47,8 @@ require_ref "references/academic-workflow.md" "Already-initialized paper reposit
 require_ref "references/academic-workflow.md" "git -C _ops/devctl fetch origin academic"
 require_ref "references/academic-workflow.md" "pin reviewed SHA"
 require_ref "references/academic-workflow.md" "commit the submodule pointer"
+require_ref "references/academic-workflow.md" "ignore = untracked"
+require_ref "references/academic-workflow.md" "devctl check submodule-hygiene"
 require_ref "references/academic-workflow.md" "PowerShell Native Git Rule"
 require_ref "references/academic-workflow.md" 'Do not use `2>&1 | Out-String` for `git submodule add`, `git clone`, `git fetch`, or `git checkout`'
 require_ref "references/academic-workflow.md" "Do not combine multiple native commands in one PowerShell line"
@@ -51,5 +59,7 @@ require_ref "references/academic-schema-contract.md" "PowerShell Native Command 
 require_ref "references/academic-schema-contract.md" "A native Git command is failed only when its process exit code is non-zero"
 require_ref "references/academic-schema-contract.md" "PowerShell helper template"
 require_ref "references/academic-schema-contract.md" "native command composition"
+require_ref "references/academic-schema-contract.md" "Submodule Hygiene Contract"
+require_ref "references/academic-schema-contract.md" "devctl check submodule-hygiene"
 
 echo "academic entrypoint ok"

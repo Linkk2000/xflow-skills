@@ -43,8 +43,20 @@ Update rules:
 - Run `devctl preflight`, `devctl help`, `devctl claude doctor`, and relevant
   `devctl check ...` commands before asking the human reviewer to approve the
   update.
+- Ensure `.gitmodules` uses `ignore = untracked` for `_ops/devctl` and
+  `_ops/workflow`. Do not use `ignore = all`.
+- Run `devctl check submodule-hygiene` before asking for human review.
 - Commit the paper repository update only after human review of the exact
   submodule pointer changes and copied guardrail changes.
+
+Submodule hygiene rules:
+
+- Treat `_ops/devctl` and `_ops/workflow` as read-only tool submodules.
+- Do not write logs, caches, TDD results, Claude outputs, or review artifacts
+  inside `_ops/*`.
+- Write workflow artifacts to `.xflow/` or `.xflow-local/`.
+- If `_ops/*` contains byproducts such as `__pycache__/`, `*.pyc`,
+  `.pytest_cache/`, `*.tmp`, or `*.log`, remove them before local review.
 
 Remote-write rules:
 
