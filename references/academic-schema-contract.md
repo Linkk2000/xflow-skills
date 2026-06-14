@@ -141,15 +141,49 @@ The command must validate the Claude task package before execution, use the
 local Claude CLI, write the result to a repository-local output file, and leave
 remote-write approval gates unchanged.
 
+The Claude task package must include these fields:
+
+- `Claude Skill:`
+- `Skill Source:`
+- `Invocation:`
+
+When `Skill Source:` is `AcademicForge`, `Invocation:` must name a command from
+`references/academicforge-skill-catalog.md`. `xflow-devctl@academic` must reject
+unknown commands such as `/paper-review` and must reject the obsolete
+`AcademicForge Skill:` field.
+
+The `Invocation:` line may include skill arguments after the verified command.
+`xflow-devctl@academic` must preserve the complete invocation line in the
+Claude prompt while validating only the leading command name against the
+catalog. Claude CLI arguments belong in `DEVCTL_CLAUDE_ARGS`, not in the skill
+command field.
+
+Before invoking Claude for an AcademicForge task, `xflow-devctl@academic` must
+verify that the exact requested command is installed in a Claude-resolvable flat
+skill path such as `.claude/skills/peer-review/SKILL.md`. Passing catalog
+validation alone is not enough to execute, and an official nested source clone
+under `.claude/skills/academic-forge/skills/...` is not sufficient by itself.
+
+`devctl claude skills` must list the verified AcademicForge command catalog so
+upper AIs can query available commands before writing `claude-task.md`.
+
+Claude output must be validated before writing `claude-result.md`. A zero exit
+code from the Claude CLI is insufficient by itself. `xflow-devctl@academic` must
+reject empty output, `Unknown command` output, and obvious generic replies that
+ask for the task again. It must not hard-code one academic output format because
+individual Forge skills may return their own valid structures.
+
 Claude readiness is exposed through:
 
 ```bash
 devctl claude doctor
 ```
 
-If AcademicForge is missing, `doctor` must report the recommended registration
-command and perform no installation. Any global Claude configuration write
-requires explicit human approval.
+If no AcademicForge-derived skill is available in a Claude-resolvable flat path,
+`doctor` must report checked skill roots such as `.claude/skills` and perform no
+installation.
+Any Claude skill installation or global configuration write requires explicit
+human approval.
 
 ## Body File Contract
 

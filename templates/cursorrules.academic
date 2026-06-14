@@ -8,6 +8,7 @@ Read these files before acting:
 - `.xflow/ops/workflow/references/academic-workflow.md`
 - `.xflow/ops/workflow/references/academic-templates.md`
 - `.xflow/ops/workflow/references/academic-schema-contract.md`
+- `.xflow/ops/workflow/references/academicforge-skill-catalog.md`
 - `.xflow/ops/workflow/references/ops-lessons.md`
 - `AGENTS.md` and `README.md` when present
 
@@ -57,9 +58,33 @@ Runtime rules:
 - Do not silently install Python.
 - Do not silently run `git submodule update`.
 - Do not silently register or install AcademicForge.
-- If Claude exists but AcademicForge is missing, run `devctl claude doctor`,
-  show the recommended command, and wait for explicit human approval before
-  executing any global Claude configuration write.
+- If Claude exists but AcademicForge-derived skills are missing, run
+  `devctl claude doctor`, show the checked `.claude/skills` roots, and wait
+  for explicit human approval before executing any installer-like action or
+  global Claude configuration write.
+- Before writing `.xflow/issues/issue-<id>/claude-task.md`, choose a verified
+  command from `.xflow/ops/workflow/references/academicforge-skill-catalog.md`.
+  You may also run `devctl claude skills` to list verified commands. Do not
+  invent Claude or AcademicForge commands.
+- Claude task packages must use `Claude Skill:`, `Skill Source:`, and
+  `Invocation:`. Do not use the obsolete `AcademicForge Skill:` field.
+- `Invocation:` must be explicit, for example `/peer-review`; do not use
+  unverified commands such as `/paper-review`.
+- If a Claude skill needs arguments, append them after the verified command on
+  the same `Invocation:` line, for example
+  `Invocation: /peer-review focus=methodology severity=major`.
+- If the Claude CLI itself needs options such as model, permission mode, or
+  allowed tools, use `DEVCTL_CLAUDE_ARGS`; do not put CLI options in
+  `Invocation:`.
+- Catalog validation proves the command exists in the audited Forge source, but
+  execution requires a Claude-resolvable flat skill directory such as
+  `.claude/skills/peer-review/SKILL.md`. A nested official source path under
+  `.claude/skills/academic-forge/skills/...` is not enough. If
+  `devctl claude run` reports a missing installed skill, stop and ask for
+  human-approved repair, mirror, or update.
+- Claude output must not be empty, `Unknown command`, or a generic reply asking
+  for the task again; a successful CLI exit code alone is not enough. Human
+  review decides whether the skill-specific result is useful.
 - Do not ask the user to manually copy prompts into Claude during normal
   workflow execution. Prepare `.xflow/issues/issue-<id>/claude-task.md` and run
   `devctl claude run --issue <id>`.

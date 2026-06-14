@@ -4,6 +4,7 @@ academic_references:
   - references/academic-workflow.md
   - references/academic-templates.md
   - references/academic-schema-contract.md
+  - references/academicforge-skill-catalog.md
 description: 通用型 Git & Issue TDD 开发工作流。适用于在本地通过 AI 助手梳理原始需求，生成规范化 issue 和开发分支（feature/编号-标题），并采用测试驱动（TDD）及 Planning with Files（基于项目内文件看板）方式开发、提交 PR/MR 并清理的自适应流程。
 ---
 

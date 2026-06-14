@@ -9,6 +9,7 @@ preparing MR/PR content, or performing remote writes:
 - `references/academic-workflow.md`
 - `references/academic-templates.md`
 - `references/academic-schema-contract.md`
+- `references/academicforge-skill-catalog.md`
 
 Academic tasks use local template artifacts under `.xflow/issues/issue-<id>/`.
 TDD/verify output is recorded in `tdd-result.md` and is a required local review
@@ -29,6 +30,11 @@ If Claude or AcademicForge is used, also verify:
 ```bash
 devctl check claude-package --issue <id>
 ```
+
+Claude task packages must use a verified command from
+`references/academicforge-skill-catalog.md`, for example `Invocation:
+/peer-review`. Do not invent commands such as `/paper-review` unless the
+catalog has been updated and reviewed first.
 
 Claude output must remain a reviewable artifact until the human reviewer
 approves it.

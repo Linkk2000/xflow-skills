@@ -40,7 +40,9 @@ visible titles such as `Academic Issue Draft` or `MR Draft`; use hidden
 
 ## Claude Delegation 🤖
 - Required: <yes|no>
-- AcademicForge Skill:
+- Claude Skill: <verified command name, for example peer-review>
+- Skill Source: <AcademicForge|local|other>
+- Invocation: /<verified command name>
 - Input files:
 - Output files:
 
@@ -86,7 +88,9 @@ Executor: <agent or person>
 # Claude Task Package
 
 Issue: <id>
-AcademicForge Skill: <skill name and version/source>
+Claude Skill: <verified command name from academicforge-skill-catalog.md>
+Skill Source: AcademicForge
+Invocation: /<verified command name> [optional skill arguments]
 Input Files:
 - <path and hash>
 Output File: <path>
@@ -100,10 +104,15 @@ Output File: <path>
 - Preserve citations and terminology unless instructed otherwise.
 
 ## Required Output Format
-- Summary:
-- Proposed changes:
-- Risks:
-- Questions:
+Return Markdown with these exact section headings:
+
+## Summary
+
+## Proposed Changes
+
+## Risks
+
+## Questions
 
 ## Human Review Requirement
 Claude output must be reviewed by the human reviewer before use.
@@ -115,7 +124,9 @@ Claude output must be reviewed by the human reviewer before use.
 # Claude Result
 
 Issue: <id>
-AcademicForge Skill: <skill name and version/source>
+Claude Skill: <verified command name>
+Skill Source: AcademicForge
+Invocation: /<verified command name>
 Executed At: <ISO-8601 time>
 Input Hashes:
 - <path>: <sha256>

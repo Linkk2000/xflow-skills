@@ -483,10 +483,48 @@ Use this command for controlled delegation:
 devctl claude run --issue <id>
 ```
 
-The command validates `.xflow/issues/issue-<id>/claude-task.md`, passes its full
-content to the local Claude CLI, and writes the result to the task package's
-`Output File`. The default Claude command is `claude -p <task-package-content>`.
-Advanced users may override the command prefix with `DEVCTL_CLAUDE_COMMAND`.
+The command validates `.xflow/issues/issue-<id>/claude-task.md`, extracts the
+explicit `Invocation: /<skill-name>` line, prefixes that invocation to the task
+package, passes the resulting prompt to the local Claude CLI, and writes the
+result to the task package's `Output File`. The default execution shape is
+`claude -p "/<skill-name>\n\n<task-package-content>"`. Skill invocation
+arguments may be appended on the `Invocation:` line, for example
+`Invocation: /peer-review focus=methodology severity=major`; devctl preserves
+the whole invocation line when building the Claude prompt. Advanced users may
+override the executable with `DEVCTL_CLAUDE_COMMAND` and append Claude CLI
+arguments with `DEVCTL_CLAUDE_ARGS`, which are inserted before `-p`.
+
+Claude task packages must not invent AcademicForge commands. Choose a verified
+command from `references/academicforge-skill-catalog.md` and write it in all
+three fields:
+
+```text
+Claude Skill: peer-review
+Skill Source: AcademicForge
+Invocation: /peer-review
+```
+
+The executable catalog can also be queried through:
+
+```bash
+devctl claude skills
+```
+
+`devctl claude run` rejects empty output, `Unknown command` output, and obvious
+generic replies that ask for the task again. It does not hard-code one academic
+review format, because individual Forge skills may return their own valid
+formats. The task package should still request `## Summary`,
+`## Proposed Changes`, `## Risks`, and `## Questions` when that format is
+appropriate, and the human reviewer decides whether the Claude result is useful.
+
+For `Skill Source: AcademicForge`, `devctl claude run` also checks the local
+AcademicForge skill before invoking Claude. Claude resolves slash commands from
+flat skill directories such as `.claude/skills/peer-review/SKILL.md`.
+An official AcademicForge clone under `.claude/skills/academic-forge` is a
+source tree; nested paths such as
+`.claude/skills/academic-forge/skills/.../peer-review/SKILL.md` are not directly
+callable as `/peer-review`. If only the nested source exists, devctl fails
+closed and asks for a human-approved mirror or copy to the flat skill path.
 
 Upper AIs must not ask users to manually copy prompts into Claude for normal
 workflow execution. The upper AI should prepare the task package, run
@@ -499,11 +537,12 @@ Before using Claude for academic work, run:
 devctl claude doctor
 ```
 
-If Claude is available but AcademicForge is missing, the command must report the
-reviewable registration command and perform no installation. The upper AI may
-execute the recommended `claude mcp add academicforge npx @hughyau/academicforge@latest`
-command only after explicit human approval, because it writes to global Claude
-configuration and may trigger package download.
+If Claude is available but no AcademicForge-derived skill is available in a
+Claude-resolvable flat path, the command must report checked skill roots such as
+`.claude/skills` and perform no installation. The upper AI may run the official
+AcademicForge installer or mirror skills from an existing source tree only after
+explicit human approval, because those actions write to Claude skill storage and
+may download external repositories.
 
 ## Body File Rule
 
