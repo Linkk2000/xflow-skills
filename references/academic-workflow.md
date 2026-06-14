@@ -54,6 +54,24 @@ that names the installer command and the reason it is needed.
 Python bytecode caches must not pollute workflow repositories. Academic devctl
 launchers set `PYTHONDONTWRITEBYTECODE=1` before invoking the Python core.
 
+## Windows Execution Surface
+
+Windows users should default to PowerShell plus Python devctl. A normal
+academic paper repository must not require WSL for initialization, remote Issue
+or PR operations, Claude delegation, rule entrypoint sync, or local approval
+checks.
+
+WSL is a developer compatibility path for tool-repository tests and legacy Bash
+fallback only. Upper AIs must not switch a paper repository workflow to WSL
+unless the human reviewer explicitly requests it or the specific task cannot be
+performed through PowerShell plus Python devctl.
+
+Terminal status lines emitted by devctl wrappers, PowerShell helpers, and Bash
+fallback scripts should stay ASCII. Chinese academic content, long Markdown,
+remote Issue/MR bodies, Claude outputs, and human-review details should be
+written as UTF-8 files and passed with file-based arguments such as
+`--body-file`.
+
 ## Cursor And Three-Repository Setup
 
 Academic users do not need Codex to use this workflow. A Cursor-like upper AI
@@ -84,7 +102,8 @@ separate areas. The recommended v2 layout is:
   devctl                  -> project wrapper
   devctl.ps1              -> project wrapper
   SKILL.md                -> synced workflow entrypoint
-  .cursorrules            -> Cursor-specific guardrail template
+  AGENTS.md               -> Codex rule entrypoint when Codex initializes
+  .cursorrules            -> Cursor rule entrypoint when Cursor is enabled
 ```
 
 The paper repository `.gitmodules` must keep tool submodules on SSH URLs and
@@ -108,12 +127,32 @@ Use `ignore = untracked`, not `ignore = all`. This hides accidental untracked
 tool byproducts from the parent repository status while preserving visibility
 for tracked submodule modifications and reviewed submodule pointer updates.
 
-Cursor or another upper AI must read the paper repository's `AGENTS.md`,
-`SKILL.md`, and relevant `references/*.md` files, then use `devctl` commands
-instead of relying on Codex-specific skill installation.
+An upper AI must read the paper repository's own rule entrypoint, `SKILL.md`,
+and relevant `references/*.md` files, then use `devctl` commands instead of
+relying on Codex-specific skill installation.
 
-When Cursor is the upper AI, copy `.xflow/ops/workflow/templates/cursorrules.academic`
-to `<paper-repo>/.cursorrules` during initialization.
+AI-client rule entrypoints are managed by
+`.xflow/ops/workflow/templates/ai-rules.json`. During initialization, sync the
+entrypoint for the tool currently being used:
+
+```bash
+./devctl rules list
+./devctl rules sync codex
+./devctl rules sync cursor
+```
+
+On Windows PowerShell:
+
+```powershell
+.\devctl.ps1 rules list
+.\devctl.ps1 rules sync codex
+.\devctl.ps1 rules sync cursor
+```
+
+Only sync the entrypoint needed for the current tool. If a repository was
+initialized by Codex and later opened in Cursor, add Cursor with
+`devctl rules sync cursor`. If a target rule file already exists and differs,
+review it locally before using `--force`.
 
 Also copy `.xflow/ops/workflow/templates/xflow-powershell-native.ps1` to
 `<paper-repo>/.xflow/tools/xflow-powershell-native.ps1`. PowerShell scripts
@@ -249,21 +288,26 @@ git -C .xflow/ops/workflow checkout <reviewed-workflow-sha>
 ```
 
 After pinning, sync generated or copied guardrail files from the workflow
-submodule:
+submodule. Sync only the current or explicitly requested AI entrypoint:
 
 ```bash
 cp .xflow/ops/workflow/SKILL.md ./SKILL.md
-cp .xflow/ops/workflow/templates/cursorrules.academic ./.cursorrules
+./devctl rules list
+./devctl rules sync <codex|cursor>
 ```
 
 On Windows PowerShell:
 
 ```powershell
 Copy-Item .\.xflow\ops\workflow\SKILL.md .\SKILL.md -Force
-Copy-Item .\.xflow\ops\workflow\templates\cursorrules.academic .\.cursorrules -Force
+.\devctl.ps1 rules list
+.\devctl.ps1 rules sync <codex|cursor>
 New-Item -ItemType Directory -Force .\.xflow\tools | Out-Null
 Copy-Item .\.xflow\ops\workflow\templates\xflow-powershell-native.ps1 .\.xflow\tools\xflow-powershell-native.ps1 -Force
 ```
+
+Use `devctl rules sync --all` only when the human reviewer explicitly wants all
+declared AI entrypoints created or refreshed.
 
 Run local checks before requesting review:
 
@@ -291,7 +335,8 @@ update surfaces:
 - `.xflow/ops/devctl`: commit the submodule pointer to the reviewed devctl SHA.
 - `.xflow/ops/workflow`: commit the submodule pointer to the reviewed workflow SHA.
 - `SKILL.md`: commit the synced workflow entrypoint when it changed.
-- `.cursorrules`: commit the synced Cursor guardrail when it changed.
+- `AGENTS.md`, `.cursorrules`, or other AI rule entrypoints: commit synced
+  guardrails when they changed.
 - `devctl` and `devctl.ps1`: commit wrapper changes only when the update
   explicitly requires wrapper changes.
 - `.xflow/`: commit or archive local review evidence according to the paper

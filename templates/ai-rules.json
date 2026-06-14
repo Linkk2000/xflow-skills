@@ -1,0 +1,17 @@
+{
+  "schema": "academic-xflow/ai-rules/v1",
+  "rules": [
+    {
+      "id": "codex",
+      "target": "AGENTS.md",
+      "template": "codex-agents.academic.md",
+      "description": "Codex project instructions"
+    },
+    {
+      "id": "cursor",
+      "target": ".cursorrules",
+      "template": "cursorrules.academic",
+      "description": "Cursor project rules"
+    }
+  ]
+}

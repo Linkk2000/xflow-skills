@@ -21,6 +21,11 @@ This contract links `xflow-skills@academic` and `xflow-devctl@academic`.
   recommendation.
 - Python bytecode policy: launchers must set `PYTHONDONTWRITEBYTECODE=1` before
   invoking the Python core.
+- Windows academic operation must not require WSL. PowerShell plus Python
+  devctl is the default Windows execution surface; WSL is a developer
+  compatibility path for tool-repository tests and legacy Bash fallback.
+- devctl wrapper, helper, and fallback status/error lines should use ASCII.
+  Non-ASCII academic content belongs in UTF-8 artifact files.
 - Pre-Issue draft location: `.xflow/issues/issue-draft/`.
 - Workflow-local scratch location: `.xflow/local/`.
 - Tool submodule locations: `.xflow/ops/devctl` and `.xflow/ops/workflow`.
@@ -41,7 +46,7 @@ Academic issue and MR templates must include hidden machine anchors:
 with the paper repository's base or task branch. `xflow-devctl@academic` must
 reject that obsolete field in academic issue and MR checks.
 
-## Cursor Compatibility Contract
+## AI Rule Entrypoint Contract
 
 Codex is not a runtime dependency. Cursor or another upper AI may operate the
 academic workflow when it can access:
@@ -53,14 +58,26 @@ academic workflow when it can access:
 The upper AI must use repository-local files and `devctl` commands as the
 source of truth. It must not require Codex skill installation.
 
-Cursor initialization must copy:
+AI-client rule files are declared by:
 
 ```text
-.xflow/ops/workflow/templates/cursorrules.academic -> .cursorrules
+.xflow/ops/workflow/templates/ai-rules.json
 ```
 
-The `.cursorrules` file is a Cursor guardrail, not a replacement for executable
-`devctl` checks.
+At minimum, the manifest must expose these entrypoints:
+
+```text
+codex -> AGENTS.md
+cursor -> .cursorrules
+```
+
+`devctl rules list` must read that manifest, and `devctl rules sync <id>` must
+copy the requested template into the paper repository root. This allows a
+repository initialized by one AI tool to add another AI tool's rule file later.
+
+`devctl rules sync` must not overwrite an existing different file unless
+`--force` is supplied after local human review. These root rule files are
+guardrails, not replacements for executable `devctl` checks.
 
 ## Pinned Update Contract
 
@@ -79,8 +96,8 @@ The parent paper repository update is valid only when:
 - `.xflow/ops/workflow` points to a human-reviewed `xflow-skills@academic` commit.
 - `.gitmodules` uses `ignore = untracked` for `.xflow/ops/devctl` and
   `.xflow/ops/workflow`.
-- copied guardrails such as `SKILL.md` and `.cursorrules` are synced from the
-  reviewed `.xflow/ops/workflow` commit.
+- copied guardrails such as `SKILL.md`, `AGENTS.md`, and `.cursorrules` are
+  synced from the reviewed `.xflow/ops/workflow` commit.
 - local checks have been run and recorded in the task's TDD result or update
   review record.
 - the human reviewer approves the exact submodule pointer changes and copied

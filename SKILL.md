@@ -70,17 +70,19 @@ description: 通用型 Git & Issue TDD 开发工作流。适用于在本地通�
 
 ## 平台与 Shell 稳定性准则
 
-在 Windows + WSL + 中文仓库环境中执行本工作流时，AI 助手必须先降低平台噪音，而不是把环境问题误判为业务问题：
+在 Windows + PowerShell + Python devctl 环境中执行本工作流时，AI 助手必须先降低平台噪音，而不是把环境问题误判为业务问题：
 
 详细经验与案例见 `references/ops-lessons.md`，遇到 shell、编码、dev server、远程 issue/MR 命令异常时应优先读取。
 
-1. **WSL 优先且单一执行面**：若用户已明确 WSL 可用，开发、测试、git、devctl、服务启动优先全部在 WSL 内执行；不要在同一任务中频繁混用 PowerShell 与 WSL。
-2. **避免复杂跨 shell 一行命令**：从 PowerShell 调用 `wsl --exec bash -lc` 时，禁止把复杂引号、正则、`$()`、长管道和多层嵌套塞进一行。优先使用项目内脚本、`devctl` 命令、短命令或 heredoc。
-3. **不要依赖中文终端输出做补丁锚点**：中文 Markdown / shell 输出可能显示为 mojibake。编辑中文文档时优先使用 ASCII 锚点、结构位置、行号附近上下文或追加章节，避免用乱码文本作为 patch 匹配依据。
-4. **避免无边界递归扫描**：在 `/mnt/c`、`/mnt/d` 等 Windows 挂载盘上，优先使用 `git grep`、限定目录的 `find -maxdepth` 或精确文件读取；不要用无边界 `grep -R` 扫大型 monorepo。
-5. **进程管理必须精确**：长期服务使用项目脚本或 pid 文件管理。禁止用宽泛 `pkill -f` 模式清进程，因为它可能匹配并杀死当前 shell。若必须清理，先 `pgrep -a` 核对 PID，再按 PID 处理。
-6. **后台服务必须验证存活**：启动 dev server 后，必须在新的 shell 调用中再次检查 `pid`、端口监听和 HTTP 响应，避免进程随 WSL shell 退出而短暂成功。
-7. **环境阻塞与业务修复分线处理**：若 dev server、编码、shell、权限或包管理器问题阻塞 UI 验证，应把它作为独立 B 线记录到 Planning with Files；业务线只能声明已通过的单测/typecheck，不能把未完成的 UI 验证说成已完成。
+1. **Windows 默认执行面**：Windows users should default to PowerShell plus Python devctl. 普通学术用户不应被要求安装或使用 WSL。
+2. **WSL 降级为兼容路径**：WSL is a developer compatibility path for tool-repository tests and legacy Bash fallback only. 除非用户明确要求或当前任务只能由 WSL 完成，不要主动切换到 WSL。
+3. **避免复杂跨 shell 一行命令**：从 PowerShell 调用 `wsl --exec bash -lc` 时，禁止把复杂引号、正则、`$()`、长管道和多层嵌套塞进一行。优先使用项目内脚本、`devctl` 命令、短命令或 heredoc。
+4. **不要依赖中文终端输出做补丁锚点**：中文 Markdown / shell 输出可能显示为 mojibake。编辑中文文档时优先使用 ASCII 锚点、结构位置、行号附近上下文或追加章节，避免用乱码文本作为 patch 匹配依据。
+5. **终端状态输出 ASCII 化**：devctl、PowerShell helper、Bash fallback 的 PASS/FAIL/INFO/ERROR 状态行应使用 ASCII；中文、长 Markdown、Issue/MR 正文与审查意见写入 UTF-8 文件。
+6. **避免无边界递归扫描**：在 `/mnt/c`、`/mnt/d` 等 Windows 挂载盘上，优先使用 `git grep`、限定目录的 `find -maxdepth` 或精确文件读取；不要用无边界 `grep -R` 扫大型 monorepo。
+7. **进程管理必须精确**：长期服务使用项目脚本或 pid 文件管理。禁止用宽泛 `pkill -f` 模式清进程，因为它可能匹配并杀死当前 shell。若必须清理，先 `pgrep -a` 核对 PID，再按 PID 处理。
+8. **后台服务必须验证存活**：启动 dev server 后，必须在新的 shell 调用中再次检查 `pid`、端口监听和 HTTP 响应，避免进程随 WSL shell 退出而短暂成功。
+9. **环境阻塞与业务修复分线处理**：若 dev server、编码、shell、权限或包管理器问题阻塞 UI 验证，应把它作为独立 B 线记录到 Planning with Files；业务线只能声明已通过的单测/typecheck，不能把未完成的 UI 验证说成已完成。
 
 ---
 
@@ -149,6 +151,17 @@ For reusable PowerShell scripts, copy and dot-source:
 Use `Invoke-XFlowNative` or `Invoke-XFlowGit -GitArguments @(...)` so each
 native command returns a structured result with `ExitCode`, `Stdout`, and
 `Stderr`. Run one native command, inspect the result, then run the next command.
+
+## AI Rule Entrypoint Safety
+
+- Root rule files such as `AGENTS.md` and `.cursorrules` are generated from
+  `.xflow/ops/workflow/templates/ai-rules.json`.
+- A repository initialized by one AI client may later add another client with
+  `devctl rules list` and `devctl rules sync <id>`.
+- `devctl rules sync` must not overwrite an existing different rule file unless
+  `--force` is used after local human review.
+- These rule files are guardrails only. Executable checks and remote-write
+  gates remain in `devctl`.
 
 ## Approval And PR Sealing Safety
 

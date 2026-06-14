@@ -17,6 +17,14 @@ Runtime rules:
 - Do not require Codex. Use repository files and `devctl` commands as the
   source of truth.
 - Use `devctl` or `devctl.ps1` from the paper repository root.
+- Default to PowerShell plus Python devctl on Windows. Do not switch to WSL
+  unless the human reviewer explicitly requests it or the task is a
+  tool-repository compatibility test that cannot run through PowerShell.
+- Treat WSL as a developer compatibility path, not as a normal academic user
+  prerequisite.
+- To add another AI client's rule entrypoint after initialization, run
+  `devctl rules list` and then `devctl rules sync <id>` after reviewing the
+  target file that will be created or overwritten.
 - Treat `academic` as the XFlow product line for `.xflow/ops/devctl` and
   `.xflow/ops/workflow`, not as the paper repository base or task branch.
 - Do not create or push an `academic` branch in the paper repository unless the
@@ -156,6 +164,8 @@ Shell safety rules:
   `Initialize-XFlowPowerShellEncoding`, and emit status lines with
   `Write-XFlowStatus`. Write Chinese or other non-ASCII details to Markdown
   files instead of stdout/stderr.
+- Bash fallback and devctl wrapper status/error lines should also stay ASCII;
+  Chinese academic content belongs in UTF-8 artifact files, not status output.
 - Do not combine multiple native commands in one PowerShell line. Run one
   native command, store its result object or exit code, inspect it, then run the
   next command.
@@ -177,6 +187,7 @@ Expected initialization outputs:
 - `devctl`
 - `devctl.ps1`
 - `SKILL.md`
-- `.cursorrules`
+- `AGENTS.md` when `devctl rules sync codex` was used
+- `.cursorrules` when `devctl rules sync cursor` was used
 - `.xflow/`
 - `.xflow/tools/xflow-powershell-native.ps1`

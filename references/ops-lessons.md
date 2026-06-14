@@ -1,8 +1,14 @@
 # XFlow 操作经验与防重复规则
 
-## Shell 与 WSL
+## Shell, PowerShell, And WSL
 
-- 优先在 WSL 中执行项目命令；不要在同一次任务里混用 PowerShell 和 WSL 语义。
+- Academic paper repositories should default to PowerShell plus Python devctl on
+  Windows. Do not require WSL for normal initialization, Issue/PR operations,
+  Claude delegation, or local approval checks.
+- WSL is a developer compatibility path for tool-repository tests and legacy
+  Bash fallback. Use it only when the human reviewer explicitly requests it or
+  a specific compatibility test cannot run through PowerShell.
+- 不要在同一次任务里频繁混用 PowerShell 和 WSL 语义。
 - 从 Codex 工具调用 WSL 时，复杂 Bash 命令容易被外层 PowerShell 解析。避免在一行命令中使用这些结构：
   - `$(...)`
   - here-doc
@@ -20,7 +26,7 @@
 ### 适合放入 Skill 的通用规则
 
 - **跨 shell 引号规则**：PowerShell 外层会先解析字符串，复杂 Bash 一行命令容易损坏。通用策略是短命令、脚本化、heredoc 或文件传参。
-- **中文输出规则**：中文终端输出可能出现 mojibake。通用策略是不要用乱码文本做 patch 锚点，优先使用 ASCII 锚点、结构位置、行号或追加章节。
+- **终端输出规则**：devctl wrapper、PowerShell helper、Bash fallback 的 PASS/FAIL/INFO/ERROR 状态行应使用 ASCII。中文终端输出可能出现 mojibake；中文、长 Markdown、Issue/MR 正文、Claude 输出和审查意见应写入 UTF-8 文件。
 - **Windows 挂载盘性能规则**：`/mnt/c`、`/mnt/d` 上无边界递归扫描慢且容易残留进程。通用策略是 `git grep`、限定目录、限定深度。
 - **进程管理规则**：禁止宽泛 `pkill -f`；长期服务使用 pid 文件、明确 PID、二次验活。
 - **验证完整性规则**：环境阻塞时必须把环境问题和业务问题分线，不能把未完成的 UI 验证说成已完成。
