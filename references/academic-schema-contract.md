@@ -241,14 +241,28 @@ skill path such as `.claude/skills/peer-review/SKILL.md`. Passing catalog
 validation alone is not enough to execute, and an official nested source clone
 under `.claude/skills/academic-forge/skills/...` is not sufficient by itself.
 
-`devctl claude skills` must list the verified AcademicForge command catalog so
-upper AIs can query available commands before writing `claude-task.md`.
+`devctl claude skills` must list the verified AcademicForge command catalog and
+mark each command as `installed` or `missing` for the current machine. Upper AIs
+must choose an `installed` command before writing `claude-task.md`; a catalog-only
+command such as `/paper-lookup` is not executable until it exists at a
+Claude-resolvable flat path.
+
+Claude CLI arguments belong in `DEVCTL_CLAUDE_ARGS`; the execution timeout is
+controlled by `DEVCTL_CLAUDE_TIMEOUT_SECONDS`. Long-running literature review
+skills must fail with a clear timeout error instead of hanging indefinitely.
+For diagnostic smoke tests, upper AIs should constrain tools and budget through
+Claude CLI arguments rather than letting a full review pipeline run by accident.
 
 Claude output must be validated before writing `claude-result.md`. A zero exit
 code from the Claude CLI is insufficient by itself. `xflow-devctl@academic` must
 reject empty output, `Unknown command` output, and obvious generic replies that
 ask for the task again. It must not hard-code one academic output format because
 individual Forge skills may return their own valid structures.
+
+Do not require emoji status markers in Claude-required output templates. Use
+ASCII status markers such as `PASS`, `WARN`, and `FAIL` instead. On Windows,
+Claude non-interactive output captured through Python pipes may corrupt emoji
+even when the terminal itself can display them.
 
 Claude readiness is exposed through:
 

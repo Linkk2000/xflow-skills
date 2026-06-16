@@ -60,10 +60,15 @@ Runtime rules:
   inspect its exit code, then run the next command.
 - Keep terminal status lines ASCII. Write Chinese, long Markdown, Issue/MR
   bodies, Claude results, and review details to UTF-8 files.
-- Before Claude delegation, run `devctl claude doctor`, choose verified
-  commands with `devctl claude skills`, write `claude-task.md`, and execute
-  through `devctl claude run --issue <id>`. Do not ask the user to manually
-  copy prompts into Claude during normal workflow execution.
+- Before Claude delegation, run `devctl claude doctor`, choose a command marked
+  `installed` by `devctl claude skills`, write `claude-task.md`, and execute
+  through `devctl claude run --issue <id>`. Do not use catalog-only commands
+  marked `missing`, and do not ask the user to manually copy prompts into Claude
+  during normal workflow execution.
+- For Claude smoke tests or bounded literature queries, use
+  `DEVCTL_CLAUDE_ARGS` and `DEVCTL_CLAUDE_TIMEOUT_SECONDS` to constrain tools,
+  budget, and runtime. Do not require emoji status markers in Claude output;
+  use ASCII markers such as `PASS`, `WARN`, and `FAIL`.
 - For review-only tasks, run `devctl check scope --issue <id> --mode review-only`
   before committing or remote writes. In this mode, keep edits inside the
   issue-local evidence allowlist unless `.xflow/scope-policy.json` explicitly

@@ -65,6 +65,9 @@ require_ref "templates/codex-agents.academic.md" "devctl migrate inspect"
 require_ref "templates/codex-agents.academic.md" "devctl migrate wrappers"
 require_ref "templates/codex-agents.academic.md" "python -m xflow"
 require_ref "templates/codex-agents.academic.md" "must not call Bash, WSL, Claude, AcademicForge, or any installer"
+require_ref "templates/codex-agents.academic.md" "command marked"
+require_ref "templates/codex-agents.academic.md" "DEVCTL_CLAUDE_TIMEOUT_SECONDS"
+require_ref "templates/codex-agents.academic.md" '`PASS`, `WARN`, and `FAIL`'
 require_ref "templates/codex-agents.academic.md" "Do not invent active approval filenames"
 require_ref "templates/codex-agents.academic.md" "Do not add AI-client co-author trailers"
 require_ref "templates/codex-agents.academic.md" "devctl check scope --issue <id> --mode review-only"
@@ -75,6 +78,7 @@ require_ref "templates/cursorrules.academic" "Default to PowerShell plus Python 
 require_ref "templates/cursorrules.academic" "Do not switch to WSL"
 require_ref "templates/cursorrules.academic" "devctl claude run --issue <id>"
 require_ref "templates/cursorrules.academic" "devctl claude skills"
+require_ref "templates/cursorrules.academic" 'commands marked `installed`'
 require_ref "templates/cursorrules.academic" "devctl rules list"
 require_ref "templates/cursorrules.academic" "devctl rules sync <id>"
 require_ref "templates/cursorrules.academic" "devctl migrate inspect"
@@ -87,8 +91,12 @@ require_ref "templates/cursorrules.academic" "Claude Skill:"
 require_ref "templates/cursorrules.academic" "Invocation:"
 require_ref "templates/cursorrules.academic" "/peer-review"
 require_ref "templates/cursorrules.academic" "DEVCTL_CLAUDE_ARGS"
+require_ref "templates/cursorrules.academic" "DEVCTL_CLAUDE_TIMEOUT_SECONDS"
+require_ref "templates/cursorrules.academic" "--disallowedTools Bash,Edit,Write,Read"
 require_ref "templates/cursorrules.academic" "focus=methodology severity=major"
 require_ref "templates/cursorrules.academic" "successful CLI exit code alone is not enough"
+require_ref "templates/cursorrules.academic" "Do not require emoji status markers"
+require_ref "templates/cursorrules.academic" '`PASS`, `WARN`, and `FAIL`'
 require_ref "templates/cursorrules.academic" "generic reply asking"
 require_ref "templates/cursorrules.academic" 'Claude-resolvable flat skill directory'
 require_ref "templates/cursorrules.academic" 'nested official source path'
@@ -138,8 +146,16 @@ require_ref "references/academic-workflow.md" "templates/xflow-powershell-native
 require_ref "references/academic-workflow.md" "academicforge-skill-catalog.md"
 require_ref "references/academic-workflow.md" "Invocation: /<skill-name>"
 require_ref "references/academic-workflow.md" "DEVCTL_CLAUDE_ARGS"
+require_ref "references/academic-workflow.md" "DEVCTL_CLAUDE_TIMEOUT_SECONDS"
+require_ref "references/academic-workflow.md" "--disallowedTools Bash,Edit,Write,Read"
 require_ref "references/academic-workflow.md" "the whole invocation line"
 require_ref "references/academic-workflow.md" "devctl claude skills"
+require_ref "references/academic-workflow.md" 'command marked `installed`'
+require_ref "references/academic-workflow.md" 'marked `missing`'
+require_ref "references/academic-workflow.md" "medical machine learning"
+require_ref "references/academic-workflow.md" 'Do not choose `/paper-lookup`, `/research-lookup`,'
+require_ref "references/academic-workflow.md" "Avoid requiring emoji status markers"
+require_ref "references/academic-workflow.md" '`PASS`, `WARN`, and `FAIL`'
 require_ref "references/academic-workflow.md" "rejects empty output"
 require_ref "references/academic-workflow.md" "does not hard-code one academic"
 require_ref "references/academic-workflow.md" "checked skill roots"
@@ -197,6 +213,10 @@ require_ref "references/academic-schema-contract.md" "must not overwrite an exis
 require_ref "references/academic-schema-contract.md" "academicforge-skill-catalog.md"
 require_ref "references/academic-schema-contract.md" "AcademicForge Skill:"
 require_ref "references/academic-schema-contract.md" "devctl claude skills"
+require_ref "references/academic-schema-contract.md" 'installed` or `missing`'
+require_ref "references/academic-schema-contract.md" "DEVCTL_CLAUDE_TIMEOUT_SECONDS"
+require_ref "references/academic-schema-contract.md" "Do not require emoji status markers"
+require_ref "references/academic-schema-contract.md" '`PASS`, `WARN`, and `FAIL`'
 require_ref "references/academic-schema-contract.md" "may include skill arguments"
 require_ref "references/academic-schema-contract.md" "preserve the complete invocation line"
 require_ref "references/academic-schema-contract.md" "A zero exit"

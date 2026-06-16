@@ -93,8 +93,9 @@ Runtime rules:
   global Claude configuration write.
 - Before writing `.xflow/issues/issue-<id>/claude-task.md`, choose a verified
   command from `.xflow/ops/workflow/references/academicforge-skill-catalog.md`.
-  You may also run `devctl claude skills` to list verified commands. Do not
-  invent Claude or AcademicForge commands.
+  Run `devctl claude skills` and use only commands marked `installed`; a
+  catalog command marked `missing` is not locally executable. Do not invent
+  Claude or AcademicForge commands.
 - Claude task packages must use `Claude Skill:`, `Skill Source:`, and
   `Invocation:`. Do not use the obsolete `AcademicForge Skill:` field.
 - `Invocation:` must be explicit, for example `/peer-review`; do not use
@@ -105,6 +106,10 @@ Runtime rules:
 - If the Claude CLI itself needs options such as model, permission mode, or
   allowed tools, use `DEVCTL_CLAUDE_ARGS`; do not put CLI options in
   `Invocation:`.
+- For bounded smoke tests or literature queries, constrain tools, budget, and
+  runtime with `DEVCTL_CLAUDE_ARGS` and `DEVCTL_CLAUDE_TIMEOUT_SECONDS`; for
+  example, prefer `--disallowedTools Bash,Edit,Write,Read` over an unbounded
+  full review run.
 - Catalog validation proves the command exists in the audited Forge source, but
   execution requires a Claude-resolvable flat skill directory such as
   `.claude/skills/peer-review/SKILL.md`. A nested official source path under
@@ -114,6 +119,9 @@ Runtime rules:
 - Claude output must not be empty, `Unknown command`, or a generic reply asking
   for the task again; a successful CLI exit code alone is not enough. Human
   review decides whether the skill-specific result is useful.
+- Do not require emoji status markers in Claude output formats. Use ASCII
+  markers such as `PASS`, `WARN`, and `FAIL` because Windows non-interactive
+  Claude output captured by devctl may corrupt emoji.
 - Do not ask the user to manually copy prompts into Claude during normal
   workflow execution. Prepare `.xflow/issues/issue-<id>/claude-task.md` and run
   `devctl claude run --issue <id>`.

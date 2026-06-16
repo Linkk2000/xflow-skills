@@ -729,12 +729,40 @@ The executable catalog can also be queried through:
 devctl claude skills
 ```
 
+The list includes both catalog commands and local execution status. Choose a
+command marked `installed` before writing `claude-task.md`. A command that is
+present in `references/academicforge-skill-catalog.md` but marked `missing`
+will pass catalog validation but fail before Claude execution because Claude
+cannot resolve the slash command locally.
+
+For literature discovery tasks such as medical machine learning paper lookup,
+prefer an installed search/review skill such as `/literature-review` or
+`/exa-search` when available. Do not choose `/paper-lookup`, `/research-lookup`,
+or `/bgpt-paper-search` unless `devctl claude skills` marks that exact command
+as `installed`.
+
 `devctl claude run` rejects empty output, `Unknown command` output, and obvious
 generic replies that ask for the task again. It does not hard-code one academic
 review format, because individual Forge skills may return their own valid
 formats. The task package should still request `## Summary`,
 `## Proposed Changes`, `## Risks`, and `## Questions` when that format is
 appropriate, and the human reviewer decides whether the Claude result is useful.
+
+`devctl claude run` has an internal timeout controlled by
+`DEVCTL_CLAUDE_TIMEOUT_SECONDS`. For small smoke tests or controlled literature
+queries, set `DEVCTL_CLAUDE_ARGS` to constrain Claude tools, permission mode,
+and budget, for example:
+
+```powershell
+$env:DEVCTL_CLAUDE_ARGS="--permission-mode dontAsk --disallowedTools Bash,Edit,Write,Read --max-budget-usd 0.50"
+$env:DEVCTL_CLAUDE_TIMEOUT_SECONDS="300"
+.\devctl.ps1 claude run --issue <id>
+```
+
+Avoid requiring emoji status markers in `claude-task.md` output formats. Use
+ASCII words such as `PASS`, `WARN`, and `FAIL` because Windows non-interactive
+Claude output captured by devctl may corrupt emoji even when PowerShell displays
+them correctly.
 
 For `Skill Source: AcademicForge`, `devctl claude run` also checks the local
 AcademicForge skill before invoking Claude. Claude resolves slash commands from
