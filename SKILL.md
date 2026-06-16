@@ -39,3 +39,24 @@ This is a phase-selected reference index. If unsure which file applies, read `re
 - Never use `devctl git mr` when the user only approved push.
 - Never create MR/PR before synchronizing the task branch with the target branch and recording the sync evidence.
 - Before commit, push, MR, and completion, re-read project rules or run matching `devctl check`.
+
+## Core Remote Write Review Gate
+
+- Core remote writes are `issue-create`, `issue-comment`, `issue-close`, and `git-mr`.
+- Prepare remote body files before running remote-write commands:
+  - `.xflow/issues/issue-draft/issue-draft.md`
+  - `.xflow/issues/issue-<id>/comment-draft.md`
+  - `.xflow/issues/issue-<id>/mr-draft.md`
+  - `.xflow/issues/issue-<id>/walkthrough.md` for issue close evidence
+- Run `devctl check issue-draft`, `devctl check mr-draft`, and `devctl check local-review` before remote writes.
+- The active approval file is `.xflow/issues/issue-<id>/approvals/local-review.md`; use `.xflow/issues/issue-draft/approvals/local-review.md` before creating a remote issue.
+- `Approved Action` must be one of `issue-create`, `issue-comment`, `issue-close`, `git-mr`, or `remote-write`.
+- Use `--body-file` for Issue, comment, and MR/PR bodies. Do not pass long Markdown through inline command arguments.
+- Remote-published body files must not include internal-only visible titles such as `# Issue Draft`, `# MR Draft`, `# PR Draft`, or `# Merge Request Draft`.
+
+## Git Commit Attribution Rule
+
+- Do not add Cursor co-author trailers.
+- Do not append `Co-authored-by: Cursor <cursoragent@cursor.com>` to commit messages.
+- Do not use `git commit --trailer` to add Cursor, cursoragent, or AI-client co-author metadata.
+- Keep commit attribution limited to the repository's configured Git author unless the human reviewer explicitly requests otherwise.
