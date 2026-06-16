@@ -33,6 +33,7 @@ def main() -> int:
     for file_name, refs in {
         "SKILL.md": (
             "PowerShell Native Command Safety",
+            "Academic Issue/MR drafts must use `references/academic-templates.md`",
             "Windows users should default to PowerShell plus Python devctl",
             "WSL is a developer compatibility path",
             "Invoke-XFlowGit -GitArguments @(...)",

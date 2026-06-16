@@ -47,7 +47,7 @@ description: 通用型 Git & Issue TDD 开发工作流。适用于在本地通�
 当用户提出口头需求或修改意见时：
 
 1. **需求提炼**：用简短的一段话提炼用户的核心诉求，并结合探查到的技术栈划分波及范围（如：前端、后端、数据层或文档层）。
-2. **编写 Issue 描述**：依据 [references/issue-template.md](references/issue-template.md) 进行格式化起草，包含背景、目标、待验证的 TDD 验收标准以及建议测试命令。
+2. **编写 Issue 描述**：Academic Issue/MR drafts must use `references/academic-templates.md` as the canonical template source. `references/issue-template.md` is a generic legacy reference and must not replace the academic templates on this branch.
 3. **分支名预览**：根据远程 Issue 编号及标题的 ASCII Slug 组合，拟定规范的分支名预览。
 4. **获取批准**：向用户展示 Issue 全文及拟执行的 `devctl issue create` 命令，待用户确认后执行创建，并捕获返回的 Issue 编号与 URL。若 Issue 正文包含多行 Markdown、反引号、代码块、JSON 或 shell 片段，必须先写入临时 Markdown 文件，再使用 `devctl issue create "<title>" --body-file <file>`；禁止把复杂正文直接放入 `--body` 参数。
 
