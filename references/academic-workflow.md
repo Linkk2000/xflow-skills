@@ -183,7 +183,15 @@ Read-only Issue commands do not require local approval:
 ./devctl issue show <id>
 ```
 
-Issue creation requires an approved body file:
+Issue creation requires a reviewed body file. First prefill the active local
+approval file:
+
+```bash
+./devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md
+```
+
+Then the human reviewer inspects the exact body file and command, updates
+`Approved: no` to `Approved: yes`, and only then the AI may run:
 
 ```bash
 ./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --labels "academic"
@@ -195,16 +203,17 @@ On Windows PowerShell:
 .\devctl.ps1 issue create "<title>" --body-file .\.xflow\issues\issue-draft\issue-draft.md --labels "academic"
 ```
 
-The command must not be run until the human reviewer has approved the exact
-issue draft file and `.xflow/issues/issue-draft/approvals/local-review.md`
-contains the matching SHA256. If the repository has no detectable GitHub
-origin, set `DEVCTL_OWNER` and `DEVCTL_REPO` explicitly.
+The command must not be run until `.xflow/issues/issue-draft/approvals/local-review.md`
+contains the human decision and matching SHA256. If the repository has no
+detectable GitHub origin, set `DEVCTL_OWNER` and `DEVCTL_REPO` explicitly.
 
 Issue comments and close operations are remote writes. Prepare the exact file,
-obtain local human approval, then run:
+prefill the approval record, obtain local human approval, then run:
 
 ```bash
+./devctl approval prepare --issue <id> --action issue-comment --file .xflow/issues/issue-<id>/comment-draft.md
 ./devctl issue comment <id> --body-file .xflow/issues/issue-<id>/comment-draft.md
+./devctl approval prepare --issue <id> --action issue-close --file .xflow/issues/issue-<id>/walkthrough.md
 ./devctl issue close <id>
 ```
 
@@ -214,9 +223,11 @@ For `issue close`, the default approved file is
 different evidence file. Inline `--body` is rejected for issue comments in
 academic Python mode.
 
-For GitHub PR creation, prepare and approve the MR draft first:
+For GitHub PR creation, prepare the MR draft, prefill the active local approval
+file, then wait for the human reviewer:
 
 ```bash
+./devctl approval prepare --issue <id> --action git-mr --file .xflow/issues/issue-<id>/mr-draft.md
 ./devctl git mr --title "<title>" --body-file .xflow/issues/issue-<id>/mr-draft.md --base main --issue <id>
 ```
 
@@ -458,6 +469,80 @@ Each academic task must keep auditable files under:
 `claude-task.md` and `claude-result.md` are required only when Claude or
 AcademicForge skills are used.
 
+## Review-Only Scope Rule
+
+Academic review tasks often require reading paper sources and writing review
+artifacts without modifying the original manuscript. Use `review-only` when the
+task is to inspect, summarize, compare, or prepare candidate changes for later
+human selection.
+
+In `review-only`, run:
+
+```bash
+devctl check scope --issue <id> --mode review-only
+```
+
+On Windows PowerShell:
+
+```powershell
+.\devctl.ps1 check scope --issue <id> --mode review-only
+```
+
+The `<id>` placeholder is a variable. For Issue 7, the default allowlist expands
+to `issue-7`; it must never be hard-coded as an example issue number such as
+`issue-5`.
+
+Default allowed paths are:
+
+```text
+.xflow/issues/issue-<id>/**
+.xflow/local/**
+reviews/issue-<id>/**
+review/issue-<id>/**
+```
+
+`.xflow/local/**` is allowed because it is workflow-local scratch space that is
+normally excluded from Git tracking. Durable evidence should still be copied or
+written under `.xflow/issues/issue-<id>/`.
+
+The scope check is allowlist-first. It does not treat manuscript paths as a
+fixed global denylist, because paper repositories may use different layouts or
+later migrate the same workflow model back to the general `main` product line.
+Paths such as `manuscript/**`, `paper/**`, `*.tex`, and `*.bib` are
+protected hints: when they appear outside the allowlist, the error message should explain
+that the task is probably leaving `review-only` and should move to
+`apply-selected-fixes` or extend the allowlist after human review.
+
+Project-specific extensions belong in:
+
+```text
+.xflow/scope-policy.json
+```
+
+Example:
+
+```json
+{
+  "review_only": {
+    "allow": [
+      "analysis/issue-<id>/**"
+    ],
+    "allow_supporting": [
+      "AGENTS.md",
+      ".cursorrules",
+      ".cursor/rules/**"
+    ],
+    "protected_hints": [
+      "chapters/**"
+    ]
+  }
+}
+```
+
+Guardrail files such as `AGENTS.md`, `.cursorrules`, and `.cursor/rules/**` are
+supporting changes. They may be allowed when they prevent repeated workflow
+errors, but the reason must be documented in `walkthrough.md` or the PR body.
+
 ## State Machine
 
 ```text
@@ -480,6 +565,37 @@ G6_APPROVE_CLEANUP
 S10_CLOSE_AND_ARCHIVE
 ```
 
+`.xflow/current-task.md` is the active local task-state board. It should contain
+at least:
+
+```markdown
+Issue: <id>
+State: <state-or-gate>
+```
+
+Before local approval, commit, push, or MR/PR creation, run:
+
+```bash
+devctl check current-task --issue <id>
+```
+
+This check compares the board with local facts such as `devctl.pr`. If a PR
+number already exists but `.xflow/current-task.md` still forbids push or PR
+creation, the check fails as stale. The AI must then show the stale board and
+the suggested update to the human reviewer instead of continuing from the old
+state.
+
+After `devctl git mr` creates a PR, devctl writes:
+
+```text
+.xflow/issues/issue-<id>/state-update-suggestion.md
+```
+
+This file suggests moving to `S9_REMOTE_REVIEW_AND_CI` and records that PR
+number/URL metadata writeback is covered by `Approved Action: git-mr`. Updating
+`.xflow/current-task.md` from the suggestion is a local state maintenance step,
+not a reason to open another PR after the remote PR has already been merged.
+
 ## Gates
 
 - `G1_LOCAL_APPROVE_ISSUE`: required before creating a remote issue.
@@ -494,6 +610,16 @@ later remote writes.
 
 Use machine-readable approval actions in `approvals/local-review.md`:
 `issue-create`, `issue-comment`, `issue-close`, `git-mr`, or `remote-write`.
+
+Before asking for human approval, the AI should run:
+
+```bash
+devctl approval prepare --issue <id> --action <action> --file <reviewed-artifact>
+```
+
+This command pre-fills mechanical fields such as approved file, SHA256,
+approval time, and suggested command. It must leave `Approved: no`; only the
+human reviewer may change the decision to `Approved: yes`.
 
 Do not invent active approval filenames such as `local-review-mr.md`. The
 active approval file is always `.xflow/issues/issue-<id>/approvals/local-review.md`.
@@ -511,7 +637,9 @@ record must include:
 - approved file
 - approved SHA256
 
-If the approved file changes, the approval is invalid and must be repeated.
+The SHA256 value is generated in lowercase. Checks should compare hashes
+case-insensitively so users are not forced to edit mechanical casing. If the
+approved file changes, the approval is invalid and must be repeated.
 
 ## Claude Delegation Rule
 

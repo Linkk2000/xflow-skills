@@ -19,16 +19,19 @@ review.
 Before any remote write, verify the relevant artifacts:
 
 ```bash
+devctl approval prepare --issue <id> --action <action> --file <approved-file>
 devctl check academic-issue --issue <id>
 devctl check tdd-result --issue <id>
 devctl check academic-mr --issue <id>
 devctl check local-review --issue <id> --file <approved-file>
+devctl check current-task --issue <id>
 ```
 
 If Claude or AcademicForge is used, also verify:
 
 ```bash
 devctl check claude-package --issue <id>
+devctl check scope --issue <id> --mode review-only
 ```
 
 Claude task packages must use a verified command from
@@ -84,6 +87,11 @@ The active local approval file is always
 under `.xflow/issues/issue-<id>/approvals/history/`. `Approved Action: git-mr`
 covers immediate PR number/URL metadata writeback. After PR merge, seal the
 task board and do not create another PR only to update local checklist records.
+Use `devctl approval prepare --issue <id> --action <action> --file <artifact>`
+to prefill hashes and command details; the human reviewer still makes the
+decision by changing `Approved: no` to `Approved: yes`.
+After PR creation, `devctl git mr` writes `.xflow/issues/issue-<id>/state-update-suggestion.md`
+and git config keys `devctl.pr` and `devctl.pr-url`.
 
 Remote issue/MR commands require `GITEE_TOKEN` through `~/gitee.env.local` or the environment.
 

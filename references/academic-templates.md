@@ -82,6 +82,32 @@ Executor: <agent or person>
 - Ready for local review: <yes|no>
 ```
 
+## .xflow/current-task.md
+
+`.xflow/current-task.md` is the active local state board. Keep it short and
+machine-checkable. Run `devctl check current-task --issue <id>` before local
+approval, commit, push, or MR/PR creation.
+
+```markdown
+# Current Task
+
+Issue: <id>
+State: <S0_REQUEST|S1_LOCAL_ISSUE_DRAFT|G1_LOCAL_APPROVE_ISSUE|S2_CREATE_REMOTE_ISSUE|G2_APPROVE_DEVELOPMENT|S3_START_TASK_BRANCH|S4_EXECUTE_AI_OR_CLAUDE_TASK|S5_WRITE_TDD_RESULT|G3_LOCAL_REVIEW_RESULT|S6_PREPARE_COMMIT_AND_MR_DRAFT|G4_LOCAL_APPROVE_REMOTE_WRITE|S7_PUSH_BRANCH|G5_LOCAL_APPROVE_MR|S8_CREATE_REMOTE_MR|S9_REMOTE_REVIEW_AND_CI|G6_APPROVE_CLEANUP|S10_CLOSE_AND_ARCHIVE>
+Branch: <branch>
+PR: <number-or-empty>
+
+## Allowed Actions
+- <next allowed local action>
+
+## Forbidden Actions
+- <remote write or content write that is not currently approved>
+
+## Evidence
+- TDD Result: .xflow/issues/issue-<id>/tdd-result.md
+- Local Review: .xflow/issues/issue-<id>/approvals/local-review.md
+- State Update Suggestion: .xflow/issues/issue-<id>/state-update-suggestion.md
+```
+
 ## claude-task.md
 
 ```markdown
@@ -179,7 +205,10 @@ Closes #<id>
 
 `approvals/local-review.md` is the active approval file. Do not create alternate
 active approval names such as `local-review-mr.md`. Archive superseded approval
-records under `approvals/history/`.
+records under `approvals/history/`. Generate or refresh this file with
+`devctl approval prepare --issue <id> --action <action> --file <artifact>`.
+The AI may prefill mechanical fields, but only the human reviewer may change
+`Approved: no` to `Approved: yes`.
 
 ```markdown
 # Local Review Approval
@@ -189,11 +218,18 @@ Reviewer: <human reviewer>
 Approved At: <ISO-8601 time>
 Approved Action: <issue-create|issue-comment|issue-close|git-mr|remote-write>
 Approved File: <path>
-Approved SHA256: <sha256>
+Approved SHA256: <lowercase sha256>
 
 ## Decision
-Approved: yes
+Approved: no
+
+## Suggested Command
+Suggested Command: <exact remote-write command>
+
+## Expected Effect
+- Authorizes exactly one remote write after the human changes `Approved: no` to `Approved: yes`.
+- If the approved file changes, rerun `devctl approval prepare` before any remote write.
 
 ## Notes
-<review notes and constraints>
+- Human reviewer must inspect the approved file, the action, and the suggested command before approving.
 ```

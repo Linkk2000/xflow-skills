@@ -32,6 +32,15 @@ Runtime rules:
 - Use `.xflow/issues/issue-<id>/approvals/local-review.md` as the active
   approval file. Do not invent active approval filenames such as
   `local-review-mr.md`.
+- Before asking for remote-write approval, run
+  `devctl approval prepare --issue <id> --action <action> --file <artifact>`
+  to prefill mechanical fields. The AI may fill hashes, timestamps, and the
+  suggested command, but must leave `Approved: no`; only the human reviewer may
+  change it to `Approved: yes`.
+- Before local approval, commit, push, or MR/PR creation, run
+  `devctl check current-task --issue <id>`. If it reports stale state, show
+  `.xflow/current-task.md` and `.xflow/issues/issue-<id>/state-update-suggestion.md`
+  to the human reviewer before continuing.
 - TDD output is required, but it never replaces human judgement.
 - Git-facing text only: commit messages, remote Issue titles/bodies, and MR/PR
   titles/bodies should follow the user's language; when the user works in
@@ -50,6 +59,10 @@ Runtime rules:
   commands with `devctl claude skills`, write `claude-task.md`, and execute
   through `devctl claude run --issue <id>`. Do not ask the user to manually
   copy prompts into Claude during normal workflow execution.
+- For review-only tasks, run `devctl check scope --issue <id> --mode review-only`
+  before committing or remote writes. In this mode, keep edits inside the
+  issue-local evidence allowlist unless `.xflow/scope-policy.json` explicitly
+  extends it after human review.
 - To add another AI client's rule entrypoint after initialization, run
   `devctl rules list` and then `devctl rules sync <id>` after reviewing the
   target file that will be created or overwritten.

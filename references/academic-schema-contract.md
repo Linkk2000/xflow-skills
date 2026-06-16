@@ -11,6 +11,9 @@ This contract links `xflow-skills@academic` and `xflow-devctl@academic`.
   - `devctl check claude-package`
   - `devctl check academic-mr`
   - `devctl check local-review`
+  - `devctl check scope --issue <id> --mode review-only`
+  - `devctl check current-task --issue <id>`
+  - `devctl approval prepare --issue <id> --action <action> --file <artifact>`
   - `devctl check submodule-hygiene`
 
 ## Runtime Contract
@@ -30,6 +33,37 @@ This contract links `xflow-skills@academic` and `xflow-devctl@academic`.
 - Workflow-local scratch location: `.xflow/local/`.
 - Tool submodule locations: `.xflow/ops/devctl` and `.xflow/ops/workflow`.
 - Task artifact location: `.xflow/issues/issue-<id>/`.
+- Scope policy extension location: `.xflow/scope-policy.json`.
+- Active task-state board: `.xflow/current-task.md`.
+
+## Scope Check Contract
+
+`devctl check scope --issue <id> --mode review-only` must validate changed
+files against an allowlist. The issue id is a variable expanded from the command
+argument; templates must not hard-code example issue numbers.
+
+Default `review-only` allowlist:
+
+- `.xflow/issues/issue-<id>/**`
+- `.xflow/local/**`
+- `reviews/issue-<id>/**`
+- `review/issue-<id>/**`
+
+Default supporting allowlist:
+
+- `.xflow/scope-policy.json`
+- `AGENTS.md`
+- `.cursorrules`
+- `.cursor/rules/**`
+
+The project may extend the allowlist through `.xflow/scope-policy.json` using
+the `review_only` key. Supported fields are `allow`, `allow_supporting`, and
+`protected_hints`; each value must be a list of glob patterns. The `<id>` token
+must be expanded to the active issue id before matching.
+
+Protected hints such as `manuscript/**`, `paper/**`, `*.tex`, and `*.bib` must
+not be the primary enforcement model. They only improve error messages when a
+changed file is outside the allowlist and appears to be manuscript content.
 
 ## Branch Semantics Contract
 
@@ -250,6 +284,22 @@ preserved under `.xflow/issues/issue-<id>/approvals/history/`, but history files
 are audit records and do not satisfy the active remote-write gate by
 themselves.
 
+`devctl approval prepare` must prefill the active approval file with:
+
+- issue id;
+- reviewer placeholder;
+- current timestamp;
+- approved action;
+- approved file;
+- lowercase SHA256 of the approved file;
+- suggested command when provided or inferable.
+
+The generated approval file must keep `Approved: no`. AI clients may update
+mechanical fields by rerunning `devctl approval prepare`, but must not set
+`Approved: yes` or forge reviewer identity. `devctl check local-review` and
+remote-write gates must reject unresolved placeholders, accept upper- or
+lowercase SHA256 text, and compare the hash against the exact reviewed file.
+
 ## GitHub Issue And PR Provider Contract
 
 `devctl issue create` in academic Python mode must:
@@ -297,6 +347,10 @@ Gitee is explicitly ported.
 - create the GitHub PR with the reviewed body file, current branch as `head`,
   and requested or detected paper base branch as `base`;
 - write the returned PR number to local git config `devctl.pr`;
+- write the returned PR URL to local git config `devctl.pr-url` when GitHub
+  returns one;
+- write `.xflow/issues/issue-<id>/state-update-suggestion.md` with the PR
+  number, optional URL, and suggested `State: S9_REMOTE_REVIEW_AND_CI`;
 - print the remote PR number and URL returned by GitHub.
 
 `Approved Action: git-mr` covers the PR publication sequence: branch push, PR
@@ -311,6 +365,17 @@ and must not require another PR just to update local task-board records.
 - read a GitHub PR by number;
 - perform no remote write;
 - require no local approval gate.
+
+`devctl check current-task --issue <id>` must:
+
+- read `.xflow/current-task.md`;
+- require a `State:` field;
+- verify the optional `Issue:` field matches the requested issue id;
+- fail when local PR metadata such as git config `devctl.pr` exists but the
+  current task board still describes a pre-PR state or contains forbidden
+  push/PR/MR actions;
+- point the AI to `.xflow/issues/issue-<id>/state-update-suggestion.md` when a
+  stale board is detected.
 
 ## Approved Action Values
 

@@ -163,9 +163,32 @@ native command returns a structured result with `ExitCode`, `Stdout`, and
 - These rule files are guardrails only. Executable checks and remote-write
   gates remain in `devctl`.
 
+## Review-Only Scope Safety
+
+- In review-only tasks, run `devctl check scope --issue <id> --mode review-only`
+  before committing or remote writes.
+- The `<id>` placeholder is expanded from the active issue. Do not hard-code
+  example paths such as `issue-5` into rules or templates.
+- Review-only uses an allowlist. Default allowed paths include
+  `.xflow/issues/issue-<id>/**`, `.xflow/local/**`,
+  `reviews/issue-<id>/**`, and `review/issue-<id>/**`.
+- Extend project-specific allowed paths through `.xflow/scope-policy.json`
+  after human review.
+
 ## Approval And PR Sealing Safety
 
 - The active approval file is always `.xflow/issues/issue-<id>/approvals/local-review.md`.
+- Before asking for remote-write approval, run
+  `devctl approval prepare --issue <id> --action <action> --file <artifact>`.
+- AI may prefill mechanical fields, hashes, timestamps, and suggested commands,
+  but must leave `Approved: no`; only the human reviewer may change it to
+  `Approved: yes`.
+- Before local approval, commit, push, or MR/PR creation, run
+  `devctl check current-task --issue <id>` to detect stale state boards.
+- After `devctl git mr` creates a PR, read
+  `.xflow/issues/issue-<id>/state-update-suggestion.md` before updating
+  `.xflow/current-task.md`; do not open another PR only to record this local
+  metadata.
 - Do not invent active approval filenames such as `local-review-mr.md`.
 - Archive superseded approvals under `.xflow/issues/issue-<id>/approvals/history/`.
 - `Approved Action: git-mr` covers PR creation plus immediate PR number/URL metadata writeback to the same task branch.

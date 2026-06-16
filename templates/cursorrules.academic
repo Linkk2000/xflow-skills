@@ -39,23 +39,39 @@ Runtime rules:
   `<!-- xflow: ... -->` anchors and readable public headings instead.
 - Run `devctl preflight` or `.\devctl.ps1 preflight` before remote writes,
   installer-like actions, or Claude delegation.
+- Before local approval, commit, push, or MR/PR creation, run
+  `devctl check current-task --issue <id>`. If it reports stale state, show
+  `.xflow/current-task.md` and `.xflow/issues/issue-<id>/state-update-suggestion.md`
+  to the human reviewer before continuing.
+- For review-only tasks, run `devctl check scope --issue <id> --mode review-only`
+  before committing or remote writes. The `<id>` placeholder is expanded from
+  the active issue; do not hard-code an example issue number into templates or
+  checks.
 - For GitHub remote Issue creation, ensure `GITHUB_TOKEN` is present, prepare
-  the Issue body as a file, obtain human approval for that exact file, then run
+  the Issue body as a file, run
+  `devctl approval prepare --issue draft --action issue-create --file <file>`,
+  obtain human approval for that exact file and suggested command, then run
   `devctl issue create "<title>" --body-file <file>`.
 - For GitHub Issue list/show, use `devctl issue list` and `devctl issue show`
   as read-only commands; no local approval gate is needed because they do not
   write remote state.
 - For GitHub Issue comments and close operations, prepare
   `.xflow/issues/issue-<id>/comment-draft.md` or
-  `.xflow/issues/issue-<id>/walkthrough.md`, obtain human approval for the exact
-  file, then run `devctl issue comment <id> --body-file <file>` or
-  `devctl issue close <id>`.
+  `.xflow/issues/issue-<id>/walkthrough.md`, run
+  `devctl approval prepare --issue <id> --action issue-comment --file <file>` or
+  `devctl approval prepare --issue <id> --action issue-close --file <file>`,
+  obtain human approval for the exact file and suggested command, then run
+  `devctl issue comment <id> --body-file <file>` or `devctl issue close <id>`.
 - For GitHub PR creation, prepare `.xflow/issues/issue-<id>/mr-draft.md`,
-  obtain human approval for that exact file, then run
+  run `devctl approval prepare --issue <id> --action git-mr --file <file>`,
+  obtain human approval for that exact file and suggested command, then run
   `devctl git mr --title "<title>" --body-file <file> --base <paper-base> --issue <id>`.
 - `Approved Action: git-mr` covers PR creation plus immediate PR number/URL
   metadata writeback to the same task branch. Do not ask for a second approval
   only to record the PR number or URL.
+- After `devctl git mr` creates a PR, read
+  `.xflow/issues/issue-<id>/state-update-suggestion.md` and use it to update
+  `.xflow/current-task.md` locally after human review.
 - After the PR is merged, seal the task board. Do not reopen the task branch or
   create another PR only to check off post-merge local items. If automatic Issue
   close fails, treat `devctl issue close <id>` as a separate maintenance action
@@ -124,6 +140,10 @@ Submodule hygiene rules:
 - Do not write logs, caches, TDD results, Claude outputs, or review artifacts
   inside `.xflow/ops/*`.
 - Write workflow artifacts to `.xflow/` or `.xflow/local/`.
+- Review-only scope uses an allowlist, not a hard-coded content denylist.
+  Default allowed paths are `.xflow/issues/issue-<id>/**`, `.xflow/local/**`,
+  `reviews/issue-<id>/**`, and `review/issue-<id>/**`. Extend it through
+  `.xflow/scope-policy.json` after human review.
 - If `.xflow/ops/*` contains byproducts such as `__pycache__/`, `*.pyc`,
   `.pytest_cache/`, `*.tmp`, or `*.log`, remove them before local review.
 
@@ -144,6 +164,9 @@ Remote-write rules:
 - Approval for one action authorizes only that next action.
 - Use `.xflow/issues/issue-<id>/approvals/local-review.md` to bind the approved file,
   approved action, and SHA256.
+- Use `devctl approval prepare --issue <id> --action <action> --file <artifact>`
+  before asking the human reviewer to approve a remote write. The generated file
+  must keep `Approved: no` until the human reviewer changes it to `Approved: yes`.
 - Do not invent active approval filenames such as `local-review-mr.md`. Archive
   superseded approvals under `.xflow/issues/issue-<id>/approvals/history/`;
   only `approvals/local-review.md` is the active gate file.
