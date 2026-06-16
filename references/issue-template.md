@@ -1,46 +1,133 @@
-# XFlow Issue Template
+# XFlow Issue, MR, And Local Review Templates
 
-将口头或零散需求转换为远程 issue 时，使用这个简洁模板。标题、正文和标签必须先展示给用户确认；多行 Markdown、代码块、JSON 或 shell 片段必须写入文件并通过 `--body-file` 传递。
+These templates are for the generic `main` product line. They are not
+academic-specific and must not contain academic-only fields.
 
-## 标题指引
+Remote-published body files are sent to GitHub or Gitee verbatim. Do not
+include internal-only visible titles such as `# Issue Draft`, `# MR Draft`,
+`# PR Draft`, or `# Merge Request Draft`. Use hidden `xflow` comments for
+machine anchors and public-facing Markdown headings for human reviewers.
+Do not include internal-only visible titles in files passed to `--body-file`.
 
-- 用一句中文描述用户可感知的问题或目标。
-- 标题应便于生成分支 slug，避免无意义形容词。
-- 创建 issue 前，预览分支格式：`feature/<issue>-<slug>` 或 `fix/<issue>-<slug>`。
+## issue-draft.md
 
-## Issue 正文模板
+Use this shape when converting an oral request into a remote issue. Store the
+file at `.xflow/issues/issue-draft/issue-draft.md` before `devctl issue create`.
 
 ```markdown
-## 背景
-<为什么现在要处理这个问题，用户遇到了什么阻碍。>
+<!-- xflow: issue-draft -->
 
-## 目标
-<完成后系统或用户应该具备什么能力。>
+## Background
+<why this task is needed>
 
-## 范围
-- 包含:
-- 不包含:
-- 影响路径:
+## Problem
+<current behavior, gap, or pain point>
 
-## 分支预览
-- 类型: feature 或 fix
-- 分支: feature/<issue>-<slug> 或 fix/<issue>-<slug>
+## Goal
+<what should be true when the task is complete>
 
-## 验收标准
-- [ ] <可验证的行为一>
-- [ ] <可验证的行为二>
-- [ ] <相关回归点未被破坏>
+## Scope
+- Includes:
+- Excludes:
+- Affected paths:
 
-## 测试/验证命令
-- <最小测试命令>
-- <必要的构建、类型检查或手动验证步骤>
+## Acceptance Criteria
+- [ ] <machine-checkable or human-reviewable criterion>
 
-## 风险
-- <兼容性、数据、权限、性能或发布风险；没有则写“暂无已知风险”。>
-
-## 待确认问题
-- <阻碍 issue 清晰度或开发边界的问题；没有则写“暂无”。>
-
-## 备注
-- 多行正文请使用 --body-file，不要把复杂 Markdown 直接放进 --body。
+## Verification Plan
+- <commands or manual checks>
 ```
+
+Before remote creation, also propose:
+
+- issue kind: `feature`, `fix`, `docs`, `test`, or `chore`
+- issue key preview: `feature/<issue-id>-<short-slug>` or `fix/<issue-id>-<short-slug>`
+- final branch name after issue creation
+- labels as comma-separated values for `devctl issue create --labels`
+
+## mr-draft.md
+
+Use this shape for PR/MR creation. Store the file at
+`.xflow/issues/issue-<id>/mr-draft.md` before `devctl git mr`.
+
+```markdown
+<!-- xflow: mr-draft -->
+
+Closes #<issue>
+
+## Summary
+- <what changed>
+
+## Test Plan
+- [x] <failing test or acceptance check first>
+- [x] <focused validation command>
+- [x] <manual/browser check if applicable>
+
+## Risk
+- <remaining risk or "low: ...">
+
+## Review Request
+- Please review the implementation, evidence, and local approval record.
+```
+
+## comment-draft.md
+
+Use this shape for remote issue comments. Store the file at
+`.xflow/issues/issue-<id>/comment-draft.md` before `devctl issue comment`.
+
+```markdown
+## Progress
+- <what changed or what was found>
+
+## Evidence
+- <command, commit, or file reference>
+
+## Next Step
+- <requested reviewer action or follow-up>
+```
+
+## approvals/local-review.md
+
+`approvals/local-review.md` is the active local approval file. It binds one
+approved action to one exact file hash.
+
+```markdown
+# Local Review Approval
+
+Issue: <draft|id>
+Reviewer: <human reviewer>
+Approved At: <ISO-8601 time>
+Approved Action: <issue-create|issue-comment|issue-close|git-mr|remote-write>
+Approved File: <path>
+Approved SHA256: <sha256>
+
+## Decision
+Approved: yes
+
+## Notes
+<review notes and constraints>
+```
+
+## Label Hints
+
+Use comma-separated labels for `devctl issue create --labels`.
+
+- `frontend`
+- `backend`
+- `api`
+- `runtime`
+- `bug`
+- `enhancement`
+- `tdd`
+- `test`
+- `docs`
+- `chore`
+
+## Clarifying Questions
+
+Ask only when the issue would otherwise be unsafe or unclear:
+
+- Is this a bug fix or a new capability?
+- What is the smallest useful scope?
+- Which module or repository owns the change?
+- What verification evidence should reviewers expect?

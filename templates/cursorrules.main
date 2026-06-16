@@ -1,0 +1,35 @@
+# XFlow Main Cursor Rules
+
+You are operating a generic XFlow development repository.
+
+Read these files before acting:
+
+- `SKILL.md`
+- `references/issue-template.md`
+- `references/xflow-map.md`
+- `AGENTS.md` and `README.md` when present
+
+Runtime rules:
+
+- Do not require Codex. Use repository files and `devctl` commands as the
+  source of truth.
+- Use `devctl` or `devctl.ps1` from the repository root when available.
+- Prepare remote body files before remote writes:
+  - `.xflow/issues/issue-draft/issue-draft.md`
+  - `.xflow/issues/issue-<id>/comment-draft.md`
+  - `.xflow/issues/issue-<id>/mr-draft.md`
+- Run `devctl check issue-draft`, `devctl check mr-draft`, and
+  `devctl check local-review` before remote writes.
+- Core remote writes are `issue-create`, `issue-comment`, `issue-close`, and
+  `git-mr`; they require local human review of the exact file being published
+  or used as evidence.
+
+Git commit rules:
+
+- Do not add Cursor co-author trailers.
+- Do not append `Co-authored-by: Cursor <cursoragent@cursor.com>` to commit
+  messages.
+- Do not use `git commit --trailer` to add Cursor, cursoragent, or AI-client
+  co-author metadata.
+- If a repository already contains such a trailer in an old commit, do not
+  rewrite history unless the human reviewer explicitly requests it.

@@ -35,6 +35,8 @@ Windows:
 .\devctl.ps1 check encoding
 .\devctl.ps1 check commit-msg --message-file FILE
 .\devctl.ps1 check branch-scope --issue N
+.\devctl.ps1 check issue-draft --file .xflow/issues/issue-draft/issue-draft.md
+.\devctl.ps1 check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create
 .\devctl.ps1 issue create "<title>" --body-file .xflow-local/issue-body.md --labels "tdd,frontend"
 .\devctl.ps1 git push
 ```
@@ -44,6 +46,8 @@ POSIX:
 ```bash
 ./devctl help
 ./devctl init --target /path/to/repo
+./devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md
+./devctl check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create
 ./devctl issue create "<title>" --body-file .xflow-local/issue-body.md --labels "tdd,frontend"
 ./devctl issue close <number>
 ./devctl issue list --state open --limit 20
@@ -53,11 +57,17 @@ POSIX:
 ./devctl git commit-msg -a
 ./devctl git commit-msg -ac
 ./devctl git push
+git fetch origin <base>
+git merge origin/<base>
+./devctl check mr-draft --issue <number>
+./devctl check local-review --issue <number> --file .xflow/issues/issue-<number>/mr-draft.md --action git-mr
 ./devctl git mr --title "<title>" --body-file .xflow-local/mr-body.md --issue <number>
 ./devctl git done
 ```
 
 For issue creation and comments, use `--body` only for short single-line text. Multi-line Markdown, fenced code, inline backticks, JSON, or shell snippets must be written to a file and passed with `--body-file` so shells do not reinterpret the content.
+
+Before MR/PR creation, fetch the target branch and merge `origin/<base>` into the task branch by default. Record the target branch SHA, sync result, conflict resolution if any, and rerun relevant checks before requesting MR/PR approval.
 
 Remote issue/MR commands require `GITEE_TOKEN` through `~/gitee.env.local` or the environment.
 
