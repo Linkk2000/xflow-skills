@@ -69,6 +69,8 @@ Run from the owning repository.
 ./devctl git mr --title "<title>" --body-file .xflow/issues/issue-<id>/mr-draft.md --issue <number>
 ./devctl git pr-get <number>
 ./devctl git done
+./devctl migrate inspect
+./devctl migrate wrappers
 ```
 
 For issue creation, comments, and MR/PR descriptions, prefer `--body-file`.
@@ -92,6 +94,13 @@ to prefill hashes and command details; the human reviewer still makes the
 decision by changing `Approved: no` to `Approved: yes`.
 After PR creation, `devctl git mr` writes `.xflow/issues/issue-<id>/state-update-suggestion.md`
 and git config keys `devctl.pr` and `devctl.pr-url`.
+
+For older paper repositories that still contain `_ops/devctl`, `_ops/workflow`,
+HTTPS submodule URLs, or a root PowerShell wrapper that calls Bash/WSL, run
+`devctl migrate inspect` first. It is read-only. After local human review, use
+`devctl migrate wrappers` to write the v2 root wrappers. The Windows wrapper
+must call `python -m xflow` directly and must not call Bash, WSL, Claude, or
+any installer.
 
 Remote issue/MR commands require `GITEE_TOKEN` through `~/gitee.env.local` or the environment.
 

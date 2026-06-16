@@ -152,6 +152,20 @@ Use `Invoke-XFlowNative` or `Invoke-XFlowGit -GitArguments @(...)` so each
 native command returns a structured result with `ExitCode`, `Stdout`, and
 `Stderr`. Run one native command, inspect the result, then run the next command.
 
+## Legacy `_ops` Migration Safety
+
+- If a paper repository contains `_ops/devctl`, `_ops/workflow`, HTTPS XFlow
+  submodule URLs, or a PowerShell wrapper that calls Bash/WSL, run
+  `devctl migrate inspect` before normal academic workflow work.
+- `devctl migrate inspect` is read-only and should be recorded in the TDD or
+  local migration review artifact.
+- After human review, run `devctl migrate wrappers` to write v2 root wrappers.
+- The Windows wrapper must call the Python core through `python -m xflow`; it
+  must not call Bash, WSL, Claude, AcademicForge, or any installer.
+- Full migration of `.gitmodules`, `.xflow/ops/devctl`,
+  `.xflow/ops/workflow`, `SKILL.md`, and AI rule entrypoints is a reviewable
+  repository change. Do not push it without local human approval.
+
 ## AI Rule Entrypoint Safety
 
 - Root rule files such as `AGENTS.md` and `.cursorrules` are generated from

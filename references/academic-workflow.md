@@ -170,6 +170,52 @@ On Windows, PowerShell users may run:
 .\devctl.ps1 preflight
 ```
 
+## Legacy `_ops` Migration
+
+Older paper repositories may still contain `_ops/devctl`, `_ops/workflow`,
+HTTPS submodule URLs, or a root `devctl.ps1` wrapper that calls Bash/WSL or
+tries to register AcademicForge automatically. Those repositories must be
+migrated to the v2 `.xflow/ops` layout before normal academic workflow use.
+
+Run a local inspection first:
+
+```bash
+./devctl migrate inspect
+```
+
+On Windows PowerShell:
+
+```powershell
+.\devctl.ps1 migrate inspect
+```
+
+The inspection is read-only. It reports legacy `_ops` layout, HTTPS submodule
+URLs, missing `.xflow/ops` paths, and missing `ignore = untracked` settings.
+
+After human review, write v2 root wrappers:
+
+```bash
+./devctl migrate wrappers
+```
+
+On Windows PowerShell:
+
+```powershell
+.\devctl.ps1 migrate wrappers
+```
+
+The generated Windows wrapper calls the Python core directly with
+`python -m xflow`; it must not call Bash, WSL, Claude, or any installer. The
+wrapper change is a reviewable local file change. It does not initialize
+submodules, install Python, install AcademicForge, create remote Issues, push
+branches, or create PRs.
+
+For a full migration, pin reviewed SSH submodules under `.xflow/ops/devctl` and
+`.xflow/ops/workflow`, sync `SKILL.md` and AI rule entrypoints from the reviewed
+workflow commit, run local checks, then ask the human reviewer to approve the
+exact `.gitmodules`, wrapper, submodule pointer, and guardrail changes before
+any paper-repository push.
+
 ## GitHub Issue And PR Provider
 
 In Academic XFlow, GitHub Issue and PR operations are handled by the Python

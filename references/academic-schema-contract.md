@@ -36,6 +36,32 @@ This contract links `xflow-skills@academic` and `xflow-devctl@academic`.
 - Scope policy extension location: `.xflow/scope-policy.json`.
 - Active task-state board: `.xflow/current-task.md`.
 
+## Legacy Layout Migration Contract
+
+Older paper repositories may still contain `_ops/devctl`, `_ops/workflow`, root
+wrappers that call Bash/WSL from PowerShell, HTTPS submodule URLs, or wrapper
+logic that tries to register AcademicForge automatically. Those repositories
+must be migrated to the v2 `.xflow/ops` layout before normal academic workflow
+use.
+
+Migration is exposed through:
+
+```bash
+devctl migrate inspect
+devctl migrate wrappers
+```
+
+`devctl migrate inspect` must be read-only. It reports legacy `_ops` layout,
+HTTPS submodule URLs, missing `.xflow/ops/devctl`, missing
+`.xflow/ops/workflow`, and missing `ignore = untracked` settings.
+
+`devctl migrate wrappers` may write only the root `devctl` and `devctl.ps1`
+wrappers. The generated Windows wrapper must call the Python core directly with
+`python -m xflow`; it must not call Bash, WSL, Claude, AcademicForge, or any installer.
+Full migration of `.gitmodules`, submodule pointers, `SKILL.md`, and AI rule
+entrypoints remains a reviewable repository change that requires human approval
+before any paper-repository push.
+
 ## Scope Check Contract
 
 `devctl check scope --issue <id> --mode review-only` must validate changed

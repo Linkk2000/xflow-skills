@@ -20,6 +20,11 @@ Runtime rules:
   tool-repository compatibility test that cannot run through PowerShell.
 - Treat WSL as a developer compatibility path, not as a normal academic user
   prerequisite.
+- If the repository still contains `_ops/devctl`, `_ops/workflow`, HTTPS XFlow
+  submodule URLs, or a PowerShell wrapper that calls Bash/WSL, run
+  `devctl migrate inspect` before normal academic workflow work. After human
+  review, run `devctl migrate wrappers` to write v2 root wrappers.
+- The v2 Windows wrapper must call `python -m xflow` directly and must not call Bash, WSL, Claude, AcademicForge, or any installer.
 - Treat `.xflow/ops/devctl` and `.xflow/ops/workflow` as reviewed tool
   submodules. Do not write logs, caches, Claude outputs, or review artifacts
   inside `.xflow/ops/*`.
