@@ -29,5 +29,5 @@ Use the project devctl adapter for workflow operations. On Windows, use `devctl.
 
 - Before commit: re-read project rules and run relevant tests/checks or `devctl check commit-msg` when available.
 - Before push: run branch scope and verification checks.
-- Before MR/PR: preview title/body, link issue, and list verification evidence.
+- Before MR/PR: fetch the target branch, merge it into the task branch by default, resolve approved conflicts if any, rerun relevant checks, record the target branch SHA and sync result, then preview title/body, link issue, and list verification evidence.
 - Before final delivery: report checks run and any skipped verification with reasons.

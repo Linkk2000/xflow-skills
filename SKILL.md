@@ -37,4 +37,5 @@ This is a phase-selected reference index. If unsure which file applies, read `re
 - Never create issue, push branch, create PR/MR, close issue, delete branches, or resolve conflicts without the required human gate.
 - Never retry ambiguous failed remote writes without reading remote state first.
 - Never use `devctl git mr` when the user only approved push.
+- Never create MR/PR before synchronizing the task branch with the target branch and recording the sync evidence.
 - Before commit, push, MR, and completion, re-read project rules or run matching `devctl check`.
