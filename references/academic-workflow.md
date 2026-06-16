@@ -786,10 +786,48 @@ devctl claude doctor
 
 If Claude is available but no AcademicForge-derived skill is available in a
 Claude-resolvable flat path, the command must report checked skill roots such as
-`.claude/skills` and perform no installation. The upper AI may run the official
-AcademicForge installer or mirror skills from an existing source tree only after
-explicit human approval, because those actions write to Claude skill storage and
-may download external repositories.
+`.claude/skills` and perform no installation.
+
+For a new user machine, configure project-local Claude skills through the
+reviewed setup flow:
+
+```bash
+devctl claude setup inspect
+devctl claude setup plan --skills literature-review,exa-search,peer-review
+```
+
+On Windows PowerShell:
+
+```powershell
+.\devctl.ps1 claude setup inspect
+.\devctl.ps1 claude setup plan --skills literature-review,exa-search,peer-review
+```
+
+`setup inspect` is read-only. `setup plan` writes
+`.xflow/local/claude-setup-plan.md` with `Approved: no`. The human reviewer must
+inspect the source repository, source ref, source directory, target root, and
+skill list. Only after the reviewer changes the plan to `Approved: yes` may the
+upper AI run:
+
+```bash
+devctl claude setup apply --plan .xflow/local/claude-setup-plan.md
+devctl claude doctor
+devctl claude skills
+```
+
+On Windows PowerShell:
+
+```powershell
+.\devctl.ps1 claude setup apply --plan .xflow/local/claude-setup-plan.md
+.\devctl.ps1 claude doctor
+.\devctl.ps1 claude skills
+```
+
+The apply step installs or mirrors skills into the paper repository only, under
+`.claude/skills/<skill>/SKILL.md`. It must not write to the user's global Claude
+configuration or global `.claude/skills` directory. If this setup flow is not
+available or the human reviewer does not approve it, Claude skill delegation is unavailable
+for the task and must be skipped rather than improvised.
 
 ## Body File Rule
 

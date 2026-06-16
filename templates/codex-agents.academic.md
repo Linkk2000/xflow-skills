@@ -65,6 +65,14 @@ Runtime rules:
   through `devctl claude run --issue <id>`. Do not use catalog-only commands
   marked `missing`, and do not ask the user to manually copy prompts into Claude
   during normal workflow execution.
+- On a new user machine, if required Claude skills are missing, run
+  `devctl claude setup inspect`, then `devctl claude setup plan --skills ...`.
+  Show `.xflow/local/claude-setup-plan.md` to the human reviewer. Run
+  `devctl claude setup apply --plan .xflow/local/claude-setup-plan.md` only
+  after the reviewer changes the plan to `Approved: yes`.
+- Claude setup must install or mirror skills into project-local
+  `.claude/skills/<skill>/SKILL.md` only. Do not write to global Claude config
+  or global `.claude/skills`.
 - For Claude smoke tests or bounded literature queries, use
   `DEVCTL_CLAUDE_ARGS` and `DEVCTL_CLAUDE_TIMEOUT_SECONDS` to constrain tools,
   budget, and runtime. Do not require emoji status markers in Claude output;

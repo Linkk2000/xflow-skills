@@ -91,6 +91,14 @@ Runtime rules:
   `devctl claude doctor`, show the checked `.claude/skills` roots, and wait
   for explicit human approval before executing any installer-like action or
   global Claude configuration write.
+- For new user setup, use `devctl claude setup inspect`, then
+  `devctl claude setup plan --skills ...`. Show
+  `.xflow/local/claude-setup-plan.md` to the human reviewer. Run
+  `devctl claude setup apply --plan .xflow/local/claude-setup-plan.md` only
+  after the reviewer changes the plan to `Approved: yes`.
+- Claude setup must install or mirror skills into project-local
+  `.claude/skills/<skill>/SKILL.md` only. Do not write to global Claude config
+  or global `.claude/skills`.
 - Before writing `.xflow/issues/issue-<id>/claude-task.md`, choose a verified
   command from `.xflow/ops/workflow/references/academicforge-skill-catalog.md`.
   Run `devctl claude skills` and use only commands marked `installed`; a

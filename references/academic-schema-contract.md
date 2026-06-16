@@ -268,13 +268,26 @@ Claude readiness is exposed through:
 
 ```bash
 devctl claude doctor
+devctl claude setup inspect
+devctl claude setup plan [--skills A,B|--all]
+devctl claude setup apply --plan .xflow/local/claude-setup-plan.md
 ```
 
 If no AcademicForge-derived skill is available in a Claude-resolvable flat path,
 `doctor` must report checked skill roots such as `.claude/skills` and perform no
 installation.
-Any Claude skill installation or global configuration write requires explicit
-human approval.
+
+`devctl claude setup inspect` must be read-only. `devctl claude setup plan` must
+write a reviewable repository-local plan at `.xflow/local/claude-setup-plan.md`
+with `Approved: no`, source repository, source ref, source directory, target
+root, and the exact skill list. `devctl claude setup apply` must reject the plan
+until the human reviewer changes it to `Approved: yes`.
+
+The approved apply path must install or mirror skills into the paper repository
+only, under the project-local `.claude/skills/<skill>/SKILL.md` path. It must
+not write to the user's global Claude configuration or global `.claude/skills`
+directory. Fetching or cloning `git@github.com:HughYau/AcademicForge.git` is
+allowed only as part of the approved plan.
 
 ## Body File Contract
 
