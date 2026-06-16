@@ -14,6 +14,11 @@ Runtime rules:
 - Do not require Codex. Use repository files and `devctl` commands as the
   source of truth.
 - Use `devctl` or `devctl.ps1` from the repository root when available.
+- Treat `devctl` / `devctl.ps1` as the only supported workflow entrypoints.
+  Do not import or call `xflow.providers` directly, and do not call GitHub or
+  Gitee APIs outside devctl during normal workflow execution.
+- User-level parameters belong in `~/.xflow/env.local`. Legacy
+  `~/gitee.env.local` may be read for compatibility. Never print token values.
 - Prefer `devctl.ps1` on Windows. Avoid `git ... 2>&1 | Out-String` and other
   native-command pipelines when the exit code matters.
 - Prepare remote body files before remote writes:

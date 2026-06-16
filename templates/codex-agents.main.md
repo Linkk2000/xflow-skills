@@ -8,6 +8,13 @@ Hard rules:
 - Read this file, `README.md`, `.cursorrules`, and `.xflow/current-task.md`
   when present before acting.
 - Use repository-local `devctl` or `devctl.ps1` from the project root.
+- Treat `devctl` / `devctl.ps1` as the only supported workflow entrypoints.
+  Do not import or call `xflow.providers` directly, and do not call GitHub or
+  Gitee APIs outside devctl during normal workflow execution.
+- `devctl` may route to `python -m xflow`; shell scripts are compatibility
+  fallback, not the preferred implementation layer for remote writes.
+- User-level parameters belong in `~/.xflow/env.local`. Legacy
+  `~/gitee.env.local` may be read for compatibility. Never print token values.
 - Do not perform remote writes before local human review approves the exact
   file being published or used as evidence.
 - Active approval file:
