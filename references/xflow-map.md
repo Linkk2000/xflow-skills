@@ -24,6 +24,7 @@ Run from the owning repository.
 ```bash
 ./devctl help
 ./devctl preflight
+./devctl check current-task --issue <number>
 ./devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create
@@ -51,8 +52,26 @@ On Windows, prefer:
 
 ```powershell
 .\devctl.ps1 preflight
+.\devctl.ps1 check current-task --issue <number>
 .\devctl.ps1 check submodule-hygiene
 ```
+
+## Current Task State
+
+Active tasks should keep `.xflow/current-task.md` in sync with
+`references/workflow-state-machine.md`.
+
+Run `devctl check current-task --issue <number>` before:
+
+- requesting local approval
+- committing implementation or workflow artifacts
+- pushing a branch
+- creating a PR/MR
+- cleanup, issue close, or archival actions
+
+The check does not approve work. It catches missing/stale state, including the
+case where local git metadata already records a PR but the task file still says
+the workflow is preparing or creating that PR.
 
 ## Remote-Write Gate
 

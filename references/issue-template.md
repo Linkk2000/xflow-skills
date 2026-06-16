@@ -86,6 +86,46 @@ Use this shape for remote issue comments. Store the file at
 - <requested reviewer action or follow-up>
 ```
 
+## .xflow/current-task.md
+
+Use this file as the live state guard for the active task. It should exist
+before local approvals, implementation commits, pushes, PR/MR creation, and
+cleanup. The state values are defined in `references/workflow-state-machine.md`.
+
+```markdown
+# XFlow Current Task
+
+Issue: <draft|id>
+State: <S0_REQUEST|S1_LOCAL_ISSUE_DRAFT|...|S10_DONE>
+Branch: <branch name or pending>
+Base: <main|master|other>
+
+## Allowed Actions
+- <what the AI may do in the current state>
+
+## Forbidden Actions
+- <what the AI must not do until the next human gate is approved>
+
+## Human Gate
+- Reviewer:
+- Required Approval:
+- Evidence File:
+
+## Notes
+<brief local state notes>
+```
+
+Run this check before sensitive transitions:
+
+```bash
+devctl check current-task --issue <id>
+```
+
+After PR/MR creation, devctl may write
+`.xflow/issues/issue-<id>/state-update-suggestion.md`. This is a local reminder
+to advance the state to `S9_REMOTE_REVIEW_AND_CI`; it must not create a second
+PR only to record metadata after the original PR has merged.
+
 ## approvals/local-review.md
 
 `approvals/local-review.md` is the active local approval file. It binds one

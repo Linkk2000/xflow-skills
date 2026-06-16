@@ -15,6 +15,9 @@ Hard rules:
   fallback, not the preferred implementation layer for remote writes.
 - User-level parameters belong in `~/.xflow/env.local`. Legacy
   `~/gitee.env.local` may be read for compatibility. Never print token values.
+- Maintain `.xflow/current-task.md` for active tasks and run
+  `devctl check current-task --issue <id>` before local approval, commit,
+  push, PR/MR creation, and cleanup.
 - Do not perform remote writes before local human review approves the exact
   file being published or used as evidence.
 - Active approval file:
@@ -31,12 +34,17 @@ Hard rules:
 Remote-write checklist:
 
 1. Create the body/evidence file.
-2. Run the matching `devctl check ...` command.
-3. Run `devctl approval prepare --issue <id> --action <action> --file <file>`.
-4. Stop for human review.
-5. Continue only after the human sets `Approved: yes`.
-6. Run `devctl check local-review --issue <id> --file <file> --action <action>`.
-7. Run the approved remote-write command.
+2. Run `devctl check current-task --issue <id>`.
+3. Run the matching `devctl check ...` command.
+4. Run `devctl approval prepare --issue <id> --action <action> --file <file>`.
+5. Stop for human review.
+6. Continue only after the human sets `Approved: yes`.
+7. Run `devctl check local-review --issue <id> --file <file> --action <action>`.
+8. Run the approved remote-write command.
+
+After PR/MR creation, use the local `state-update-suggestion.md` only to update
+local task state. Do not create another PR only to commit post-merge state
+metadata.
 
 Use the user's language for Git-related public text: commit messages, remote
 Issue text, remote PR/MR text, review comments, and branch task summaries.

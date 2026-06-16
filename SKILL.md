@@ -21,20 +21,23 @@ as `academic`, not here.
 4. Do not create remote Issues, comments, PRs/MRs, pushes, branch publication,
    or remote metadata changes before local human review approves the exact
    body/evidence file.
-5. The active approval file is always
+5. Maintain `.xflow/current-task.md` for active tasks and run
+   `devctl check current-task --issue <id>` before local approval, commit,
+   push, MR/PR creation, and cleanup.
+6. The active approval file is always
    `.xflow/issues/issue-<id>/approvals/local-review.md`; for issue creation use
    `.xflow/issues/issue-draft/approvals/local-review.md`.
-6. Do not invent alternate active approval names such as
+7. Do not invent alternate active approval names such as
    `local-review-mr.md`. Historical approvals may be archived under
    `approvals/history/`, but only `approvals/local-review.md` satisfies the
    gate.
-7. Use `--body-file` for Issue bodies, comments, and PR/MR bodies. Do not pass
+8. Use `--body-file` for Issue bodies, comments, and PR/MR bodies. Do not pass
    multiline Markdown, fenced code, JSON, shell snippets, backticks, or `$()`
    through inline command arguments.
-8. Use the user's language for Git-related public text: commit messages,
+9. Use the user's language for Git-related public text: commit messages,
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
-9. Do not add AI-client co-author trailers. In particular, never add
+10. Do not add AI-client co-author trailers. In particular, never add
    `Co-authored-by: Cursor <cursoragent@cursor.com>`.
 
 ## Required Flow
@@ -42,18 +45,23 @@ as `academic`, not here.
 1. Clarify the request only when required for safety or scope.
 2. Draft `.xflow/issues/issue-draft/issue-draft.md` from
    `references/issue-template.md`.
-3. Run `devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md`.
-4. Prepare approval with
+3. Create or update `.xflow/current-task.md` using the state machine in
+   `references/workflow-state-machine.md`.
+4. Run `devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md`
+   and `devctl check current-task`.
+5. Prepare approval with
    `devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md`.
-5. Stop for human review. The human reviewer must inspect the file and change
+6. Stop for human review. The human reviewer must inspect the file and change
    `Approved: no` to `Approved: yes` before any remote write.
-6. Create the remote issue only after approval:
+7. Create the remote issue only after approval:
    `devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md`.
-7. Start the task branch from the repository's base branch.
-8. Follow TDD: write or identify a failing test/check first, then implement the
+8. Start the task branch from the repository's base branch.
+9. Follow TDD: write or identify a failing test/check first, then implement the
    smallest change to pass it.
-9. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
-10. Draft `.xflow/issues/issue-<id>/mr-draft.md`, run
+10. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
+11. Before commit, push, PR/MR creation, or cleanup, run
+    `devctl check current-task --issue <id>`.
+12. Draft `.xflow/issues/issue-<id>/mr-draft.md`, run
     `devctl check mr-draft --issue <id>`, prepare `Approved Action: git-mr`,
     stop for human review, then run `devctl git mr --body-file ... --issue <id>`.
 
@@ -83,6 +91,8 @@ Before each remote write:
 - MR/PR draft: `.xflow/issues/issue-<id>/mr-draft.md`
 - Walkthrough/evidence: `.xflow/issues/issue-<id>/walkthrough.md`
 - Active local approval: `.xflow/issues/issue-<id>/approvals/local-review.md`
+- Current task state: `.xflow/current-task.md`
+- PR/MR state suggestion: `.xflow/issues/issue-<id>/state-update-suggestion.md`
 
 Remote-published body files must not contain visible internal titles such as
 `# Issue Draft`, `# MR Draft`, `# PR Draft`, or `# Merge Request Draft`. Use
@@ -136,5 +146,6 @@ AI task. Provider modules are internal implementation details behind devctl.
 ## References
 
 - `references/issue-template.md`
+- `references/workflow-state-machine.md`
 - `references/xflow-map.md`
 - `references/ops-lessons.md`
