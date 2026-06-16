@@ -14,6 +14,8 @@ Runtime rules:
 - Do not require Codex. Use repository files and `devctl` commands as the
   source of truth.
 - Use `devctl` or `devctl.ps1` from the repository root when available.
+- Prefer `devctl.ps1` on Windows. Avoid `git ... 2>&1 | Out-String` and other
+  native-command pipelines when the exit code matters.
 - Prepare remote body files before remote writes:
   - `.xflow/issues/issue-draft/issue-draft.md`
   - `.xflow/issues/issue-<id>/comment-draft.md`
@@ -23,6 +25,9 @@ Runtime rules:
 - Core remote writes are `issue-create`, `issue-comment`, `issue-close`, and
   `git-mr`; they require local human review of the exact file being published
   or used as evidence.
+- Use the user's language for Git-related public text: commit messages, remote
+  Issue text, remote PR/MR text, review comments, and branch task summaries.
+  Do not expand this rule to unrelated source code or docs.
 
 Git commit rules:
 

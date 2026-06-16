@@ -91,6 +91,11 @@ Use this shape for remote issue comments. Store the file at
 `approvals/local-review.md` is the active local approval file. It binds one
 approved action to one exact file hash.
 
+Prefer generating it with `devctl approval prepare`. The tool should prefill
+mechanical fields such as `Approved At`, `Approved File`, `Approved SHA256`,
+and the suggested command. The human reviewer should inspect the referenced
+artifact and then change `Approved: no` to `Approved: yes`.
+
 ```markdown
 # Local Review Approval
 
@@ -102,7 +107,7 @@ Approved File: <path>
 Approved SHA256: <sha256>
 
 ## Decision
-Approved: yes
+Approved: no
 
 ## Notes
 <review notes and constraints>
