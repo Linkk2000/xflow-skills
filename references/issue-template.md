@@ -133,7 +133,9 @@ approved action to one exact file hash.
 
 Prefer generating it with `devctl approval prepare`. The tool should prefill
 mechanical fields such as `Approved At`, `Approved File`, `Approved SHA256`,
-and the suggested command. The human reviewer should inspect the referenced
+`Reviewer`, and the suggested command. By default, `Reviewer` comes from
+`git config user.name` and `git config user.email` when available; pass
+`--reviewer` to override it. The human reviewer should inspect the referenced
 artifact and then change `Approved: no` to `Approved: yes`.
 
 ```markdown

@@ -58,6 +58,8 @@ def main() -> None:
     require("references/issue-template.md", "<!-- xflow: issue-draft -->")
     require("references/issue-template.md", "<!-- xflow: mr-draft -->")
     require("references/issue-template.md", ".xflow/current-task.md")
+    require("references/issue-template.md", "git config user.name")
+    require("references/issue-template.md", "--reviewer")
     require("references/workflow-state-machine.md", "S0_REQUEST")
     require("references/workflow-state-machine.md", "G3_APPROVE_RESULT")
     require("references/workflow-state-machine.md", "Do not edit an approval file to set `Approved: yes`")
