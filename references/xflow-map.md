@@ -3,6 +3,29 @@
 This reference is for the `main` product line. It must stay repository-neutral:
 do not hard-code a user's local project path or an academic paper layout here.
 
+## XFlow Workflow References
+
+- `workflow-state-machine.md`: phase order, states, human gates, and the
+  pre-MR target-branch synchronization checkpoint.
+- `bootstrap-policy.md`: how an empty repository obtains XFlow files and local
+  devctl entrypoints.
+- `restore-policy.md`: how an existing XFlow repository is rehydrated on a new
+  machine.
+- `source-resolution.md`: source/ref/submodule priority and project binding
+  rules.
+- `human-gates.md`: valid and invalid human approval wording.
+- `priority-and-overrides.md`: rule precedence and project override boundaries.
+- `platform-adapters.md`: Windows/POSIX command and encoding expectations.
+- `devctl-contract.md`: devctl entrypoints, environment variables, and command
+  semantics.
+- `git-policy.md`: Git action matrix, branch, commit, issue, MR/PR, and
+  conflict rules.
+- `issue-policy.md`: issue drafting, duplicate checks, body-file usage, and
+  retry safety.
+- `scoring-rubric.md`: 100-point effectiveness rubric and hard-fail conditions.
+- `ops-lessons.md`: concise operational lessons for remote writes, shell
+  boundaries, and context drift.
+
 ## Tool Layers
 
 1. Project repository: the user's current Git repository.
@@ -72,6 +95,21 @@ Run `devctl check current-task --issue <number>` before:
 The check does not approve work. It catches missing/stale state, including the
 case where local git metadata already records a PR but the task file still says
 the workflow is preparing or creating that PR.
+
+## Pre-MR Target Branch Synchronization
+
+Before MR/PR creation, fetch the target branch and merge `origin/<base>` into
+the current task branch by default. Record:
+
+- target branch name
+- target branch SHA before merge
+- merge command and result
+- conflict files and approved conflict strategy, if any
+- checks rerun after synchronization
+
+Rebase is allowed only when the user or project policy explicitly prefers it
+and the AI previews the strategy first. Push approval and MR/PR approval remain
+separate human gates.
 
 ## Remote-Write Gate
 

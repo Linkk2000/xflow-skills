@@ -1,6 +1,6 @@
 ---
 name: xflow-tdd-workflow
-description: Generic Git, Issue, TDD, local-review, and PR/MR workflow for software-development repositories. Use when an AI assistant must turn a user request into a reviewed issue-driven branch workflow with local human approval before remote writes.
+description: Generic Git, Issue, TDD, local-review, pre-merge synchronization, and PR/MR workflow for software-development repositories. Use when an AI assistant must turn a user request into a reviewed issue-driven branch workflow with local human approval before remote writes.
 ---
 
 # XFlow TDD Workflow
@@ -10,20 +10,50 @@ Domain-specific workflows, external domain skill catalogs, delegated specialist
 task packages, and paper-specific templates belong on specialized branches such
 as `academic`, not here.
 
+## Load Order
+
+1. Read the current user request.
+2. Read repository-local rules first: `AGENTS.md`, `.cursorrules`,
+   `CLAUDE.md`, `GEMINI.md`, `README.md`, and `.xflow/current-task.md` when
+   present.
+3. Apply precedence: current user instruction > nearest project rule > global
+   XFlow skill > agent defaults.
+4. Stop and ask the user before irreversible action if rules conflict.
+5. On Windows prefer `devctl.ps1`; do not use PowerShell-to-WSL-to-Bash chains
+   for normal XFlow commands.
+
+## Required References
+
+This is a phase-selected reference index. If unsure which file applies, read
+`references/xflow-map.md` first, then read the phase-specific reference below.
+
+- Start or unsure: `references/xflow-map.md`
+- Empty repository or missing local workflow files: `references/bootstrap-policy.md`
+- Existing XFlow repository on a new machine: `references/restore-policy.md`
+- XFlow source, ref, submodule, and global-vs-project precedence: `references/source-resolution.md`
+- Phase order and human gates: `references/workflow-state-machine.md`
+- Rule precedence and project overrides: `references/priority-and-overrides.md`
+- Issue creation and comments: `references/issue-policy.md`
+- Branch, commit, push, MR, merge, conflict handling: `references/git-policy.md`
+- `devctl` command semantics and default variables: `references/devctl-contract.md`
+- Windows, PowerShell, WSL, UTF-8, LF/CRLF: `references/platform-adapters.md`
+- Operational incidents and recovery patterns: `references/ops-lessons.md`
+- Final self-evaluation: `references/scoring-rubric.md`
+
 ## Hard Rules
 
-1. Read repository-local rules first: `AGENTS.md`, `.cursorrules`,
-   `CLAUDE.md`, `GEMINI.md`, and `README.md` when present.
-2. Use repository-local `devctl` or `devctl.ps1` when available.
-3. Treat `devctl` / `devctl.ps1` as the only supported workflow entrypoints.
+1. Use repository-local `devctl` or `devctl.ps1` when available.
+2. Treat `devctl` / `devctl.ps1` as the only supported workflow entrypoints.
    They may route to `python -m xflow`, but AI assistants must not import
    provider modules directly or call GitHub/Gitee APIs outside devctl.
-4. Do not create remote Issues, comments, PRs/MRs, pushes, branch publication,
+3. Do not create remote Issues, comments, PRs/MRs, pushes, branch publication,
    or remote metadata changes before local human review approves the exact
    body/evidence file.
-5. Maintain `.xflow/current-task.md` for active tasks and run
+4. Maintain `.xflow/current-task.md` for active tasks and run
    `devctl check current-task --issue <id>` before local approval, commit,
    push, MR/PR creation, and cleanup.
+5. Never create MR/PR before synchronizing the task branch with the target
+   branch and recording the sync evidence.
 6. The active approval file is always
    `.xflow/issues/issue-<id>/approvals/local-review.md`; for issue creation use
    `.xflow/issues/issue-draft/approvals/local-review.md`.
@@ -38,7 +68,7 @@ as `academic`, not here.
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
 10. Do not add AI-client co-author trailers. In particular, never add
-   `Co-authored-by: Cursor <cursoragent@cursor.com>`.
+    `Co-authored-by: Cursor <cursoragent@cursor.com>`.
 
 ## Required Flow
 
@@ -61,7 +91,11 @@ as `academic`, not here.
 10. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
 11. Before commit, push, PR/MR creation, or cleanup, run
     `devctl check current-task --issue <id>`.
-12. Draft `.xflow/issues/issue-<id>/mr-draft.md`, run
+12. Before requesting MR/PR approval, fetch the target branch, merge
+    `origin/<base>` into the task branch by default, resolve approved
+    conflicts, rerun relevant checks, and record the target branch SHA plus
+    sync result.
+13. Draft `.xflow/issues/issue-<id>/mr-draft.md`, run
     `devctl check mr-draft --issue <id>`, prepare `Approved Action: git-mr`,
     stop for human review, then run `devctl git mr --body-file ... --issue <id>`.
 
@@ -148,4 +182,5 @@ AI task. Provider modules are internal implementation details behind devctl.
 - `references/issue-template.md`
 - `references/workflow-state-machine.md`
 - `references/xflow-map.md`
+- `references/git-policy.md`
 - `references/ops-lessons.md`

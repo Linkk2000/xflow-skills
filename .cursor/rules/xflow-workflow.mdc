@@ -1,0 +1,11 @@
+---
+description: "Apply XFlow workflow gates for issue, branch, commit, push, PR/MR, conflict handling, and devctl commands."
+globs: ["**/*"]
+alwaysApply: true
+---
+
+Read `AGENTS.md` first and treat it as canonical. Follow the human-gated XFlow workflow for issue, branch, commit, push, PR/MR, conflict handling, and close or cleanup work.
+
+Do not create issues, push branches, create MR/PRs, close issues, delete or clean up local branches, or choose a non-trivial conflict resolution strategy without explicit approval for that exact action.
+
+On Windows, use `devctl.ps1` rather than WSL shell chains. On POSIX, use `devctl`.

@@ -55,14 +55,32 @@ state note after the original PR has already merged.
   generated artifacts before commit or remote publication.
 - `G4_APPROVE_REMOTE_WRITE`: human approves the exact commit/MR body evidence
   file before push or PR/MR creation.
-- `G5_APPROVE_MR_CREATE`: human approves creating the remote PR/MR.
+- `G5_APPROVE_MR_CREATE`: human approves creating the remote PR/MR after target
+  branch synchronization evidence is available.
 - `G6_APPROVE_CLEANUP`: human confirms cleanup, issue close, or archival
   actions after remote review finishes.
+
+## Pre-Merge Synchronization Checkpoint
+
+Before `G5_APPROVE_MR_CREATE`, the task branch must be synchronized with the
+current target branch:
+
+1. Fetch the target branch.
+2. Record the target branch SHA.
+3. Merge `origin/<base>` into the current task branch by default.
+4. Resolve conflicts only under the approved conflict strategy.
+5. Rerun relevant checks.
+6. Record the sync result in the MR/PR draft or local task evidence.
+
+Do not create an MR/PR if this checkpoint has not completed. Rebase is allowed
+only when the user or project policy explicitly prefers it and the AI previews
+the strategy first.
 
 ## AI Constraints
 
 - Do not edit an approval file to set `Approved: yes`.
 - Do not skip a `G*` state because tests pass.
+- Do not skip target branch synchronization before MR/PR creation.
 - Do not rely on memory. Read `.xflow/current-task.md` and run
   `devctl check current-task --issue <id>`.
 - If the state file is stale, prepare a proposed update and ask the human to
