@@ -1,0 +1,16 @@
+{
+  "rules": [
+    {
+      "id": "codex",
+      "target": "AGENTS.md",
+      "template": "codex-agents.main.md",
+      "description": "Codex project-level XFlow guardrails"
+    },
+    {
+      "id": "cursor",
+      "target": ".cursorrules",
+      "template": "cursorrules.main",
+      "description": "Cursor project-level XFlow guardrails"
+    }
+  ]
+}

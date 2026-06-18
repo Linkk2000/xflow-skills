@@ -14,6 +14,16 @@ Runtime rules:
 - Do not require Codex. Use repository files and `devctl` commands as the
   source of truth.
 - Use `devctl` or `devctl.ps1` from the repository root when available.
+- Treat `devctl` / `devctl.ps1` as the only supported workflow entrypoints.
+  Do not import or call `xflow.providers` directly, and do not call GitHub or
+  Gitee APIs outside devctl during normal workflow execution.
+- User-level parameters belong in `~/.xflow/env.local`. Legacy
+  `~/gitee.env.local` may be read for compatibility. Never print token values.
+- Maintain `.xflow/current-task.md` for active tasks and run
+  `devctl check current-task --issue <id>` before local approval, commit,
+  push, PR/MR creation, and cleanup.
+- Prefer `devctl.ps1` on Windows. Avoid `git ... 2>&1 | Out-String` and other
+  native-command pipelines when the exit code matters.
 - Prepare remote body files before remote writes:
   - `.xflow/issues/issue-draft/issue-draft.md`
   - `.xflow/issues/issue-<id>/comment-draft.md`
@@ -23,6 +33,11 @@ Runtime rules:
 - Core remote writes are `issue-create`, `issue-comment`, `issue-close`, and
   `git-mr`; they require local human review of the exact file being published
   or used as evidence.
+- After PR/MR creation, use `state-update-suggestion.md` only for local state
+  updates. Do not create another PR only to commit post-merge state metadata.
+- Use the user's language for Git-related public text: commit messages, remote
+  Issue text, remote PR/MR text, review comments, and branch task summaries.
+  Do not expand this rule to unrelated source code or docs.
 
 Git commit rules:
 
