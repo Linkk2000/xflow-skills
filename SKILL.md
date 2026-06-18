@@ -157,17 +157,20 @@ contain values such as:
 ```text
 GITHUB_TOKEN=...
 GITEE_TOKEN=...
-XFLOW_PLATFORM=github
 ```
 
 `~/gitee.env.local` is a legacy compatibility path. `XFLOW_ENV_FILE` may point
 to an explicit env file for a single run. Never print token values; preflight
 may only print whether a token is `SET` or `UNSET`.
 
-The Python provider supports GitHub and Gitee. Set `XFLOW_PLATFORM` to
-`github` or `gitee`, or let devctl infer the platform from the repository
-`origin` remote. Gitee uses `GITEE_TOKEN` and the Gitee v5 OpenAPI shape;
-`GITEE_API_BASE` is only for tests or custom hosts.
+Do not put `XFLOW_PLATFORM` in user-level `~/.xflow/env.local` when working
+across both GitHub and Gitee projects. Let devctl infer the platform from the
+repository `origin` remote. For unusual projects, set `XFLOW_PLATFORM` in
+project-local `.xflow/local/env.local`, an explicit `XFLOW_ENV_FILE`, or the
+process environment.
+
+The Python provider supports GitHub and Gitee. Gitee uses `GITEE_TOKEN` and the
+Gitee v5 OpenAPI shape; `GITEE_API_BASE` is only for tests or custom hosts.
 
 Do not import provider modules directly, for example `xflow.providers`, from an
 AI task. Provider modules are internal implementation details behind devctl.

@@ -15,6 +15,10 @@ Hard rules:
   fallback, not the preferred implementation layer for remote writes.
 - User-level parameters belong in `~/.xflow/env.local`. Legacy
   `~/gitee.env.local` may be read for compatibility. Never print token values.
+- Do not put `XFLOW_PLATFORM` in user-level `~/.xflow/env.local` when working
+  across both GitHub and Gitee projects. Use project-local
+  `.xflow/local/env.local`, explicit `XFLOW_ENV_FILE`, or the process
+  environment for platform overrides.
 - Use `XFLOW_PLATFORM=github|gitee` only to select devctl's provider. Do not
   call GitHub or Gitee APIs directly from the AI workflow.
 - Maintain `.xflow/current-task.md` for active tasks and run

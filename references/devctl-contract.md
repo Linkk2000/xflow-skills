@@ -16,6 +16,9 @@
 - `GITHUB_TOKEN`: GitHub token from environment or env file.
 - `GITEE_TOKEN`: Gitee token from environment or env file.
 - `XFLOW_PLATFORM`: `github` or `gitee`, otherwise inferred from `origin`.
+  Avoid setting it in user-level `~/.xflow/env.local` when working across
+  both GitHub and Gitee projects; use project-local `.xflow/local/env.local`
+  or explicit `XFLOW_ENV_FILE` for project-specific overrides.
 - `GITHUB_API_BASE`: optional GitHub API base override.
 - `GITEE_API_BASE`: optional Gitee v5 API base override; default is `https://gitee.com/api/v5`.
 - `DEVCTL_REPO_ROOT`: target repository root.

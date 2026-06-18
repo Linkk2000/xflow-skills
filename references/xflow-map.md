@@ -42,10 +42,12 @@ checkouts are only bootstrap/update sources.
 
 ## Provider Selection
 
-`devctl` supports GitHub and Gitee through the same command surface. Set
-`XFLOW_PLATFORM=github` or `XFLOW_PLATFORM=gitee` when auto-detection from the
-`origin` remote is not enough. Gitee uses `GITEE_TOKEN` and the Gitee v5
-OpenAPI; do not call Gitee endpoints directly from an AI workflow.
+`devctl` supports GitHub and Gitee through the same command surface. Prefer
+auto-detection from the `origin` remote. Put global tokens in
+`~/.xflow/env.local`, but put project-specific platform overrides in
+`.xflow/local/env.local`, an explicit `XFLOW_ENV_FILE`, or the process
+environment. Gitee uses `GITEE_TOKEN` and the Gitee v5 OpenAPI; do not call
+Gitee endpoints directly from an AI workflow.
 
 ## devctl Commands
 
