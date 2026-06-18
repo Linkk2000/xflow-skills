@@ -16,6 +16,8 @@
 - `GITHUB_TOKEN`: GitHub token from environment or env file.
 - `GITEE_TOKEN`: Gitee token from environment or env file.
 - `XFLOW_PLATFORM`: `github` or `gitee`, otherwise inferred from `origin`.
+- `GITHUB_API_BASE`: optional GitHub API base override.
+- `GITEE_API_BASE`: optional Gitee v5 API base override; default is `https://gitee.com/api/v5`.
 - `DEVCTL_REPO_ROOT`: target repository root.
 - `DEVCTL_TOOL_ROOT`: devctl installation root.
 - `DEVCTL_BASE_BRANCH`: default base branch, otherwise auto-detect `master` then `main`.
@@ -32,6 +34,17 @@
 - `devctl check encoding`: check UTF-8/LF and shell syntax health.
 - `devctl check commit-msg`: validate commit message against project rules.
 - `devctl check branch-scope`: validate current branch is issue-bound.
+
+## Provider Semantics
+
+- GitHub provider calls use JSON bodies and GitHub REST repository paths.
+- Gitee provider calls use the Gitee v5 OpenAPI shape and form/query
+  parameters. For example, issue creation uses
+  `POST /v5/repos/{owner}/issues` with `repo` in form data, while PR creation
+  uses `POST /v5/repos/{owner}/{repo}/pulls`.
+- Agents must call these providers only through `devctl`; direct imports of
+  `xflow.providers` or direct GitHub/Gitee API calls are not normal workflow
+  entrypoints.
 
 ## Canonical Sources
 

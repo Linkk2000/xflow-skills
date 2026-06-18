@@ -15,6 +15,8 @@ Hard rules:
   fallback, not the preferred implementation layer for remote writes.
 - User-level parameters belong in `~/.xflow/env.local`. Legacy
   `~/gitee.env.local` may be read for compatibility. Never print token values.
+- Use `XFLOW_PLATFORM=github|gitee` only to select devctl's provider. Do not
+  call GitHub or Gitee APIs directly from the AI workflow.
 - Maintain `.xflow/current-task.md` for active tasks and run
   `devctl check current-task --issue <id>` before local approval, commit,
   push, PR/MR creation, and cleanup.
@@ -30,6 +32,9 @@ Hard rules:
   task-related files.
 - Do not add AI-client co-author trailers, including
   `Co-authored-by: Cursor <cursoragent@cursor.com>`.
+- Direct `main` maintenance is an exception only for the `xflow-devctl` and
+  `xflow-skills` tool repositories when the user explicitly requests it. Do
+  not apply that exception to ordinary user projects.
 
 Remote-write checklist:
 

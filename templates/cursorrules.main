@@ -19,6 +19,8 @@ Runtime rules:
   Gitee APIs outside devctl during normal workflow execution.
 - User-level parameters belong in `~/.xflow/env.local`. Legacy
   `~/gitee.env.local` may be read for compatibility. Never print token values.
+- Use `XFLOW_PLATFORM=github|gitee` only to select devctl's provider. Do not
+  call GitHub or Gitee APIs directly from the AI workflow.
 - Maintain `.xflow/current-task.md` for active tasks and run
   `devctl check current-task --issue <id>` before local approval, commit,
   push, PR/MR creation, and cleanup.
@@ -48,3 +50,6 @@ Git commit rules:
   co-author metadata.
 - If a repository already contains such a trailer in an old commit, do not
   rewrite history unless the human reviewer explicitly requests it.
+- Direct `main` maintenance is an exception only for the `xflow-devctl` and
+  `xflow-skills` tool repositories when the user explicitly requests it. Do
+  not apply that exception to ordinary user projects.

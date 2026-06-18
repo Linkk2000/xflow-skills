@@ -164,8 +164,21 @@ XFLOW_PLATFORM=github
 to an explicit env file for a single run. Never print token values; preflight
 may only print whether a token is `SET` or `UNSET`.
 
+The Python provider supports GitHub and Gitee. Set `XFLOW_PLATFORM` to
+`github` or `gitee`, or let devctl infer the platform from the repository
+`origin` remote. Gitee uses `GITEE_TOKEN` and the Gitee v5 OpenAPI shape;
+`GITEE_API_BASE` is only for tests or custom hosts.
+
 Do not import provider modules directly, for example `xflow.providers`, from an
 AI task. Provider modules are internal implementation details behind devctl.
+
+## Tool Repository Maintenance Exception
+
+The `xflow-devctl` and `xflow-skills` repositories may be maintained directly
+on their own `main` branches when the user explicitly asks for that maintenance
+mode. This exception is limited to those two tool repositories. It does not
+apply to repositories that consume XFlow, and it must not weaken user-project
+issue, branch, local human review, or MR/PR gates.
 
 ## PowerShell And Encoding
 

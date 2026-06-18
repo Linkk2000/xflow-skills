@@ -40,6 +40,13 @@ do not hard-code a user's local project path or an academic paper layout here.
 The project-local tool submodules are the runtime source of truth. Global
 checkouts are only bootstrap/update sources.
 
+## Provider Selection
+
+`devctl` supports GitHub and Gitee through the same command surface. Set
+`XFLOW_PLATFORM=github` or `XFLOW_PLATFORM=gitee` when auto-detection from the
+`origin` remote is not enough. Gitee uses `GITEE_TOKEN` and the Gitee v5
+OpenAPI; do not call Gitee endpoints directly from an AI workflow.
+
 ## devctl Commands
 
 Run from the owning repository.
