@@ -177,6 +177,20 @@ native command returns a structured result with `ExitCode`, `Stdout`, and
 - These rule files are guardrails only. Executable checks and remote-write
   gates remain in `devctl`.
 
+## Project Platform And Token Safety
+
+- Global token files are token-only. `~/gitee.env.local` and
+  `~/.xflow/env.local` may hold `GITHUB_TOKEN` and `GITEE_TOKEN`, but they
+  must not decide the active project platform.
+- Project platform selection belongs in `.xflow/local/env.local`. Use
+  `XFLOW_PLATFORM=github` or `XFLOW_PLATFORM=gitee` there when a paper
+  repository cannot be detected from `origin`, or when multiple projects on the
+  same machine use different platforms.
+- `XFLOW_ENV_FILE` is an explicit per-command override for reviewed special
+  cases. Do not use it to bypass project-local configuration review.
+- `devctl preflight` may print whether token variables are set, but it must not
+  print token values.
+
 ## Review-Only Scope Safety
 
 - In review-only tasks, run `devctl check scope --issue <id> --mode review-only`
@@ -197,6 +211,9 @@ native command returns a structured result with `ExitCode`, `Stdout`, and
 - AI may prefill mechanical fields, hashes, timestamps, and suggested commands,
   but must leave `Approved: no`; only the human reviewer may change it to
   `Approved: yes`.
+- The reviewer defaults to Git `user.name` and `user.email`.
+- `devctl approval prepare` reviewer defaults to Git `user.name` and
+  `user.email` when available; `--reviewer` may override it after local review.
 - Before local approval, commit, push, or MR/PR creation, run
   `devctl check current-task --issue <id>` to detect stale state boards.
 - After `devctl git mr` creates a PR, read

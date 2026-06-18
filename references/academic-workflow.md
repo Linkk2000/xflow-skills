@@ -170,6 +170,35 @@ On Windows, PowerShell users may run:
 .\devctl.ps1 preflight
 ```
 
+## Project Platform And Token Configuration
+
+Global token files are token-only. A user-level file such as
+`~/gitee.env.local` or `~/.xflow/env.local` may contain `GITHUB_TOKEN` and
+`GITEE_TOKEN`, but it must not contain `XFLOW_PLATFORM` as a machine-wide
+default. Otherwise one project can accidentally force another project to use
+the wrong remote provider.
+
+Project platform selection belongs in `.xflow/local/env.local`:
+
+```text
+XFLOW_PLATFORM=github
+```
+
+or:
+
+```text
+XFLOW_PLATFORM=gitee
+```
+
+Use the project-local file when a repository has no detectable `origin`, when
+the origin host is ambiguous, or when the same machine is working on both
+GitHub and Gitee projects. `XFLOW_ENV_FILE` is available for explicit reviewed
+overrides, but it should not replace the project-local configuration in normal
+workflow use.
+
+`devctl preflight` may report which env files were loaded and whether
+`GITHUB_TOKEN` or `GITEE_TOKEN` is set. It must not print token values.
+
 ## Legacy `_ops` Migration
 
 Older paper repositories may still contain `_ops/devctl`, `_ops/workflow`,
@@ -306,10 +335,33 @@ PR inspection is read-only and does not require local approval:
 ./devctl git pr-get <number>
 ```
 
-The Python academic provider currently supports GitHub Issue
-create/list/show/comment/close, PR creation, and PR lookup. Gitee Issue/PR
-creation remains available only through the legacy shell provider path and must
-not be assumed available in academic Python mode until it is ported.
+## Gitee Issue And PR Provider
+
+Gitee Issue/PR commands use `GITEE_TOKEN` and the same approval gates as the
+GitHub provider. Select Gitee with a Gitee `origin` URL or with project-local
+configuration:
+
+```text
+.xflow/local/env.local
+XFLOW_PLATFORM=gitee
+```
+
+The academic Python provider supports these Gitee operations:
+
+```bash
+./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --labels "academic"
+./devctl issue list --state open --limit 20
+./devctl issue show <id>
+./devctl issue comment <id> --body-file .xflow/issues/issue-<id>/comment-draft.md
+./devctl issue close <id>
+./devctl git mr --title "<title>" --body-file .xflow/issues/issue-<id>/mr-draft.md --base main --issue <id>
+./devctl git pr-get <number>
+```
+
+For Gitee repositories without a detectable `origin`, set `DEVCTL_OWNER` and
+`DEVCTL_REPO`. Remote writes still require the exact same
+`devctl approval prepare`, human approval, matching SHA256, and active
+`approvals/local-review.md` gate.
 
 ## Updating An Initialized Paper Repository
 
@@ -665,7 +717,9 @@ devctl approval prepare --issue <id> --action <action> --file <reviewed-artifact
 
 This command pre-fills mechanical fields such as approved file, SHA256,
 approval time, and suggested command. It must leave `Approved: no`; only the
-human reviewer may change the decision to `Approved: yes`.
+human reviewer may change the decision to `Approved: yes`. The reviewer field
+defaults from Git `user.name` and `user.email`; use `--reviewer` only when the
+human reviewer intentionally wants a different visible reviewer label.
 
 Do not invent active approval filenames such as `local-review-mr.md`. The
 active approval file is always `.xflow/issues/issue-<id>/approvals/local-review.md`.

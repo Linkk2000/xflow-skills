@@ -27,6 +27,13 @@ Runtime rules:
   `devctl migrate inspect` before normal academic workflow work. After human
   review, run `devctl migrate wrappers` to write v2 root wrappers.
 - The v2 Windows wrapper must call `python -m xflow` directly and must not call Bash, WSL, Claude, AcademicForge, or any installer.
+- User-level env files such as `~/gitee.env.local` and `~/.xflow/env.local`
+  are token-only. Do not put machine-wide `XFLOW_PLATFORM` there.
+- XFLOW_PLATFORM belongs in the paper repository, normally
+  `.xflow/local/env.local`, so GitHub and Gitee projects on the same machine do
+  not affect each other.
+- Gitee Issue/PR commands use `GITEE_TOKEN` and the same local human approval
+  gates as GitHub commands.
 - To add another AI client's rule entrypoint after initialization, run
   `devctl rules list` and then `devctl rules sync <id>` after reviewing the
   target file that will be created or overwritten.
@@ -83,7 +90,9 @@ Runtime rules:
   with fresh `Approved Action: issue-close`.
 - For GitHub PR lookup, use `devctl git pr-get <number>` as a read-only
   command.
-- Do not assume Gitee Issue/PR creation is available in academic Python mode.
+- Gitee Issue/PR creation, listing, comments, close, PR creation, and PR lookup
+  are available in academic Python mode when `XFLOW_PLATFORM=gitee` and
+  `GITEE_TOKEN` are configured.
 - Do not silently install Python.
 - Do not silently run `git submodule update`.
 - Do not silently register or install AcademicForge.
@@ -188,6 +197,9 @@ Remote-write rules:
 - Use `devctl approval prepare --issue <id> --action <action> --file <artifact>`
   before asking the human reviewer to approve a remote write. The generated file
   must keep `Approved: no` until the human reviewer changes it to `Approved: yes`.
+- `devctl approval prepare` defaults the reviewer from Git `user.name` and
+  `user.email`; do not replace it unless the human reviewer asks for a
+  different reviewer label.
 - Do not invent active approval filenames such as `local-review-mr.md`. Archive
   superseded approvals under `.xflow/issues/issue-<id>/approvals/history/`;
   only `approvals/local-review.md` is the active gate file.

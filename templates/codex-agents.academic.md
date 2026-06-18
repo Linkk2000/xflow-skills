@@ -28,6 +28,13 @@ Runtime rules:
 - Treat `.xflow/ops/devctl` and `.xflow/ops/workflow` as reviewed tool
   submodules. Do not write logs, caches, Claude outputs, or review artifacts
   inside `.xflow/ops/*`.
+- User-level env files such as `~/gitee.env.local` and `~/.xflow/env.local`
+  are token-only. Do not put machine-wide `XFLOW_PLATFORM` there.
+- XFLOW_PLATFORM belongs in the paper repository, normally
+  `.xflow/local/env.local`, so GitHub and Gitee projects on the same machine do
+  not affect each other.
+- Gitee Issue/PR commands use `GITEE_TOKEN` and the same local human approval
+  gates as GitHub commands.
 - Treat `academic` as the XFlow tool product line only. Do not create or push
   an `academic` branch in the paper repository unless the human reviewer
   explicitly approves that repository policy.
@@ -42,6 +49,9 @@ Runtime rules:
   to prefill mechanical fields. The AI may fill hashes, timestamps, and the
   suggested command, but must leave `Approved: no`; only the human reviewer may
   change it to `Approved: yes`.
+- `devctl approval prepare` defaults the reviewer from Git `user.name` and
+  `user.email`; do not replace it unless the human reviewer asks for a
+  different reviewer label.
 - Before local approval, commit, push, or MR/PR creation, run
   `devctl check current-task --issue <id>`. If it reports stale state, show
   `.xflow/current-task.md` and `.xflow/issues/issue-<id>/state-update-suggestion.md`

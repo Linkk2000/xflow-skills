@@ -31,6 +31,14 @@ This contract links `xflow-skills@academic` and `xflow-devctl@academic`.
   Non-ASCII academic content belongs in UTF-8 artifact files.
 - Pre-Issue draft location: `.xflow/issues/issue-draft/`.
 - Workflow-local scratch location: `.xflow/local/`.
+- Global token files are token-only. `~/gitee.env.local` and
+  `~/.xflow/env.local` may provide `GITHUB_TOKEN` and `GITEE_TOKEN`, but they
+  must not provide a machine-wide `XFLOW_PLATFORM`.
+- Project platform selection belongs in `.xflow/local/env.local`. Use
+  `XFLOW_PLATFORM=github` or `XFLOW_PLATFORM=gitee` there when explicit
+  provider selection is needed for the current paper repository.
+- `XFLOW_ENV_FILE` is an explicit override for reviewed special cases and is
+  loaded after the default user and project env files.
 - Tool submodule locations: `.xflow/ops/devctl` and `.xflow/ops/workflow`.
 - Task artifact location: `.xflow/issues/issue-<id>/`.
 - Scope policy extension location: `.xflow/scope-policy.json`.
@@ -340,7 +348,7 @@ themselves.
 `devctl approval prepare` must prefill the active approval file with:
 
 - issue id;
-- reviewer placeholder;
+- reviewer, defaulting from Git `user.name` and `user.email` when available;
 - current timestamp;
 - approved action;
 - approved file;
@@ -349,9 +357,11 @@ themselves.
 
 The generated approval file must keep `Approved: no`. AI clients may update
 mechanical fields by rerunning `devctl approval prepare`, but must not set
-`Approved: yes` or forge reviewer identity. `devctl check local-review` and
-remote-write gates must reject unresolved placeholders, accept upper- or
-lowercase SHA256 text, and compare the hash against the exact reviewed file.
+`Approved: yes` or forge reviewer identity. `--reviewer` may override the
+default label only when the human reviewer intentionally approves that label.
+`devctl check local-review` and remote-write gates must reject unresolved
+placeholders, accept upper- or lowercase SHA256 text, and compare the hash
+against the exact reviewed file.
 
 ## GitHub Issue And PR Provider Contract
 
@@ -388,9 +398,6 @@ lowercase SHA256 text, and compare the hash against the exact reviewed file.
 - close the GitHub Issue only after the approval gate passes;
 - print the remote Issue number and URL returned by GitHub.
 
-If `XFLOW_PLATFORM=gitee`, the Python academic provider must fail closed until
-Gitee is explicitly ported.
-
 `devctl git mr` in academic Python mode must:
 
 - reject inline `--body`;
@@ -418,6 +425,24 @@ and must not require another PR just to update local task-board records.
 - read a GitHub PR by number;
 - perform no remote write;
 - require no local approval gate.
+
+## Gitee Issue And PR Provider Contract
+
+`devctl issue create`, `devctl issue list`, `devctl issue show`,
+`devctl issue comment`, `devctl issue close`, `devctl git mr`, and
+`devctl git pr-get` must support `XFLOW_PLATFORM=gitee` in academic Python
+mode.
+
+Gitee Issue/PR commands use `GITEE_TOKEN` or a supported alias. They must
+resolve the repository from `DEVCTL_OWNER`/`DEVCTL_REPO` or `origin`, use
+Gitee v5 API paths, and keep the same local human approval gates as GitHub for
+remote writes.
+
+Read-only Gitee commands, `issue list`, `issue show`, and `git pr-get`, require
+no local approval gate because they do not write remote state. Gitee remote
+writes must validate the active
+`.xflow/issues/issue-<id>/approvals/local-review.md` before any network
+request.
 
 `devctl check current-task --issue <id>` must:
 
