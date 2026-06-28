@@ -22,6 +22,8 @@ do not hard-code a user's local project path or an academic paper layout here.
   conflict rules.
 - `issue-policy.md`: issue drafting, duplicate checks, body-file usage, and
   retry safety.
+- `attachment-policy.md`: pasted files, screenshots, image manifests, backend
+  publishing, and placeholder guards for issue/comment/MR bodies.
 - `scoring-rubric.md`: 100-point effectiveness rubric and hard-fail conditions.
 - `ops-lessons.md`: concise operational lessons for remote writes, shell
   boundaries, and context drift.
@@ -58,6 +60,8 @@ Run from the owning repository.
 ./devctl preflight
 ./devctl check current-task --issue <number>
 ./devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md
+./devctl attachment add --issue draft --file /path/to/screenshot.png --as image
+./devctl attachment check --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json
 ./devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create
 ./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --labels "tdd,backend"
@@ -136,6 +140,12 @@ artifact and changes `Approved: no` to `Approved: yes`.
 For issue creation, comments, and MR/PR descriptions, use `--body-file`.
 Multi-line Markdown, fenced code, inline backticks, JSON, or shell snippets
 must be written to a file so shells do not reinterpret the content.
+
+If the body refers to pasted files, screenshots, or images, use
+`attachment-policy.md`. Local drafts may contain `xflow-attachment://`
+placeholders, but remote-published bodies must contain only reviewed public
+URLs. Do not publish `C:\...`, `/tmp/...`, `.xflow/...`, `file://...`, or WSL
+mount paths as attachment links.
 
 Remote-published body files must be public-facing Markdown. Use hidden
 `<!-- xflow: ... -->` anchors for machine checks, and do not include internal

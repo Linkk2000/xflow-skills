@@ -4,15 +4,15 @@ Use this when the target repository is empty or does not contain project-level X
 
 ## Canonical Sources
 
-- XFlow Skill source: `https://github.com/Linkk2000/xflow-skills`
-- devctl source: `https://github.com/Linkk2000/xflow-devctl`
+- XFlow Skill source: `git@github.com:Linkk2000/xflow-skills.git`
+- devctl source: `git@github.com:Linkk2000/xflow-devctl.git`
 
 Default local cache locations:
 
-- Windows: `%USERPROFILE%\.xflow\sources\xflow-skills`
-- Windows: `%USERPROFILE%\.xflow\sources\xflow-devctl`
-- POSIX: `~/.xflow/sources/xflow-skills`
-- POSIX: `~/.xflow/sources/xflow-devctl`
+- Windows: `%USERPROFILE%\.codex\xflow\repos\xflow-skills`
+- Windows: `%USERPROFILE%\.codex\xflow\repos\xflow-devctl`
+- POSIX: `~/.codex/xflow/repos/xflow-skills`
+- POSIX: `~/.codex/xflow/repos/xflow-devctl`
 
 If local copies are already available, prefer them over network fetches. If a default local copy is missing, the agent may clone the canonical source into the default cache path. If neither the local copy nor the network source is available, stop and ask the user where to obtain XFlow.
 

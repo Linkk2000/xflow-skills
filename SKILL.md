@@ -34,6 +34,8 @@ This is a phase-selected reference index. If unsure which file applies, read
 - Phase order and human gates: `references/workflow-state-machine.md`
 - Rule precedence and project overrides: `references/priority-and-overrides.md`
 - Issue creation and comments: `references/issue-policy.md`
+- Pasted files, screenshots, images, and comment attachments:
+  `references/attachment-policy.md`
 - Branch, commit, push, MR, merge, conflict handling: `references/git-policy.md`
 - `devctl` command semantics and default variables: `references/devctl-contract.md`
 - Windows, PowerShell, WSL, UTF-8, LF/CRLF: `references/platform-adapters.md`
@@ -64,10 +66,14 @@ This is a phase-selected reference index. If unsure which file applies, read
 8. Use `--body-file` for Issue bodies, comments, and PR/MR bodies. Do not pass
    multiline Markdown, fenced code, JSON, shell snippets, backticks, or `$()`
    through inline command arguments.
-9. Use the user's language for Git-related public text: commit messages,
+9. Do not publish local file paths or unresolved `xflow-attachment://`
+   placeholders in remote Issues, comments, or PR/MR bodies. If a pasted file
+   or image is referenced, use `references/attachment-policy.md` and require a
+   reviewed attachment manifest before any remote write.
+10. Use the user's language for Git-related public text: commit messages,
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
-10. Do not add AI-client co-author trailers. In particular, never add
+11. Do not add AI-client co-author trailers. In particular, never add
     `Co-authored-by: Cursor <cursoragent@cursor.com>`.
 
 ## Required Flow
@@ -112,6 +118,9 @@ Core remote writes are:
 Before each remote write:
 
 - The exact file to be published or used as evidence must exist locally.
+- If the body references pasted files, screenshots, or images, the attachment
+  manifest must exist locally, all placeholders must resolve to reviewed
+  published URLs, and both the body hash and manifest hash must be approved.
 - `devctl approval prepare` should prefill the action, path, timestamp, and
   SHA256.
 - The human reviewer only needs to make a judgement and set `Approved: yes`.
@@ -122,6 +131,7 @@ Before each remote write:
 
 - Issue draft: `.xflow/issues/issue-draft/issue-draft.md`
 - Issue comment draft: `.xflow/issues/issue-<id>/comment-draft.md`
+- Attachment manifest: `.xflow/issues/issue-<id>/attachments/manifest.json`
 - MR/PR draft: `.xflow/issues/issue-<id>/mr-draft.md`
 - Walkthrough/evidence: `.xflow/issues/issue-<id>/walkthrough.md`
 - Active local approval: `.xflow/issues/issue-<id>/approvals/local-review.md`

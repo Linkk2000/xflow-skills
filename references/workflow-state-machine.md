@@ -48,13 +48,15 @@ state note after the original PR has already merged.
 ## Gate Meaning
 
 - `G1_APPROVE_ISSUE_CREATE`: human approves the issue body before remote issue
-  creation.
+  creation. If attachments are referenced, the human also approves the
+  attachment manifest and rendered public URLs.
 - `G2_APPROVE_DEVELOPMENT_START`: human accepts the created issue and intended
   task branch before implementation starts.
 - `G3_APPROVE_RESULT`: human reviews local evidence, test results, scope, and
   generated artifacts before commit or remote publication.
 - `G4_APPROVE_REMOTE_WRITE`: human approves the exact commit/MR body evidence
-  file before push or PR/MR creation.
+  file before push or PR/MR creation. If the body contains attachment-derived
+  links, the approval also covers the attachment manifest hash.
 - `G5_APPROVE_MR_CREATE`: human approves creating the remote PR/MR after target
   branch synchronization evidence is available.
 - `G6_APPROVE_CLEANUP`: human confirms cleanup, issue close, or archival

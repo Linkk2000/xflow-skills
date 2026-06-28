@@ -36,6 +36,9 @@ file at `.xflow/issues/issue-draft/issue-draft.md` before `devctl issue create`.
 
 ## Verification Plan
 - <commands or manual checks>
+
+## Attachments
+- <none, or published URLs rendered from the approved attachment manifest>
 ```
 
 Before remote creation, also propose:
@@ -81,6 +84,7 @@ Use this shape for remote issue comments. Store the file at
 
 ## Evidence
 - <command, commit, or file reference>
+- <optional published attachment URL from the approved attachment manifest>
 
 ## Next Step
 - <requested reviewer action or follow-up>
@@ -147,6 +151,8 @@ Approved At: <ISO-8601 time>
 Approved Action: <issue-create|issue-comment|issue-close|git-mr|remote-write>
 Approved File: <path>
 Approved SHA256: <sha256>
+Attachment Manifest: <none|path>
+Attachment Manifest SHA256: <none|sha256>
 
 ## Decision
 Approved: no

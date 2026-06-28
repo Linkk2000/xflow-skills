@@ -4,11 +4,11 @@ Use this when deciding which XFlow Skill or devctl version controls a repository
 
 ## Default Sources
 
-- XFlow Skill: `https://github.com/Linkk2000/xflow-skills`
-- devctl: `https://github.com/Linkk2000/xflow-devctl`
+- XFlow Skill: `git@github.com:Linkk2000/xflow-skills.git`
+- devctl: `git@github.com:Linkk2000/xflow-devctl.git`
 - Default ref: `main`
-- Default cache on Windows: `%USERPROFILE%\.xflow\sources\`
-- Default cache on POSIX: `~/.xflow/sources/`
+- Default global source root on Windows: `%USERPROFILE%\.codex\xflow\repos\`
+- Default global source root on POSIX: `~/.codex/xflow/repos/`
 
 ## Priority
 
@@ -18,7 +18,7 @@ Apply sources in this order:
 2. Project `.xflow/xflow.json` source/ref/mode/path.
 3. Project `AGENTS.md`.
 4. Project-bound git submodules under `.xflow/sources/`.
-5. Default local cache under the user's home directory.
+5. Default local source checkout under the user's Codex XFlow directory.
 6. Globally installed Skill/devctl.
 7. Agent defaults.
 
@@ -32,16 +32,16 @@ Recommended `.xflow/xflow.json` shape:
 {
   "version": 1,
   "skill": {
-    "source": "https://github.com/Linkk2000/xflow-skills",
+    "source": "git@github.com:Linkk2000/xflow-skills.git",
     "ref": "main",
     "mode": "cache",
-    "path": "~/.xflow/sources/xflow-skills"
+    "path": "~/.codex/xflow/repos/xflow-skills"
   },
   "devctl": {
-    "source": "https://github.com/Linkk2000/xflow-devctl",
+    "source": "git@github.com:Linkk2000/xflow-devctl.git",
     "ref": "main",
     "mode": "cache",
-    "path": "~/.xflow/sources/xflow-devctl"
+    "path": "~/.codex/xflow/repos/xflow-devctl"
   },
   "humanGated": true
 }

@@ -7,10 +7,10 @@
 
 ## Default Variable Locations
 
-- XFlow Skill source: `https://github.com/Linkk2000/xflow-skills`
-- devctl source: `https://github.com/Linkk2000/xflow-devctl`
-- Windows source cache root: `%USERPROFILE%\.xflow\sources`
-- POSIX source cache root: `~/.xflow/sources`
+- XFlow Skill source: `git@github.com:Linkk2000/xflow-skills.git`
+- devctl source: `git@github.com:Linkk2000/xflow-devctl.git`
+- Windows global source root: `%USERPROFILE%\.codex\xflow\repos`
+- POSIX global source root: `~/.codex/xflow/repos`
 - `XFLOW_ENV_FILE`: optional unified env file.
 - `GITEE_ENV_FILE`: defaults to `~/gitee.env.local`.
 - `GITHUB_TOKEN`: GitHub token from environment or env file.
@@ -37,6 +37,19 @@
 - `devctl check encoding`: check UTF-8/LF and shell syntax health.
 - `devctl check commit-msg`: validate commit message against project rules.
 - `devctl check branch-scope`: validate current branch is issue-bound.
+- `devctl issue create --attachments <manifest>`: create issue only after the
+  body file and attachment manifest have both passed review and all attachment
+  placeholders have been replaced with approved published URLs.
+- `devctl issue comment --attachments <manifest>`: comment only after the body
+  file and attachment manifest have both passed review.
+- `devctl attachment add`: register or copy a pasted file/image into the
+  XFlow attachment directory and update the manifest.
+- `devctl attachment check`: verify manifest hashes, MIME/size metadata,
+  placeholder usage, and final-body publication guards.
+- `devctl attachment publish`: publish manifest items to the configured backend
+  and record reviewed URLs.
+- `devctl attachment render`: render a final body file by replacing reviewed
+  attachment placeholders with published URLs.
 
 ## Provider Semantics
 
@@ -48,10 +61,13 @@
 - Agents must call these providers only through `devctl`; direct imports of
   `xflow.providers` or direct GitHub/Gitee API calls are not normal workflow
   entrypoints.
+- If attachment commands are not implemented in the local `devctl`, agents
+  must stop and ask for a supported backend or tool update. They must not
+  bypass the contract by uploading files manually through provider APIs.
 
 ## Canonical Sources
 
-- XFlow Skill source: `https://github.com/Linkk2000/xflow-skills`
-- devctl source: `https://github.com/Linkk2000/xflow-devctl`
+- XFlow Skill source: `git@github.com:Linkk2000/xflow-skills.git`
+- devctl source: `git@github.com:Linkk2000/xflow-devctl.git`
 
 Agents should not ask the user to paste long workflow text when these sources or local copies are available. For an empty repository, obtain or locate `xflow-devctl`, ask the source strategy gate if the project has no binding yet, then run `devctl init --target <repo>` with the selected source/ref/mode and stop for review.
