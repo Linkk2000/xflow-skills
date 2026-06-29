@@ -50,7 +50,10 @@ This is a phase-selected reference index. If unsure which file applies, read
    provider modules directly or call GitHub/Gitee APIs outside devctl.
 3. Do not create remote Issues, comments, PRs/MRs, pushes, branch publication,
    or remote metadata changes before local human review approves the exact
-   body/evidence file.
+   body/evidence file, unless the current user explicitly authorizes an
+   unattended issue/comment command and devctl is invoked with
+   `--no-local-review` for that exact action. If attachments are present, also
+   use `--attach-file` and `--upload-attachments github`.
 4. Maintain `.xflow/current-task.md` for active tasks and run
    `devctl check current-task --issue <id>` before local approval, commit,
    push, MR/PR creation, and cleanup.
@@ -121,6 +124,9 @@ Before each remote write:
 - If the body references pasted files, screenshots, or images, the attachment
   manifest must exist locally, all placeholders must resolve to reviewed
   published URLs, and both the body hash and manifest hash must be approved.
+- If the current user explicitly requests no-human issue/comment handling, use
+  devctl's unattended flow. When attachments are present, the generated final
+  body and manifest must still be written locally as evidence.
 - `devctl approval prepare` should prefill the action, path, timestamp, and
   SHA256.
 - The human reviewer only needs to make a judgement and set `Approved: yes`.
@@ -159,7 +165,10 @@ pollute the parent project. Run `devctl check submodule-hygiene` after updates.
 `devctl` and `devctl.ps1` are launchers. The generic main workflow should move
 actual workflow behavior into `python -m xflow` over time. Shell scripts may
 remain as compatibility fallback, but remote writes, approval checks, provider
-calls, and rule synchronization must be routed through devctl.
+calls, Git/app lifecycle commands, and rule synchronization must be routed
+through devctl. Windows validation should use Python core checks such as
+`python tests/python-core.py` and `python tests/entrypoint-routing.py`, not
+bare `bash`, Git Bash, or WSL.
 
 Use `~/.xflow/env.local` as the preferred user-level parameter file. It may
 contain values such as:

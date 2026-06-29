@@ -24,6 +24,8 @@
 
 - Do not assume WSL is available. If WSL is broken or unavailable, use
   PowerShell plus `devctl.ps1`.
+- Do not use bare `bash`, Git Bash, or WSL as the default Windows validation
+  path. Run Python core checks instead.
 - Do not use mojibake terminal output as a patch anchor. Match ASCII anchors,
   file names, hidden comments, or nearby structure.
 - Prefer Python core checks for cross-platform behavior.

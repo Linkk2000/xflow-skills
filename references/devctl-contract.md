@@ -4,6 +4,11 @@
 
 - Windows: `devctl.ps1`
 - POSIX: `devctl`
+- Both entrypoints must route normal XFlow commands to `python -m xflow`.
+  POSIX shell scripts may remain only as compatibility helpers. Windows
+  validation must not invoke bare `bash`, Git Bash, or WSL.
+
+Search anchor: Windows validation must not invoke bare `bash`.
 
 ## Default Variable Locations
 
@@ -33,6 +38,10 @@
 - `devctl issue create`: create issue only after duplicate check.
 - `devctl git push`: push current branch only.
 - `devctl git mr`: create MR/PR only, after push has already been approved or completed.
+- `devctl git start/status/commit-msg/done`: Git lifecycle commands implemented
+  by Python core for normal Windows/POSIX use.
+- `devctl app start-frontend/status/stop-frontend`: App helper commands
+  implemented by Python core for normal Windows/POSIX use.
 - `devctl doctor`: check environment health.
 - `devctl check encoding`: check UTF-8/LF and shell syntax health.
 - `devctl check commit-msg`: validate commit message against project rules.
@@ -40,16 +49,80 @@
 - `devctl issue create --attachments <manifest>`: create issue only after the
   body file and attachment manifest have both passed review and all attachment
   placeholders have been replaced with approved published URLs.
+- `devctl issue create --attach-file <path> --upload-attachments github`:
+  register a pasted file or image, upload it to GitHub release assets, render a
+  final body with GitHub URLs, and create the issue. `--no-local-review` is
+  allowed only when the current user explicitly requested unattended operation
+  for that exact command.
+- `devctl issue create --no-local-review`: create an issue without attachments
+  when the current user explicitly requested unattended operation for that exact
+  command.
 - `devctl issue comment --attachments <manifest>`: comment only after the body
   file and attachment manifest have both passed review.
+- `devctl issue comment --attach-file <path> --upload-attachments github`:
+  same attachment upload and render flow for an issue comment.
+- `devctl issue comment --no-local-review`: comment without attachments when
+  explicitly authorized by the current user for that exact command.
 - `devctl attachment add`: register or copy a pasted file/image into the
   XFlow attachment directory and update the manifest.
 - `devctl attachment check`: verify manifest hashes, MIME/size metadata,
   placeholder usage, and final-body publication guards.
 - `devctl attachment publish`: publish manifest items to the configured backend
   and record reviewed URLs.
+  On GitHub, `--backend github` uses the `xflow-attachments` release by default
+  and records each asset's GitHub `browser_download_url`.
 - `devctl attachment render`: render a final body file by replacing reviewed
   attachment placeholders with published URLs.
+
+## AI Call Recipes
+
+Use these recipes as the normal command surface. Do not probe by retrying
+random flag combinations after an error; read the remote state or run the
+matching check command first.
+
+Plain unattended issue:
+
+```text
+devctl issue create "<title>" --body-file issue.md --no-local-review
+```
+
+Plain unattended comment:
+
+```text
+devctl issue comment <number> --body-file comment.md --no-local-review
+```
+
+Unattended GitHub attachment issue:
+
+```text
+devctl issue create "<title>" --body-file issue.md --attach-file screenshot.png --attach-file notes.txt --upload-attachments github --no-local-review
+```
+
+Unattended GitHub attachment comment:
+
+```text
+devctl issue comment <number> --body-file comment.md --attach-file screenshot.png --attach-file notes.txt --upload-attachments github --no-local-review
+```
+
+Reviewed issue with attachments:
+
+```text
+devctl attachment add --issue draft --file screenshot.png --as auto
+devctl attachment publish --issue draft --backend github --body-file issue.md --output issue.final.md
+devctl approval prepare --issue draft --action issue-create --file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
+devctl check local-review --issue draft --file issue.final.md --action issue-create --attachments .xflow/issues/issue-draft/attachments/manifest.json
+devctl issue create "<title>" --body-file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
+```
+
+`--attach-file` accepts any file. Image MIME types render as Markdown images;
+other files render as links. `--upload-attachments github` uploads files to
+the `xflow-attachments` GitHub release by default and writes a rendered final
+body file next to the input body unless `--rendered-body-file` is provided.
+`GITHUB_TOKEN` is required for GitHub uploads and issue/comment remote writes.
+If there are no attachments, omit all attachment flags.
+
+Plain text search anchors for agents: --attach-file accepts any file.
+GITHUB_TOKEN is required for GitHub uploads.
 
 ## Provider Semantics
 

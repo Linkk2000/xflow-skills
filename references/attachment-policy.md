@@ -2,7 +2,8 @@
 
 Use this reference when a user pastes files, screenshots, image paths, or
 other local artifacts that should appear in a remote Issue, issue comment, or
-PR/MR body.
+PR/MR body. Images are attachments with image MIME types; they use Markdown
+image syntax while other attachments use normal Markdown links.
 
 ## Core Rule
 
@@ -71,6 +72,31 @@ The project or user may choose one mode:
 If no backend is configured, fail closed. Do not guess a public host and do not
 paste a local path into the remote body.
 
+For GitHub repositories, the default supported provider backend is
+`github-release`: devctl creates or reuses the `xflow-attachments` release,
+uploads files as release assets, records GitHub's `browser_download_url` in the
+manifest, and renders the final body with those URLs.
+
+## AI Decision Table
+
+Choose one row and follow it exactly. Do not probe by retrying random flag
+combinations.
+
+| Situation | Required command path |
+| --- | --- |
+| Plain unattended issue | `devctl issue create "<title>" --body-file issue.md --no-local-review` |
+| Plain unattended comment | `devctl issue comment <number> --body-file comment.md --no-local-review` |
+| Unattended GitHub attachment issue | `devctl issue create "<title>" --body-file issue.md --attach-file <file> --upload-attachments github --no-local-review` |
+| Unattended GitHub attachment comment | `devctl issue comment <number> --body-file comment.md --attach-file <file> --upload-attachments github --no-local-review` |
+| Reviewed issue with attachments | `attachment add` -> `attachment publish --backend github --body-file issue.md --output issue.final.md` -> `approval prepare` -> `check local-review` -> `issue create --body-file issue.final.md --attachments manifest.json` |
+| Reviewed comment with attachments | `attachment add` -> `attachment publish --backend github --body-file comment.md --output comment.final.md` -> `approval prepare --action issue-comment` -> `check local-review` -> `issue comment --body-file comment.final.md --attachments manifest.json` |
+| Manual public URLs only | `devctl attachment publish --backend manual --url att-001=https://public.example/file.png` before rendering the final body |
+
+`--attach-file` accepts any file. Images are recognized by MIME type or
+`--attach-as image` and render as Markdown images; non-image files render as
+normal Markdown links. `GITHUB_TOKEN` is required for GitHub uploads and
+issue/comment remote writes.
+
 ## Human Approval Gate
 
 For `issue-create`, `issue-comment`, and `git-mr`, approval must cover:
@@ -98,10 +124,17 @@ Two-step flow:
 
 One-step natural-language flow:
 
-1. The user asks to create an issue/comment and provides files or images.
+1. The user asks to create an issue/comment and may provide files or images.
 2. The AI saves or registers each artifact into the XFlow attachment directory.
 3. The AI creates the body draft and manifest together.
-4. The AI stops at the same local approval gate before any remote write.
+4. If the user explicitly requested no-human handling and there are attachments,
+   run `devctl issue create ... --attach-file <file> --upload-attachments
+   github --no-local-review` for that exact action.
+5. If the user explicitly requested no-human handling and there are no
+   attachments, run `devctl issue create ... --no-local-review` for that exact
+   action.
+6. Otherwise, the AI stops at the same local approval gate before any remote
+   write.
 
 ## Required Checks
 

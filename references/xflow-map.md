@@ -62,9 +62,12 @@ Run from the owning repository.
 ./devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl attachment add --issue draft --file /path/to/screenshot.png --as image
 ./devctl attachment check --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json
+./devctl attachment publish --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json --backend github --body-file .xflow/issues/issue-draft/issue-draft.md
 ./devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create
 ./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --labels "tdd,backend"
+./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --no-local-review
+./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --attach-file /path/to/screenshot.png --upload-attachments github --no-local-review
 ./devctl issue list --state open --limit 20
 ./devctl issue show <number>
 ./devctl issue comment <number> --body-file .xflow/issues/issue-<number>/comment-draft.md
@@ -91,6 +94,33 @@ On Windows, prefer:
 .\devctl.ps1 check current-task --issue <number>
 .\devctl.ps1 check submodule-hygiene
 ```
+
+Windows validation must use Python core checks, for example:
+
+```powershell
+python tests/python-core.py
+python tests/entrypoint-routing.py
+```
+
+Do not use bare `bash`, Git Bash, or WSL as the normal Windows validation path.
+`bash -n` is POSIX-only and applies only to intentionally changed shell
+compatibility scripts.
+
+## Issue And Attachment Command Choice
+
+For issue/comment creation, choose a single path before running commands:
+
+- No attachments and user explicitly authorized unattended remote write:
+  `devctl issue create "<title>" --body-file issue.md --no-local-review`.
+- Attachments and user explicitly authorized unattended GitHub upload:
+  `devctl issue create "<title>" --body-file issue.md --attach-file <file> --upload-attachments github --no-local-review`.
+- Attachments and normal human gate required: use `attachment add`,
+  `attachment publish --backend github`, `attachment render` when needed,
+  `approval prepare`, `check local-review`, then the final `issue create` or
+  `issue comment` command with `--attachments manifest.json`.
+
+Images are just attachments with image MIME types. Other files use the same
+`--attach-file` flag and render as normal Markdown links.
 
 ## Current Task State
 
