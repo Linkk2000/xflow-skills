@@ -125,10 +125,12 @@ Run this check before sensitive transitions:
 devctl check current-task --issue <id>
 ```
 
-After PR/MR creation, devctl may write
-`.xflow/issues/issue-<id>/state-update-suggestion.md`. This is a local reminder
-to advance the state to `S9_REMOTE_REVIEW_AND_CI`; it must not create a second
-PR only to record metadata after the original PR has merged.
+After PR/MR creation, devctl writes
+`.xflow/issues/issue-<id>/state-update-suggestion.md`, records the PR number
+and URL in task state, creates a metadata-only state backfill commit, and
+pushes that commit to the same branch under the `git-mr` approval scope. It
+must not create a second PR only to record metadata after the original PR has
+merged.
 
 ## approvals/local-review.md
 

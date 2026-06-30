@@ -9,10 +9,11 @@
 - If the issue or comment references pasted files, screenshots, or images, read
   `references/attachment-policy.md` and create an attachment manifest before
   approval.
-- For GitHub repositories where the user explicitly asks for no-human attachment
-  handling, use devctl's `--attach-file <path> --upload-attachments github`
-  flow so the attachment is uploaded and the issue/comment body is rendered without
-  manual URL copying.
+- Issue/comment image attachments are disabled. Do not use
+  `--upload-attachments github` or GitHub release assets to publish screenshots
+  or images into issues/comments.
+- For non-image attachments, use a reviewed manifest and an approved public URL
+  plan before the remote write.
 - If there are no attachments, `devctl issue create ... --no-local-review`
   remains valid when the current user explicitly authorized unattended issue
   creation for that exact command.

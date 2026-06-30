@@ -9,7 +9,7 @@
 | Stage files | Development | No | Scope matches issue | `git add <scoped files>` |
 | Commit | Development | No, unless project requires | Read project rules, run tests/checks, run `devctl check commit-msg` | `devctl git commit-msg` or native `git commit` if message passes checks |
 | Pull/rebase base | Before branch or conflict work | Ask if conflicts likely | Clean worktree or stash plan | `git pull --ff-only`, explicit rebase only after strategy preview |
-| Push branch | After verification | Yes: approve push | `devctl check branch-scope`, tests/checks completed, no base branch | `devctl git push` |
+| Push branch | After verification | Yes: approve push | `devctl check current-task`, tests/checks completed, no base branch | `devctl git push --issue <id> --file <evidence.md>` |
 | Sync target branch before MR/PR | After branch push, before MR/PR approval | Ask if merge/rebase may create conflicts; approval required for non-trivial conflict resolution | Clean worktree, target branch fetched, target branch SHA recorded | `git fetch origin <base>` then `git merge origin/<base>`; explicit rebase only after strategy preview |
 | Create MR/PR | Branch pushed and target branch synced into the task branch | Yes: approve MR/PR | MR title/body preview, issue link, verification list, target branch SHA, sync result | `devctl git mr` |
 | Resolve conflicts | During pull/rebase/merge | Yes for non-trivial conflicts | Conflict file list, strategy preview | Native git plus explicit file edits |
@@ -43,6 +43,10 @@
 - Push and MR/PR creation are separate human gates. MR/PR creation requires separate approval after push approval.
 - Push approval only authorizes `devctl git push`; it does not authorize `devctl git mr`.
 - `devctl git mr` must not push implicitly. If the branch has no upstream, fail and ask for push approval first, then request MR approval after `devctl git push` completes.
+- After PR/MR creation succeeds, devctl may create and push one metadata-only
+  state backfill commit containing XFlow PR number/URL state. This post-MR
+  push is covered by the `git-mr` approval and must not include business code
+  or unrelated files.
 - Before MR/PR approval, the task branch must be synchronized with the target branch.
 - Synchronization means: fetch the target branch, merge `origin/<base>` into the current task branch, resolve conflicts if any, rerun relevant checks, and record the target branch SHA plus the sync result in the MR/PR draft or local task evidence.
 - Rebase is allowed only when the user or project policy explicitly prefers it and the agent previews the strategy first. The default XFlow strategy is merge target branch into the task branch.

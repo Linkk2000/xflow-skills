@@ -40,25 +40,29 @@ Run this before local approval, commit, push, MR/PR creation, and cleanup:
 devctl check current-task --issue <id>
 ```
 
-If a PR/MR has already been created, `devctl` may write
-`.xflow/issues/issue-<id>/state-update-suggestion.md`. Apply the suggested
-state locally as needed, but do not create a new PR only to commit this local
-state note after the original PR has already merged.
+If a PR/MR has just been created, `devctl` writes
+`.xflow/issues/issue-<id>/state-update-suggestion.md`, updates local XFlow task
+state with the PR number/URL, creates a metadata-only state backfill commit,
+and pushes that commit to the same branch. This post-MR push is part of the
+`git-mr` approval scope and must not include business code.
 
 ## Gate Meaning
 
 - `G1_APPROVE_ISSUE_CREATE`: human approves the issue body before remote issue
-  creation. If attachments are referenced, the human also approves the
-  attachment manifest and rendered public URLs.
+  creation. If approved non-image attachments are referenced, the human also
+  approves the attachment manifest and rendered public URLs. Issue/comment
+  images cannot be approved for remote upload under the current policy.
 - `G2_APPROVE_DEVELOPMENT_START`: human accepts the created issue and intended
   task branch before implementation starts.
 - `G3_APPROVE_RESULT`: human reviews local evidence, test results, scope, and
   generated artifacts before commit or remote publication.
-- `G4_APPROVE_REMOTE_WRITE`: human approves the exact commit/MR body evidence
-  file before push or PR/MR creation. If the body contains attachment-derived
-  links, the approval also covers the attachment manifest hash.
+- `G4_APPROVE_REMOTE_WRITE`: human approves the exact evidence file before
+  `devctl git push`. If the body contains attachment-derived links, the
+  approval also covers the attachment manifest hash.
 - `G5_APPROVE_MR_CREATE`: human approves creating the remote PR/MR after target
-  branch synchronization evidence is available.
+  branch synchronization evidence is available. This approval also covers the
+  metadata-only state backfill commit and push created after the PR/MR number
+  and URL are known.
 - `G6_APPROVE_CLEANUP`: human confirms cleanup, issue close, or archival
   actions after remote review finishes.
 

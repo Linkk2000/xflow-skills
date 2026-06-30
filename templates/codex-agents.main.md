@@ -51,9 +51,11 @@ Remote-write checklist:
 7. Run `devctl check local-review --issue <id> --file <file> --action <action>`.
 8. Run the approved remote-write command.
 
-After PR/MR creation, use the local `state-update-suggestion.md` only to update
-local task state. Do not create another PR only to commit post-merge state
-metadata.
+Push and PR/MR creation are separate gates. Use `devctl git push` only after
+`Approved Action: git-push`; use `devctl git mr` only after separate
+`Approved Action: git-mr`. After PR/MR creation, devctl may create and push one
+metadata-only state backfill commit containing the PR number/URL. Do not create
+another PR only to commit post-merge state metadata.
 
 Use the user's language for Git-related public text: commit messages, remote
 Issue text, remote PR/MR text, review comments, and branch task summaries.

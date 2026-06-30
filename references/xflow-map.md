@@ -60,14 +60,13 @@ Run from the owning repository.
 ./devctl preflight
 ./devctl check current-task --issue <number>
 ./devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md
-./devctl attachment add --issue draft --file /path/to/screenshot.png --as image
+./devctl attachment add --issue draft --file /path/to/notes.txt --as file
 ./devctl attachment check --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json
-./devctl attachment publish --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json --backend github --body-file .xflow/issues/issue-draft/issue-draft.md
+./devctl attachment publish --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json --backend manual --url att-001=https://public.example/notes.txt --body-file .xflow/issues/issue-draft/issue-draft.md
 ./devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create
 ./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --labels "tdd,backend"
 ./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --no-local-review
-./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --attach-file /path/to/screenshot.png --upload-attachments github --no-local-review
 ./devctl issue list --state open --limit 20
 ./devctl issue show <number>
 ./devctl issue comment <number> --body-file .xflow/issues/issue-<number>/comment-draft.md
@@ -75,6 +74,9 @@ Run from the owning repository.
 ./devctl git start <slug> --issue <number>
 ./devctl git status
 ./devctl git commit-msg -a
+./devctl approval prepare --issue <number> --action git-push --file .xflow/issues/issue-<number>/walkthrough.md
+./devctl check local-review --issue <number> --file .xflow/issues/issue-<number>/walkthrough.md --action git-push
+./devctl git push --issue <number> --file .xflow/issues/issue-<number>/walkthrough.md
 ./devctl check mr-draft --issue <number>
 ./devctl approval prepare --issue <number> --action git-mr --file .xflow/issues/issue-<number>/mr-draft.md
 ./devctl check local-review --issue <number> --file .xflow/issues/issue-<number>/mr-draft.md --action git-mr
@@ -112,15 +114,16 @@ For issue/comment creation, choose a single path before running commands:
 
 - No attachments and user explicitly authorized unattended remote write:
   `devctl issue create "<title>" --body-file issue.md --no-local-review`.
-- Attachments and user explicitly authorized unattended GitHub upload:
-  `devctl issue create "<title>" --body-file issue.md --attach-file <file> --upload-attachments github --no-local-review`.
-- Attachments and normal human gate required: use `attachment add`,
-  `attachment publish --backend github`, `attachment render` when needed,
-  `approval prepare`, `check local-review`, then the final `issue create` or
-  `issue comment` command with `--attachments manifest.json`.
+- Issue/comment images or screenshots: do not upload and do not use GitHub
+  release assets. Keep local evidence and stop before remote write.
+- Non-image attachments and normal human gate required: use `attachment add`,
+  `attachment publish --backend manual` with an approved public URL,
+  `attachment render` when needed, `approval prepare`, `check local-review`,
+  then the final `issue create` or `issue comment` command with
+  `--attachments manifest.json`.
 
-Images are just attachments with image MIME types. Other files use the same
-`--attach-file` flag and render as normal Markdown links.
+Issue/comment image attachments are disabled. Other files may render as normal
+Markdown links after an approved URL is recorded.
 
 ## Current Task State
 
@@ -154,6 +157,12 @@ Rebase is allowed only when the user or project policy explicitly prefers it
 and the AI previews the strategy first. Push approval and MR/PR approval remain
 separate human gates.
 
+`devctl git push --issue <number>` only publishes the current task branch.
+`devctl git mr` must not push task code implicitly; it requires an upstream and
+no unpushed task commits. After PR/MR creation, devctl records the PR number
+and URL, creates a metadata-only state backfill commit, and pushes that commit
+to the same branch under the `git-mr` approval scope.
+
 ## Remote-Write Gate
 
 Core remote writes require local review of the exact file being published or
@@ -173,9 +182,10 @@ must be written to a file so shells do not reinterpret the content.
 
 If the body refers to pasted files, screenshots, or images, use
 `attachment-policy.md`. Local drafts may contain `xflow-attachment://`
-placeholders, but remote-published bodies must contain only reviewed public
-URLs. Do not publish `C:\...`, `/tmp/...`, `.xflow/...`, `file://...`, or WSL
-mount paths as attachment links.
+placeholders, but issue/comment images must not be published under the current
+policy. Remote-published bodies must contain only reviewed public URLs for
+approved non-image attachments. Do not publish `C:\...`, `/tmp/...`,
+`.xflow/...`, `file://...`, or WSL mount paths as attachment links.
 
 Remote-published body files must be public-facing Markdown. Use hidden
 `<!-- xflow: ... -->` anchors for machine checks, and do not include internal

@@ -52,8 +52,10 @@ This is a phase-selected reference index. If unsure which file applies, read
    or remote metadata changes before local human review approves the exact
    body/evidence file, unless the current user explicitly authorizes an
    unattended issue/comment command and devctl is invoked with
-   `--no-local-review` for that exact action. If attachments are present, also
-   use `--attach-file` and `--upload-attachments github`.
+   `--no-local-review` for that exact action. If issue/comment images or
+   screenshots are present, do not upload or publish them; keep them as local
+   evidence and stop until a supported GitHub issue-native attachment policy is
+   approved.
 4. Maintain `.xflow/current-task.md` for active tasks and run
    `devctl check current-task --issue <id>` before local approval, commit,
    push, MR/PR creation, and cleanup.
@@ -71,8 +73,9 @@ This is a phase-selected reference index. If unsure which file applies, read
    through inline command arguments.
 9. Do not publish local file paths or unresolved `xflow-attachment://`
    placeholders in remote Issues, comments, or PR/MR bodies. If a pasted file
-   or image is referenced, use `references/attachment-policy.md` and require a
-   reviewed attachment manifest before any remote write.
+   or image is referenced, use `references/attachment-policy.md`. Issue/comment
+   image attachments are currently disabled; never use GitHub release assets as
+   an issue/comment image store.
 10. Use the user's language for Git-related public text: commit messages,
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
@@ -104,9 +107,14 @@ This is a phase-selected reference index. If unsure which file applies, read
     `origin/<base>` into the task branch by default, resolve approved
     conflicts, rerun relevant checks, and record the target branch SHA plus
     sync result.
-13. Draft `.xflow/issues/issue-<id>/mr-draft.md`, run
+13. Prepare `Approved Action: git-push`, stop for human review, then run
+    `devctl git push --issue <id> --file .xflow/issues/issue-<id>/walkthrough.md`.
+14. Draft `.xflow/issues/issue-<id>/mr-draft.md`, run
     `devctl check mr-draft --issue <id>`, prepare `Approved Action: git-mr`,
     stop for human review, then run `devctl git mr --body-file ... --issue <id>`.
+    After PR/MR creation, devctl records the PR number/URL, creates a
+    metadata-only state backfill commit, and pushes that commit to the same
+    branch under the `git-mr` approval scope.
 
 ## Core Remote Write Review Gate
 
@@ -115,18 +123,20 @@ Core remote writes are:
 - `issue-create`
 - `issue-comment`
 - `issue-close`
+- `git-push`
 - `git-mr`
 - other remote metadata writes that publish or mutate remote state
 
 Before each remote write:
 
 - The exact file to be published or used as evidence must exist locally.
-- If the body references pasted files, screenshots, or images, the attachment
-  manifest must exist locally, all placeholders must resolve to reviewed
-  published URLs, and both the body hash and manifest hash must be approved.
+- If the body references pasted files, screenshots, or images, read
+  `references/attachment-policy.md` before any remote write. Issue/comment
+  image attachments are disabled and must stay local as evidence; non-image
+  attachments require a reviewed manifest and approved public URL plan.
 - If the current user explicitly requests no-human issue/comment handling, use
-  devctl's unattended flow. When attachments are present, the generated final
-  body and manifest must still be written locally as evidence.
+  devctl's unattended flow only for the exact no-attachment command or a
+  supported non-image path. Image attachments still fail closed.
 - `devctl approval prepare` should prefill the action, path, timestamp, and
   SHA256.
 - The human reviewer only needs to make a judgement and set `Approved: yes`.
