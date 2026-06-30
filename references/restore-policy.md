@@ -9,7 +9,7 @@ Enter restore instead of init when any of these are true:
 - `.xflow/xflow.json` exists.
 - The user says they changed computers or recloned a repository.
 - `AGENTS.md` exists but local `devctl.ps1`, `devctl`, or `.xflow/devctl` is missing.
-- `.gitmodules` contains `.xflow/sources/xflow-skills` or `.xflow/sources/xflow-devctl`.
+- `.gitmodules` contains `.xflow/ops/devctl` or `.xflow/ops/workflow`.
 
 ## Authority
 

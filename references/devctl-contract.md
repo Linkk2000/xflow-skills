@@ -16,8 +16,8 @@ Search anchor: Windows validation must not invoke bare `bash`.
 
 - XFlow Skill source: `git@github.com:Linkk2000/xflow-skills.git`
 - devctl source: `git@github.com:Linkk2000/xflow-devctl.git`
-- Project skill source path: `.xflow/sources/xflow-skills`
-- Project devctl source path: `.xflow/sources/xflow-devctl`
+- Project skill/workflow source path: `.xflow/ops/workflow`
+- Project devctl source path: `.xflow/ops/devctl`
 - `XFLOW_ENV_FILE`: optional unified env file.
 - `GITEE_ENV_FILE`: defaults to `~/gitee.env.local`.
 - `GITHUB_TOKEN`: GitHub token from environment or env file.

@@ -30,7 +30,7 @@ The agent executes the required local commands. Do not answer by making the user
 
 Before first-time bootstrap, ask the user to choose the XFlow source strategy when it is not already clear:
 
-1. Project-bound git submodules under `.xflow/sources/` on main branch.
+1. Project-bound git submodules under `.xflow/ops/` on main branch.
 2. Project-bound git submodules on a specific branch for skill and/or devctl.
 3. Project-bound git submodules pinned to a specific tag or commit.
 
@@ -87,8 +87,8 @@ After bootstrap, the project should contain:
 
 The project should also contain:
 
-- `.xflow/sources/xflow-skills`
-- `.xflow/sources/xflow-devctl`
+- `.xflow/ops/devctl`
+- `.xflow/ops/workflow`
 - `.gitmodules`
 
 The agent is responsible for adding or validating those submodules during

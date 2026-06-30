@@ -11,8 +11,8 @@ Use this when deciding which XFlow Skill or devctl version controls a repository
 Project submodules are the runtime source of truth. New and restored projects
 should bind XFlow under the repository, normally:
 
-- `.xflow/sources/xflow-skills`
-- `.xflow/sources/xflow-devctl`
+- `.xflow/ops/devctl`
+- `.xflow/ops/workflow`
 
 Developer checkouts such as `%USERPROFILE%\.codex\xflow\repos\...` are
 maintenance workspaces only. They are not a runtime fallback for user projects
@@ -24,7 +24,7 @@ Apply sources in this order:
 
 1. Current user instruction for this task.
 2. Project `.xflow/xflow.json` source/ref/mode/path.
-3. Project-bound git submodules under `.xflow/sources/`.
+3. Project-bound git submodules under `.xflow/ops/`.
 4. Project `AGENTS.md`.
 5. Repository-local wrappers such as `devctl.ps1`, `devctl`, and `.xflow/devctl`.
 6. Agent defaults.
@@ -44,13 +44,13 @@ Recommended `.xflow/xflow.json` shape:
     "source": "git@github.com:Linkk2000/xflow-skills.git",
     "ref": "main",
     "mode": "submodule",
-    "path": ".xflow/sources/xflow-skills"
+    "path": ".xflow/ops/workflow"
   },
   "devctl": {
     "source": "git@github.com:Linkk2000/xflow-devctl.git",
     "ref": "main",
     "mode": "submodule",
-    "path": ".xflow/sources/xflow-devctl"
+    "path": ".xflow/ops/devctl"
   },
   "humanGated": true
 }
