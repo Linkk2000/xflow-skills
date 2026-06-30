@@ -7,14 +7,14 @@ Use this when the target repository is empty or does not contain project-level X
 - XFlow Skill source: `git@github.com:Linkk2000/xflow-skills.git`
 - devctl source: `git@github.com:Linkk2000/xflow-devctl.git`
 
-Default local cache locations:
+Submodule mode is the default. Bootstrap should bind XFlow inside the target
+repository rather than relying on a user-level installed skill or PATH devctl.
+Developer checkouts may exist for maintaining XFlow itself, but they are not
+normal runtime sources for user projects.
 
-- Windows: `%USERPROFILE%\.codex\xflow\repos\xflow-skills`
-- Windows: `%USERPROFILE%\.codex\xflow\repos\xflow-devctl`
-- POSIX: `~/.codex/xflow/repos/xflow-skills`
-- POSIX: `~/.codex/xflow/repos/xflow-devctl`
-
-If local copies are already available, prefer them over network fetches. If a default local copy is missing, the agent may clone the canonical source into the default cache path. If neither the local copy nor the network source is available, stop and ask the user where to obtain XFlow.
+If the network source is unavailable and no project-bound copy exists, stop and
+ask the user where to obtain XFlow. Do not silently use a global installed
+Skill or global devctl entrypoint.
 
 ## Natural Language Entry
 
@@ -30,12 +30,13 @@ The agent executes the required local commands. Do not answer by making the user
 
 Before first-time bootstrap, ask the user to choose the XFlow source strategy when it is not already clear:
 
-1. Default cache on main branch.
-2. Specific branch for skill and/or devctl.
-3. Specific tag or commit for skill and/or devctl.
-4. Project-bound git submodules under `.xflow/sources/`.
+1. Project-bound git submodules under `.xflow/sources/` on main branch.
+2. Project-bound git submodules on a specific branch for skill and/or devctl.
+3. Project-bound git submodules pinned to a specific tag or commit.
 
-The global default is the main branch. A project may override it by recording source, ref, mode, and path in `.xflow/xflow.json` or by using git submodules.
+The project default is submodule mode on the main branch. A project may record
+source, ref, mode, and path in `.xflow/xflow.json`; that project binding is the
+authority for future restore.
 
 ## Bootstrap Trigger
 
@@ -84,13 +85,15 @@ After bootstrap, the project should contain:
 - `.xflow/config.env.example`
 - local `devctl.ps1` and `devctl` entrypoints
 
-If submodule mode is selected, the project should also contain:
+The project should also contain:
 
 - `.xflow/sources/xflow-skills`
 - `.xflow/sources/xflow-devctl`
 - `.gitmodules`
 
-The agent is responsible for adding or validating those submodules during bootstrap. Do not ask the user to run the submodule commands manually unless the current environment cannot execute Git commands.
+The agent is responsible for adding or validating those submodules during
+bootstrap. Do not ask the user to run the submodule commands manually unless
+the current environment cannot execute Git commands.
 
 ## Post-Bootstrap Stop
 

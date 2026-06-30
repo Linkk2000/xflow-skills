@@ -2,11 +2,13 @@
 
 ## Entrypoints
 
-- Windows: `devctl.ps1`
-- POSIX: `devctl`
+- Windows: repository-local `.\devctl.ps1`
+- POSIX: repository-local `./devctl`
 - Both entrypoints must route normal XFlow commands to `python -m xflow`.
   POSIX shell scripts may remain only as compatibility helpers. Windows
   validation must not invoke bare `bash`, Git Bash, or WSL.
+- No global devctl entrypoint is required. Do not rely on a user-level
+  `%USERPROFILE%\.codex\xflow\bin\devctl.ps1` or PATH shim for repository work.
 
 Search anchor: Windows validation must not invoke bare `bash`.
 
@@ -14,8 +16,8 @@ Search anchor: Windows validation must not invoke bare `bash`.
 
 - XFlow Skill source: `git@github.com:Linkk2000/xflow-skills.git`
 - devctl source: `git@github.com:Linkk2000/xflow-devctl.git`
-- Windows global source root: `%USERPROFILE%\.codex\xflow\repos`
-- POSIX global source root: `~/.codex/xflow/repos`
+- Project skill source path: `.xflow/sources/xflow-skills`
+- Project devctl source path: `.xflow/sources/xflow-devctl`
 - `XFLOW_ENV_FILE`: optional unified env file.
 - `GITEE_ENV_FILE`: defaults to `~/gitee.env.local`.
 - `GITHUB_TOKEN`: GitHub token from environment or env file.

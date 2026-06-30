@@ -16,8 +16,8 @@ as `academic`, not here.
 2. Read repository-local rules first: `AGENTS.md`, `.cursorrules`,
    `CLAUDE.md`, `GEMINI.md`, `README.md`, and `.xflow/current-task.md` when
    present.
-3. Apply precedence: current user instruction > nearest project rule > global
-   XFlow skill > agent defaults.
+3. Apply precedence: current user instruction > nearest project rule >
+   project-bound XFlow submodule/config > agent defaults.
 4. Stop and ask the user before irreversible action if rules conflict.
 5. On Windows prefer `devctl.ps1`; do not use PowerShell-to-WSL-to-Bash chains
    for normal XFlow commands.
@@ -30,7 +30,7 @@ This is a phase-selected reference index. If unsure which file applies, read
 - Start or unsure: `references/xflow-map.md`
 - Empty repository or missing local workflow files: `references/bootstrap-policy.md`
 - Existing XFlow repository on a new machine: `references/restore-policy.md`
-- XFlow source, ref, submodule, and global-vs-project precedence: `references/source-resolution.md`
+- XFlow source, ref, submodule, and project binding precedence: `references/source-resolution.md`
 - Phase order and human gates: `references/workflow-state-machine.md`
 - Rule precedence and project overrides: `references/priority-and-overrides.md`
 - Issue creation and comments: `references/issue-policy.md`
@@ -48,6 +48,8 @@ This is a phase-selected reference index. If unsure which file applies, read
 2. Treat `devctl` / `devctl.ps1` as the only supported workflow entrypoints.
    They may route to `python -m xflow`, but AI assistants must not import
    provider modules directly or call GitHub/Gitee APIs outside devctl.
+   Do not use a globally installed XFlow Skill or user-level devctl PATH shim
+   as a runtime fallback for project repositories.
 3. Do not create remote Issues, comments, PRs/MRs, pushes, branch publication,
    or remote metadata changes before local human review approves the exact
    body/evidence file, unless the current user explicitly authorizes an

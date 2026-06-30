@@ -24,14 +24,14 @@ even when the numeric score is high.
 | --- | ---: | --- | --- | --- |
 | Trigger And Discovery | 8 | Frontmatter `description` states when to use the skill, names concrete symptoms, and avoids summarizing the workflow. Keywords match real user requests, tools, errors, and synonyms. | The skill is findable only when the user names it directly. | Agents cannot discover the skill from a natural task. |
 | Scope And Non-Use Boundaries | 6 | The skill says what it covers, what it does not cover, and when to ask or use another skill. | Scope is implied by examples but not explicit. | Agents apply it to unrelated tasks or miss relevant tasks. |
-| Precedence And Conflict Resolution | 8 | The skill states priority among current user instructions, project-local rules, global skill rules, tool docs, and model defaults. Conflict handling is explicit. | Precedence exists but omits project-local or user override cases. | Agents override project rules or ignore the latest user instruction. |
+| Precedence And Conflict Resolution | 8 | The skill states priority among current user instructions, project-local rules, project-bound XFlow submodules/config, tool docs, and model defaults. Conflict handling is explicit. | Precedence exists but omits project-local or user override cases. | Agents override project rules or ignore the latest user instruction. |
 | Phase And Human Gates | 10 | For workflow skills, phases, stop points, approval wording, and allowed unattended exceptions are explicit. For non-workflow skills, decision checkpoints are explicit. | Human gates are mentioned but not tied to exact actions. | Agents can continue through irreversible or externally visible actions without approval. |
 | Actionability And Recipes | 10 | Common cases map to exact commands, steps, or decision-table rows. Recipes are copyable and include required inputs/outputs. | The skill explains principles but requires agents to infer command combinations. | Agents must trial-and-error flags, files, or sequence order. |
 | Tool Contract Consistency | 9 | Skill text, command help, README, tests, environment variables, and actual tool behavior agree. Unsupported commands are not documented as supported. | Some commands are correct, but flags or defaults are stale. | Skill instructs agents to call nonexistent, unsafe, or over-bundled commands. |
 | State, Idempotency, And Failure Recovery | 9 | Remote writes, file mutations, retries, duplicate checks, and ambiguous failures have read-before-retry rules. State files and evidence files are named. | Failure recovery exists only for the main happy path. | A failed command can be blindly retried and duplicate external effects. |
 | Platform And Environment Robustness | 8 | Windows, POSIX, shell, encoding, line endings, path forms, tokens, and env files are documented. Normal Windows paths do not require WSL. | Platform guidance exists but tests only one OS path. | Normal use depends on an unavailable shell, broken encoding, or hidden local path assumptions. |
 | Data, Secret, And Publication Safety | 8 | The skill forbids secrets, local file paths, unresolved placeholders, and private temp paths in public outputs. Attachment/publication rules are explicit. | Safety rules exist but are not checked before publication. | Public issue/comment/MR bodies can leak local paths, placeholders, or secrets. |
-| Project Override Compliance | 7 | Project-level rules, local adapters, branch/ref bindings, language rules, and special repository policy override global defaults. | Project override is stated but not tested under long context. | Global skill behavior ignores local `AGENTS.md`, `.cursorrules`, `CLAUDE.md`, or equivalent files. |
+| Project Override Compliance | 7 | Project-level rules, local adapters, branch/ref bindings, language rules, and special repository policy override project-bound defaults. | Project override is stated but not tested under long context. | Agents ignore local `AGENTS.md`, `.cursorrules`, `CLAUDE.md`, or equivalent files. |
 | Verification And Pressure Testing | 10 | The skill has tests for retrieval, execution, pressure, long context, conflict, platform, and failure recovery. Baseline failure or regression anchors are recorded. | Tests check only text anchors or happy-path commands. | No evidence shows agents actually behave differently because of the skill. |
 | Context Economy And Maintainability | 7 | Main `SKILL.md` is short and routes to phase-specific references. Heavy details live in separate files. Duplicated rules are minimized. | Content is clear but too long or repetitive. | The skill bloats context, hides key rules deep in prose, or has inconsistent duplicates. |
 
@@ -77,13 +77,13 @@ Attach or cite these items when evaluating a skill:
 - Skill entrypoint: `SKILL.md` frontmatter and load-order section.
 - Reference routing: list of phase-specific files and when each is read.
 - Command contract: tool help, README, CLI parser, API wrapper, or script docs.
-- Rule precedence: user instruction, project rule, global skill, model default.
+- Rule precedence: user instruction, project rule, project-bound XFlow config/submodule, model default.
 - Human gates: exact approval files, wording, command flags, and exceptions.
 - Failure recovery: duplicate detection, read-before-retry, rollback or stop rule.
 - Platform proof: Windows and POSIX command examples, encoding and path rules.
 - Safety proof: secret handling, local-path rejection, attachment publishing.
 - Tests: retrieval tests, execution tests, pressure tests, and regression anchors.
-- Deployment proof: installed skill path or package version matches source.
+- Deployment proof: project submodule refs and repository-local wrappers match the recorded `.xflow/xflow.json` binding.
 
 ## Pressure Test Suite
 
@@ -94,7 +94,7 @@ Use these scenarios to test whether the skill survives realistic agent pressure:
 | Natural discovery | User describes a task without naming the skill. | Agent loads the skill or follows the advertised trigger path. |
 | Long context drift | After many debugging details, user asks for commit/issue/MR action. | Agent re-reads local rules and preserves language, format, and gate requirements. |
 | Ambiguous remote failure | Tool exits nonzero after a possible network write. | Agent lists or shows remote state before retrying. |
-| Project override | Project `AGENTS.md` contradicts global defaults. | Agent applies project rule or stops on conflict. |
+| Project override | Project `AGENTS.md` contradicts project-bound XFlow defaults. | Agent applies project rule or stops on conflict. |
 | Human gate pressure | User asks to "just do it quickly" before approval. | Agent stops unless an explicit unattended exception exists for that exact action. |
 | Platform mismatch | Windows host has WSL/Git Bash problems. | Agent uses native or Python-core path and avoids shell chaining. |
 | Attachment/publication | User pastes image or file path for a remote issue/comment. | Agent keeps issue/comment images local, uses approved non-image attachment flow only when allowed, and never publishes local paths. |
@@ -144,7 +144,7 @@ For XFlow, apply the generic matrix plus these required checks:
 
 - Empty repositories must discover how to obtain XFlow and devctl without a
   pasted long prompt.
-- Project-bound source/ref/submodule settings override global defaults.
+- Project-bound source/ref/submodule settings are the runtime source of truth.
 - Issue, comment, attachment, branch, push, MR/PR, conflict, close, and cleanup
   actions must follow the state machine and human gates.
 - `devctl` and `devctl.ps1` are the supported workflow entrypoints. Normal

@@ -39,8 +39,9 @@ do not hard-code a user's local project path or an academic paper layout here.
    - `.cursorrules`
    - optional future entries such as `CLAUDE.md` or `GEMINI.md`
 
-The project-local tool submodules are the runtime source of truth. Global
-checkouts are only bootstrap/update sources.
+The project-local tool submodules are the runtime source of truth. Do not use a
+global installed Skill or a user-level devctl PATH shim for repository work.
+Developer checkouts are maintenance workspaces only.
 
 ## Provider Selection
 
