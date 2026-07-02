@@ -132,6 +132,47 @@ pushes that commit to the same branch under the `git-mr` approval scope. It
 must not create a second PR only to record metadata after the original PR has
 merged.
 
+## subtask-001/README.md
+
+Use this shape when a large issue needs local subtasks. Store each subtask
+under `.xflow/issues/issue-<id>/subtask-001/`, `subtask-002/`, and so on.
+This is local repository evidence only; it does not create GitHub/Gitee
+sub-issues.
+
+```markdown
+# Subtask <001>
+
+## Source
+- <issue directory file such as walkthrough.md, mr-draft.md, comment-draft.md>
+
+## Purpose
+<why this subtask exists>
+
+## Implementation Plan
+- [ ] <planned local step>
+
+## Evidence
+- [local evidence](evidence/<small-file-or-image>)
+
+## AI Review Checkpoints
+- [ ] <AI self-check before handoff>
+
+## Human Review Checkpoints
+- [ ] <human review point>
+
+## Conclusion
+<success|blocked|superseded-by-human>: <reason and final state>
+```
+
+Run:
+
+```bash
+devctl check subtask --issue <id> --path .xflow/issues/issue-<id>/subtask-001
+```
+
+Subtask evidence belongs under `subtask-001/evidence/` and must stay in the
+repository, not in COS/OSS or any object storage backend.
+
 ## approvals/local-review.md
 
 `approvals/local-review.md` is the active local approval file. It binds one

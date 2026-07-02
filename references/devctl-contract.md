@@ -59,6 +59,9 @@ Search anchor: Windows validation must not invoke bare `bash`.
 - `devctl check encoding`: check UTF-8/LF and shell syntax health.
 - `devctl check commit-msg`: validate commit message against project rules.
 - `devctl check branch-scope`: validate current branch is issue-bound.
+- `devctl check subtask --issue <id> [--path .xflow/issues/issue-<id>/subtask-001]`:
+  validate local subtask directory naming, README sections, source file, local
+  evidence links, and conclusion status.
 - `devctl issue create --attachments <manifest>`: create issue only after the
   body file and attachment manifest have both passed review and all attachment
   placeholders have been replaced with approved published URLs. Image MIME
@@ -120,6 +123,16 @@ devctl approval prepare --issue <number> --action git-push --file .xflow/issues/
 devctl check local-review --issue <number> --file .xflow/issues/issue-<number>/walkthrough.md --action git-push
 devctl git push --issue <number> --file .xflow/issues/issue-<number>/walkthrough.md
 ```
+
+Local subtask check:
+
+```text
+devctl check subtask --issue <number> --path .xflow/issues/issue-<number>/subtask-001
+```
+
+Subtask evidence must stay in the repository under the current subtask's
+`evidence/` directory. Do not store subtask evidence in COS/OSS or object
+storage; object storage is only for rendered remote issue/comment/PR bodies.
 
 Approved MR/PR creation:
 

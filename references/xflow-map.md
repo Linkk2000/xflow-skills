@@ -60,6 +60,7 @@ Run from the owning repository.
 ./devctl help
 ./devctl preflight
 ./devctl check current-task --issue <number>
+./devctl check subtask --issue <number> --path .xflow/issues/issue-<number>/subtask-001
 ./devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl attachment add --issue draft --file /path/to/notes.txt --as file
 ./devctl attachment check --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json
@@ -133,6 +134,24 @@ For issue/comment creation, choose a single path before running commands:
 Issue/comment image attachments are disabled unless the manifest shows an
 approved object storage backend such as `aliyun-oss`. Other files may render as
 normal Markdown links after an approved URL is recorded.
+
+## Local Subtasks
+
+Large issues may be split into local subtask directories:
+
+```text
+.xflow/issues/issue-<id>/subtask-001/README.md
+.xflow/issues/issue-<id>/subtask-001/evidence/
+```
+
+Each README records Source, Purpose, Implementation Plan, Evidence, AI Review
+Checkpoints, Human Review Checkpoints, and Conclusion. Run
+`devctl check subtask --issue <id> --path .xflow/issues/issue-<id>/subtask-001`
+before using the subtask as workflow evidence.
+
+Subtask evidence must stay in the repository under `subtask-001/evidence/`.
+Do not upload subtask evidence to COS/OSS or object storage. Object storage is
+only for rendered remote issue/comment/PR bodies.
 
 ## Current Task State
 

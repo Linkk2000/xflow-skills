@@ -43,6 +43,12 @@ Copy or register the artifact locally before drafting the remote body. The
 manifest is the review target; it lets the human see exactly what will be
 published and where.
 
+Subtask evidence must stay in the repository. Store subtask screenshots, small
+files, logs, and local proof under
+`.xflow/issues/issue-<id>/subtask-001/evidence/`, not in COS/OSS or any object
+storage backend. Object storage is only for rendered GitHub/Gitee issue,
+comment, or PR/MR bodies.
+
 ## Manifest Shape
 
 ```json

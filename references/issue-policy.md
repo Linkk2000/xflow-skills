@@ -22,6 +22,10 @@
 - If there are no attachments, `devctl issue create ... --no-local-review`
   remains valid when the current user explicitly authorized unattended issue
   creation for that exact command.
+- If an issue is too large, create local subtasks under
+  `.xflow/issues/issue-<id>/subtask-001/` and run
+  `devctl check subtask --issue <id>`. Subtask evidence must stay in the
+  repository and must not be uploaded to COS/OSS.
 - Do not publish local file paths, chat-client temp paths, `.xflow/` paths, or
   unresolved `xflow-attachment://` placeholders in remote bodies.
 - Before creating, check for an open issue with the same exact title.

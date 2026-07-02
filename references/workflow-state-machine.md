@@ -57,6 +57,8 @@ and pushes that commit to the same branch. This post-MR push is part of the
   task branch before implementation starts.
 - `G3_APPROVE_RESULT`: human reviews local evidence, test results, scope, and
   generated artifacts before commit or remote publication.
+  If a large issue was split into subtasks, each subtask README and
+  repository-local evidence directory must be ready for review.
 - `G4_APPROVE_REMOTE_WRITE`: human approves the exact evidence file before
   `devctl git push`. If the body contains attachment-derived links, the
   approval also covers the attachment manifest hash.

@@ -79,10 +79,15 @@ This is a phase-selected reference index. If unsure which file applies, read
    image attachments are currently disabled unless an approved object storage
    backend published reviewed URLs; never use GitHub release assets as an
    issue/comment image store.
-10. Use the user's language for Git-related public text: commit messages,
+10. Large issues may be split into local subtask directories named
+    `.xflow/issues/issue-<id>/subtask-001`, `subtask-002`, and so on. Each
+    subtask needs `README.md` and must pass `devctl check subtask --issue <id>`.
+    Subtask evidence must stay under that subtask's `evidence/` directory in
+    the repository; do not store it in COS/OSS or any object storage backend.
+11. Use the user's language for Git-related public text: commit messages,
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
-11. Do not add AI-client co-author trailers. In particular, never add
+12. Do not add AI-client co-author trailers. In particular, never add
     `Co-authored-by: Cursor <cursoragent@cursor.com>`.
 
 ## Required Flow
@@ -104,6 +109,9 @@ This is a phase-selected reference index. If unsure which file applies, read
 9. Follow TDD: write or identify a failing test/check first, then implement the
    smallest change to pass it.
 10. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
+    If the issue is too large, create `.xflow/issues/issue-<id>/subtask-001/`
+    style local subtasks and record their plans, evidence, review checkpoints,
+    and conclusions in each subtask README.
 11. Before commit, push, PR/MR creation, or cleanup, run
     `devctl check current-task --issue <id>`.
 12. Before requesting MR/PR approval, fetch the target branch, merge
@@ -153,6 +161,8 @@ Before each remote write:
 - Issue draft: `.xflow/issues/issue-draft/issue-draft.md`
 - Issue comment draft: `.xflow/issues/issue-<id>/comment-draft.md`
 - Attachment manifest: `.xflow/issues/issue-<id>/attachments/manifest.json`
+- Local subtask: `.xflow/issues/issue-<id>/subtask-001/README.md`
+- Local subtask evidence: `.xflow/issues/issue-<id>/subtask-001/evidence/`
 - MR/PR draft: `.xflow/issues/issue-<id>/mr-draft.md`
 - Walkthrough/evidence: `.xflow/issues/issue-<id>/walkthrough.md`
 - Active local approval: `.xflow/issues/issue-<id>/approvals/local-review.md`

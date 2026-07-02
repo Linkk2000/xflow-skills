@@ -156,3 +156,6 @@ For XFlow, apply the generic matrix plus these required checks:
 - Remote issue/comment bodies must not use GitHub release assets as an image
   store; image attachments remain local unless an approved object storage
   backend such as `aliyun-oss` has published reviewed public URLs.
+- Large-issue subtasks must use `subtask-001` style local directories, include
+  checked README files, and keep subtask evidence under each subtask's
+  `evidence/` directory in the repository rather than COS/OSS.
