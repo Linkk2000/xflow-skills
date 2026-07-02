@@ -154,5 +154,5 @@ For XFlow, apply the generic matrix plus these required checks:
 - Remote issue/comment/MR bodies must not publish local attachment paths or
   unresolved `xflow-attachment://` placeholders.
 - Remote issue/comment bodies must not use GitHub release assets as an image
-  store; image attachments remain local until an approved issue-native policy
-  exists.
+  store; image attachments remain local unless an approved object storage
+  backend such as `aliyun-oss` has published reviewed public URLs.

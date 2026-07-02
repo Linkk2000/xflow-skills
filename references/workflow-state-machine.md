@@ -51,7 +51,8 @@ and pushes that commit to the same branch. This post-MR push is part of the
 - `G1_APPROVE_ISSUE_CREATE`: human approves the issue body before remote issue
   creation. If approved non-image attachments are referenced, the human also
   approves the attachment manifest and rendered public URLs. Issue/comment
-  images cannot be approved for remote upload under the current policy.
+  images require an approved object storage backend such as `aliyun-oss`;
+  otherwise they remain local evidence.
 - `G2_APPROVE_DEVELOPMENT_START`: human accepts the created issue and intended
   task branch before implementation starts.
 - `G3_APPROVE_RESULT`: human reviews local evidence, test results, scope, and

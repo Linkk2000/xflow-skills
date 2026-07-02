@@ -28,6 +28,14 @@ Search anchor: Windows validation must not invoke bare `bash`.
   or explicit `XFLOW_ENV_FILE` for project-specific overrides.
 - `GITHUB_API_BASE`: optional GitHub API base override.
 - `GITEE_API_BASE`: optional Gitee v5 API base override; default is `https://gitee.com/api/v5`.
+- `XFLOW_ATTACHMENT_BACKEND`: optional attachment backend selector; use
+  `aliyun-oss` for the shared object storage backend.
+- `ALIYUN_OSS_BUCKET`, `ALIYUN_OSS_REGION`, `ALIYUN_OSS_ACCESS_KEY_ID`,
+  `ALIYUN_OSS_ACCESS_KEY_SECRET`: Aliyun OSS upload config. Store shared values
+  in `%USERPROFILE%\.xflow\env.local` on Windows or `~/.xflow/env.local` on
+  POSIX; store project overrides in `.xflow/local/env.local`.
+- `ALIYUN_OSS_ENDPOINT`, `ALIYUN_OSS_PUBLIC_BASE_URL`, `ALIYUN_OSS_PREFIX`:
+  optional Aliyun OSS endpoint, public URL, and object key prefix.
 - `DEVCTL_REPO_ROOT`: target repository root.
 - `DEVCTL_TOOL_ROOT`: devctl installation root.
 - `DEVCTL_BASE_BRANCH`: default base branch, otherwise auto-detect `master` then `main`.
@@ -53,8 +61,9 @@ Search anchor: Windows validation must not invoke bare `bash`.
 - `devctl check branch-scope`: validate current branch is issue-bound.
 - `devctl issue create --attachments <manifest>`: create issue only after the
   body file and attachment manifest have both passed review and all attachment
-  non-image placeholders have been replaced with approved published URLs.
-  Image MIME types or Markdown image attachments fail before remote writes.
+  placeholders have been replaced with approved published URLs. Image MIME
+  types or Markdown image attachments require an approved object storage
+  backend such as `aliyun-oss`; otherwise they fail before remote writes.
 - `devctl issue create --attach-file <path> --upload-attachments github`:
   legacy generic-file path. It must not be used for images or screenshots;
   issue creation rejects image attachments before any GitHub issue or release
@@ -64,7 +73,8 @@ Search anchor: Windows validation must not invoke bare `bash`.
   command.
 - `devctl issue comment --attachments <manifest>`: comment only after the body
   file and attachment manifest have both passed review. Image MIME types or
-  Markdown image attachments fail before remote writes.
+  Markdown image attachments require an approved object storage backend such as
+  `aliyun-oss`; otherwise they fail before remote writes.
 - `devctl issue comment --attach-file <path> --upload-attachments github`:
   legacy generic-file path. It must not be used for images or screenshots.
 - `devctl issue comment --no-local-review`: comment without attachments when
@@ -78,6 +88,10 @@ Search anchor: Windows validation must not invoke bare `bash`.
   On GitHub, `--backend github` uses the legacy `xflow-attachments` release by
   default and records each asset's GitHub `browser_download_url`. It rejects
   image attachments; do not use that backend as an issue/comment image store.
+  With `--backend aliyun-oss`, devctl uploads manifest files to Aliyun OSS using
+  env-file credentials and records `backend`, `provider`, `bucket`,
+  `objectKey`, and `publishedUrl`. AccessKey values must not be written to
+  manifests.
 - `devctl attachment render`: render a final body file by replacing reviewed
   attachment placeholders with published URLs.
 
@@ -129,10 +143,23 @@ devctl check local-review --issue draft --file issue.final.md --action issue-cre
 devctl issue create "<title>" --body-file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
 ```
 
-Issue/comment image attachments are disabled. Do not use GitHub release assets
-as an issue image store. `--attach-file` with an image MIME type or Markdown
-image attachment fails before issue/comment remote writes. Non-image files use
-normal Markdown links after an approved URL is recorded. `GITHUB_TOKEN` is
+Reviewed Aliyun OSS image issue:
+
+```text
+devctl attachment add --issue draft --file screenshot.png --as image
+devctl attachment publish --issue draft --backend aliyun-oss --manifest .xflow/issues/issue-draft/attachments/manifest.json
+devctl attachment render --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json --input issue.md --output issue.final.md
+devctl approval prepare --issue draft --action issue-create --file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
+devctl check local-review --issue draft --file issue.final.md --action issue-create --attachments .xflow/issues/issue-draft/attachments/manifest.json
+devctl issue create "<title>" --body-file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
+```
+
+Issue/comment image attachments are disabled unless the manifest shows an
+approved object storage backend such as `aliyun-oss`. Do not use GitHub release
+assets as an issue image store. `--attach-file` with an image MIME type or
+Markdown image attachment fails before issue/comment remote writes unless the
+image was first published through the approved attachment flow. Non-image files
+use normal Markdown links after an approved URL is recorded. `GITHUB_TOKEN` is
 required for GitHub issue/comment remote writes.
 If there are no attachments, omit all attachment flags.
 

@@ -55,9 +55,9 @@ This is a phase-selected reference index. If unsure which file applies, read
    body/evidence file, unless the current user explicitly authorizes an
    unattended issue/comment command and devctl is invoked with
    `--no-local-review` for that exact action. If issue/comment images or
-   screenshots are present, do not upload or publish them; keep them as local
-   evidence and stop until a supported GitHub issue-native attachment policy is
-   approved.
+   screenshots are present, publish them only through an approved object
+   storage backend such as `aliyun-oss`; otherwise keep them as local evidence
+   and stop.
 4. Maintain `.xflow/current-task.md` for active tasks and run
    `devctl check current-task --issue <id>` before local approval, commit,
    push, MR/PR creation, and cleanup.
@@ -76,8 +76,9 @@ This is a phase-selected reference index. If unsure which file applies, read
 9. Do not publish local file paths or unresolved `xflow-attachment://`
    placeholders in remote Issues, comments, or PR/MR bodies. If a pasted file
    or image is referenced, use `references/attachment-policy.md`. Issue/comment
-   image attachments are currently disabled; never use GitHub release assets as
-   an issue/comment image store.
+   image attachments are currently disabled unless an approved object storage
+   backend published reviewed URLs; never use GitHub release assets as an
+   issue/comment image store.
 10. Use the user's language for Git-related public text: commit messages,
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
@@ -134,11 +135,13 @@ Before each remote write:
 - The exact file to be published or used as evidence must exist locally.
 - If the body references pasted files, screenshots, or images, read
   `references/attachment-policy.md` before any remote write. Issue/comment
-  image attachments are disabled and must stay local as evidence; non-image
-  attachments require a reviewed manifest and approved public URL plan.
+  image attachments require an approved object storage backend such as
+  `aliyun-oss`; otherwise they must stay local as evidence. Other attachments
+  require a reviewed manifest and approved public URL plan.
 - If the current user explicitly requests no-human issue/comment handling, use
   devctl's unattended flow only for the exact no-attachment command or a
-  supported non-image path. Image attachments still fail closed.
+  supported attachment path. Image attachments still fail closed unless the
+  approved object storage flow has already produced reviewed public URLs.
 - `devctl approval prepare` should prefill the action, path, timestamp, and
   SHA256.
 - The human reviewer only needs to make a judgement and set `Approved: yes`.
@@ -188,11 +191,19 @@ contain values such as:
 ```text
 GITHUB_TOKEN=...
 GITEE_TOKEN=...
+ALIYUN_OSS_BUCKET=...
+ALIYUN_OSS_REGION=...
+ALIYUN_OSS_ACCESS_KEY_ID=...
+ALIYUN_OSS_ACCESS_KEY_SECRET=...
 ```
 
 `~/gitee.env.local` is a legacy compatibility path. `XFLOW_ENV_FILE` may point
 to an explicit env file for a single run. Never print token values; preflight
 may only print whether a token is `SET` or `UNSET`.
+
+Object storage credentials are runtime secrets. Do not write
+`ALIYUN_OSS_ACCESS_KEY_SECRET` or other credentials into manifests, issues,
+comments, commits, or Markdown guides.
 
 Do not put `XFLOW_PLATFORM` in user-level `~/.xflow/env.local` when working
 across both GitHub and Gitee projects. Let devctl infer the platform from the

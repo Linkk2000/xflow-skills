@@ -64,6 +64,7 @@ Run from the owning repository.
 ./devctl attachment add --issue draft --file /path/to/notes.txt --as file
 ./devctl attachment check --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json
 ./devctl attachment publish --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json --backend manual --url att-001=https://public.example/notes.txt --body-file .xflow/issues/issue-draft/issue-draft.md
+./devctl attachment publish --issue draft --backend aliyun-oss --manifest .xflow/issues/issue-draft/attachments/manifest.json
 ./devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create
 ./devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md --labels "tdd,backend"
@@ -115,16 +116,23 @@ For issue/comment creation, choose a single path before running commands:
 
 - No attachments and user explicitly authorized unattended remote write:
   `devctl issue create "<title>" --body-file issue.md --no-local-review`.
-- Issue/comment images or screenshots: do not upload and do not use GitHub
-  release assets. Keep local evidence and stop before remote write.
+- Issue/comment images or screenshots without an approved object storage
+  backend: do not upload and do not use GitHub release assets. Keep local
+  evidence and stop before remote write.
+- Issue/comment images or screenshots with approved Aliyun OSS config: use
+  `attachment add --as image`, `attachment publish --backend aliyun-oss`,
+  `attachment render`, `approval prepare`, `check local-review`, then the
+  final `issue create` or `issue comment` command with
+  `--attachments manifest.json`.
 - Non-image attachments and normal human gate required: use `attachment add`,
   `attachment publish --backend manual` with an approved public URL,
   `attachment render` when needed, `approval prepare`, `check local-review`,
   then the final `issue create` or `issue comment` command with
   `--attachments manifest.json`.
 
-Issue/comment image attachments are disabled. Other files may render as normal
-Markdown links after an approved URL is recorded.
+Issue/comment image attachments are disabled unless the manifest shows an
+approved object storage backend such as `aliyun-oss`. Other files may render as
+normal Markdown links after an approved URL is recorded.
 
 ## Current Task State
 
@@ -183,10 +191,10 @@ must be written to a file so shells do not reinterpret the content.
 
 If the body refers to pasted files, screenshots, or images, use
 `attachment-policy.md`. Local drafts may contain `xflow-attachment://`
-placeholders, but issue/comment images must not be published under the current
-policy. Remote-published bodies must contain only reviewed public URLs for
-approved non-image attachments. Do not publish `C:\...`, `/tmp/...`,
-`.xflow/...`, `file://...`, or WSL mount paths as attachment links.
+placeholders, but issue/comment images must be published only through an
+approved object storage backend. Remote-published bodies must contain only
+reviewed public URLs for approved attachments. Do not publish `C:\...`,
+`/tmp/...`, `.xflow/...`, `file://...`, or WSL mount paths as attachment links.
 
 Remote-published body files must be public-facing Markdown. Use hidden
 `<!-- xflow: ... -->` anchors for machine checks, and do not include internal

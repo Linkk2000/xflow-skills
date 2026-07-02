@@ -9,11 +9,16 @@
 - If the issue or comment references pasted files, screenshots, or images, read
   `references/attachment-policy.md` and create an attachment manifest before
   approval.
-- Issue/comment image attachments are disabled. Do not use
-  `--upload-attachments github` or GitHub release assets to publish screenshots
-  or images into issues/comments.
+- Issue/comment image attachments are disabled unless the manifest shows an
+  approved object storage backend. Do not use `--upload-attachments github` or
+  GitHub release assets to publish screenshots or images into issues/comments.
+- For screenshots or images that must appear in GitHub/Gitee, use the approved object storage backend:
+  `devctl attachment publish --issue draft --backend aliyun-oss`.
 - For non-image attachments, use a reviewed manifest and an approved public URL
   plan before the remote write.
+- Object storage credentials such as `ALIYUN_OSS_ACCESS_KEY_SECRET` belong in
+  user or project env files and must not appear in issues, comments, commits,
+  Markdown guides, or manifests.
 - If there are no attachments, `devctl issue create ... --no-local-review`
   remains valid when the current user explicitly authorized unattended issue
   creation for that exact command.
