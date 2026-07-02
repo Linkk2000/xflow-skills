@@ -61,10 +61,11 @@ Run from the owning repository.
 ./devctl preflight
 ./devctl check current-task --issue <number>
 ./devctl check subtask --issue <number> --path .xflow/issues/issue-<number>/subtask-001
+./devctl check issue-evidence --issue <number>
 ./devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl attachment add --issue draft --file /path/to/notes.txt --as file
 ./devctl attachment check --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json
-./devctl attachment publish --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json --backend manual --url att-001=https://public.example/notes.txt --body-file .xflow/issues/issue-draft/issue-draft.md
+./devctl attachment publish --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json --backend manual --url att-001=https://public.example/notes.txt --body-file .xflow/issues/issue-draft/issue-draft.md --output .xflow/publish/issues/issue-draft/issue.final.md
 ./devctl attachment publish --issue draft --backend aliyun-oss --manifest .xflow/issues/issue-draft/attachments/manifest.json
 ./devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create
@@ -134,6 +135,11 @@ For issue/comment creation, choose a single path before running commands:
 Issue/comment image attachments are disabled unless the manifest shows an
 approved object storage backend such as `aliyun-oss`. Other files may render as
 normal Markdown links after an approved URL is recorded.
+
+`.xflow/issues/issue-<id>/` is local evidence and approval state only. It must
+not contain COS/OSS URLs, object-storage URLs, or non-null `publishedUrl`
+values. Rendered remote bodies and published manifests belong under
+`.xflow/publish/issues/issue-<id>/`.
 
 ## Local Subtasks
 

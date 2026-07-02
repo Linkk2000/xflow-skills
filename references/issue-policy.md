@@ -26,6 +26,10 @@
   `.xflow/issues/issue-<id>/subtask-001/` and run
   `devctl check subtask --issue <id>`. Subtask evidence must stay in the
   repository and must not be uploaded to COS/OSS.
+- `.xflow/issues/issue-<id>/` and `.xflow/issues/issue-draft/` are local
+  evidence workspaces. Do not store COS/OSS URLs, object-storage URLs, or
+  non-null `publishedUrl` values there. Put rendered remote bodies and
+  published manifests under `.xflow/publish/issues/issue-<id>/`.
 - Do not publish local file paths, chat-client temp paths, `.xflow/` paths, or
   unresolved `xflow-attachment://` placeholders in remote bodies.
 - Before creating, check for an open issue with the same exact title.

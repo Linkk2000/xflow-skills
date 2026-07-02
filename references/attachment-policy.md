@@ -30,6 +30,12 @@ Never publish:
 
 ## Local Storage
 
+`.xflow/issues/` is a local evidence workspace. It stores drafts, local
+artifacts, approval records, and unpublished attachment manifests. It must not
+store COS/OSS URLs, object-storage URLs, or non-null `publishedUrl` values.
+Rendered remote bodies and published attachment manifests belong under
+`.xflow/publish/issues/issue-<id>/`.
+
 Use these default locations:
 
 ```text
@@ -37,6 +43,8 @@ Use these default locations:
 .xflow/issues/issue-draft/attachments/files/
 .xflow/issues/issue-<id>/attachments/manifest.json
 .xflow/issues/issue-<id>/attachments/files/
+.xflow/publish/issues/issue-draft/attachments/manifest.json
+.xflow/publish/issues/issue-<id>/attachments/manifest.json
 ```
 
 Copy or register the artifact locally before drafting the remote body. The
@@ -73,7 +81,9 @@ comment, or PR/MR bodies.
 ```
 
 The body draft may use `xflow-attachment://<id>` while still local. A final
-remote body must replace every placeholder with a reviewed `publishedUrl`.
+remote body must replace every placeholder with a reviewed `publishedUrl` and
+must be stored under `.xflow/publish/issues/issue-<id>/`, not under
+`.xflow/issues/`.
 Issue/comment image placeholders may be rendered only when the manifest item
 was published by an approved object storage backend such as `aliyun-oss`.
 
@@ -107,10 +117,10 @@ only through devctl:
 ```text
 devctl attachment add --issue draft --file screenshot.png --as image
 devctl attachment publish --issue draft --backend aliyun-oss --manifest .xflow/issues/issue-draft/attachments/manifest.json
-devctl attachment render --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json --input issue.md --output issue.final.md
-devctl approval prepare --issue draft --action issue-create --file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
-devctl check local-review --issue draft --file issue.final.md --action issue-create --attachments .xflow/issues/issue-draft/attachments/manifest.json
-devctl issue create "<title>" --body-file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
+devctl attachment render --issue draft --manifest .xflow/publish/issues/issue-draft/attachments/manifest.json --input issue.md --output .xflow/publish/issues/issue-draft/issue.final.md
+devctl approval prepare --issue draft --action issue-create --file .xflow/publish/issues/issue-draft/issue.final.md --attachments .xflow/publish/issues/issue-draft/attachments/manifest.json
+devctl check local-review --issue draft --file .xflow/publish/issues/issue-draft/issue.final.md --action issue-create --attachments .xflow/publish/issues/issue-draft/attachments/manifest.json
+devctl issue create "<title>" --body-file .xflow/publish/issues/issue-draft/issue.final.md --attachments .xflow/publish/issues/issue-draft/attachments/manifest.json
 ```
 
 Credential config belongs in user or project local env files:

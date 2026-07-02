@@ -79,15 +79,19 @@ This is a phase-selected reference index. If unsure which file applies, read
    image attachments are currently disabled unless an approved object storage
    backend published reviewed URLs; never use GitHub release assets as an
    issue/comment image store.
-10. Large issues may be split into local subtask directories named
+10. `.xflow/issues/` is local evidence and approval workspace. Do not store
+    COS/OSS URLs, object-storage URLs, or non-null `publishedUrl` values there.
+    Rendered remote bodies and published attachment manifests belong under
+    `.xflow/publish/issues/`.
+11. Large issues may be split into local subtask directories named
     `.xflow/issues/issue-<id>/subtask-001`, `subtask-002`, and so on. Each
     subtask needs `README.md` and must pass `devctl check subtask --issue <id>`.
     Subtask evidence must stay under that subtask's `evidence/` directory in
     the repository; do not store it in COS/OSS or any object storage backend.
-11. Use the user's language for Git-related public text: commit messages,
+12. Use the user's language for Git-related public text: commit messages,
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
-12. Do not add AI-client co-author trailers. In particular, never add
+13. Do not add AI-client co-author trailers. In particular, never add
     `Co-authored-by: Cursor <cursoragent@cursor.com>`.
 
 ## Required Flow
@@ -161,6 +165,8 @@ Before each remote write:
 - Issue draft: `.xflow/issues/issue-draft/issue-draft.md`
 - Issue comment draft: `.xflow/issues/issue-<id>/comment-draft.md`
 - Attachment manifest: `.xflow/issues/issue-<id>/attachments/manifest.json`
+- Published manifest: `.xflow/publish/issues/issue-<id>/attachments/manifest.json`
+- Rendered remote body: `.xflow/publish/issues/issue-<id>/<body>.final.md`
 - Local subtask: `.xflow/issues/issue-<id>/subtask-001/README.md`
 - Local subtask evidence: `.xflow/issues/issue-<id>/subtask-001/evidence/`
 - MR/PR draft: `.xflow/issues/issue-<id>/mr-draft.md`

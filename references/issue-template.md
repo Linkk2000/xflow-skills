@@ -132,6 +132,14 @@ pushes that commit to the same branch under the `git-mr` approval scope. It
 must not create a second PR only to record metadata after the original PR has
 merged.
 
+## Issue Workspace Evidence
+
+Files under `.xflow/issues/issue-<id>/` and `.xflow/issues/issue-draft/` are
+local evidence and approval state. They may reference repository-local evidence
+files, but must not contain COS/OSS URLs, object-storage URLs, or non-null
+`publishedUrl` values. Store rendered remote bodies and published attachment
+manifests under `.xflow/publish/issues/issue-<id>/`.
+
 ## subtask-001/README.md
 
 Use this shape when a large issue needs local subtasks. Store each subtask

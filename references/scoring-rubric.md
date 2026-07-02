@@ -159,3 +159,6 @@ For XFlow, apply the generic matrix plus these required checks:
 - Large-issue subtasks must use `subtask-001` style local directories, include
   checked README files, and keep subtask evidence under each subtask's
   `evidence/` directory in the repository rather than COS/OSS.
+- Issue workspaces under `.xflow/issues/` must remain local evidence and
+  approval state; COS/OSS published URLs and non-null `publishedUrl` values
+  belong only in `.xflow/publish/issues/`.

@@ -59,6 +59,9 @@ Search anchor: Windows validation must not invoke bare `bash`.
 - `devctl check encoding`: check UTF-8/LF and shell syntax health.
 - `devctl check commit-msg`: validate commit message against project rules.
 - `devctl check branch-scope`: validate current branch is issue-bound.
+- `devctl check issue-evidence --issue <id> [--publish-root .xflow/publish/issues/issue-<id>]`:
+  validate that `.xflow/issues/issue-<id>/` remains a local evidence workspace
+  without COS/OSS published URLs or non-null `publishedUrl` values.
 - `devctl check subtask --issue <id> [--path .xflow/issues/issue-<id>/subtask-001]`:
   validate local subtask directory naming, README sections, source file, local
   evidence links, and conclusion status.
@@ -87,7 +90,8 @@ Search anchor: Windows validation must not invoke bare `bash`.
 - `devctl attachment check`: verify manifest hashes, MIME/size metadata,
   placeholder usage, and final-body publication guards.
 - `devctl attachment publish`: publish manifest items to the configured backend
-  and record reviewed URLs.
+  and record reviewed URLs in `.xflow/publish/issues/issue-<id>/`, not in
+  `.xflow/issues/issue-<id>/`.
   On GitHub, `--backend github` uses the legacy `xflow-attachments` release by
   default and records each asset's GitHub `browser_download_url`. It rejects
   image attachments; do not use that backend as an issue/comment image store.
@@ -96,7 +100,8 @@ Search anchor: Windows validation must not invoke bare `bash`.
   `objectKey`, and `publishedUrl`. AccessKey values must not be written to
   manifests.
 - `devctl attachment render`: render a final body file by replacing reviewed
-  attachment placeholders with published URLs.
+  attachment placeholders with published URLs. Rendered remote bodies must be
+  written under `.xflow/publish/issues/issue-<id>/`.
 
 ## AI Call Recipes
 
@@ -134,6 +139,16 @@ Subtask evidence must stay in the repository under the current subtask's
 `evidence/` directory. Do not store subtask evidence in COS/OSS or object
 storage; object storage is only for rendered remote issue/comment/PR bodies.
 
+Issue workspace evidence check:
+
+```text
+devctl check issue-evidence --issue <number>
+```
+
+`.xflow/issues/issue-<number>/` is local evidence and approval state only.
+Published attachment manifests and rendered remote bodies belong under
+`.xflow/publish/issues/issue-<number>/`.
+
 Approved MR/PR creation:
 
 ```text
@@ -150,10 +165,10 @@ Reviewed non-image attachment issue:
 
 ```text
 devctl attachment add --issue draft --file notes.txt --as file
-devctl attachment publish --issue draft --backend manual --url att-001=https://public.example/notes.txt --body-file issue.md --output issue.final.md
-devctl approval prepare --issue draft --action issue-create --file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
-devctl check local-review --issue draft --file issue.final.md --action issue-create --attachments .xflow/issues/issue-draft/attachments/manifest.json
-devctl issue create "<title>" --body-file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
+devctl attachment publish --issue draft --backend manual --url att-001=https://public.example/notes.txt --body-file issue.md --output .xflow/publish/issues/issue-draft/issue.final.md
+devctl approval prepare --issue draft --action issue-create --file .xflow/publish/issues/issue-draft/issue.final.md --attachments .xflow/publish/issues/issue-draft/attachments/manifest.json
+devctl check local-review --issue draft --file .xflow/publish/issues/issue-draft/issue.final.md --action issue-create --attachments .xflow/publish/issues/issue-draft/attachments/manifest.json
+devctl issue create "<title>" --body-file .xflow/publish/issues/issue-draft/issue.final.md --attachments .xflow/publish/issues/issue-draft/attachments/manifest.json
 ```
 
 Reviewed Aliyun OSS image issue:
@@ -161,10 +176,10 @@ Reviewed Aliyun OSS image issue:
 ```text
 devctl attachment add --issue draft --file screenshot.png --as image
 devctl attachment publish --issue draft --backend aliyun-oss --manifest .xflow/issues/issue-draft/attachments/manifest.json
-devctl attachment render --issue draft --manifest .xflow/issues/issue-draft/attachments/manifest.json --input issue.md --output issue.final.md
-devctl approval prepare --issue draft --action issue-create --file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
-devctl check local-review --issue draft --file issue.final.md --action issue-create --attachments .xflow/issues/issue-draft/attachments/manifest.json
-devctl issue create "<title>" --body-file issue.final.md --attachments .xflow/issues/issue-draft/attachments/manifest.json
+devctl attachment render --issue draft --manifest .xflow/publish/issues/issue-draft/attachments/manifest.json --input issue.md --output .xflow/publish/issues/issue-draft/issue.final.md
+devctl approval prepare --issue draft --action issue-create --file .xflow/publish/issues/issue-draft/issue.final.md --attachments .xflow/publish/issues/issue-draft/attachments/manifest.json
+devctl check local-review --issue draft --file .xflow/publish/issues/issue-draft/issue.final.md --action issue-create --attachments .xflow/publish/issues/issue-draft/attachments/manifest.json
+devctl issue create "<title>" --body-file .xflow/publish/issues/issue-draft/issue.final.md --attachments .xflow/publish/issues/issue-draft/attachments/manifest.json
 ```
 
 Issue/comment image attachments are disabled unless the manifest shows an
