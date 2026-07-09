@@ -65,6 +65,15 @@ Search anchor: Windows validation must not invoke bare `bash`.
 - `devctl check subtask --issue <id> [--path .xflow/issues/issue-<id>/subtask-001]`:
   validate local subtask directory naming, README sections, source file, local
   evidence links, and conclusion status.
+- `devctl check gap-analysis --issue draft|<id> [--file .xflow/issues/issue-<id>/gap-analysis.md]`:
+  validate the Problem/Gap Closure Loop analysis before implementation. It
+  requires sections for user statement, clarified gap, analysis, local
+  evidence, scope, proposed plan, acceptance criteria, and `Recognized: yes`.
+- `devctl check resolution-report --issue <id> [--file .xflow/issues/issue-<id>/resolution-report.md]`:
+  validate the completion report after implementation. It requires local
+  evidence, actual changes, `resolved|reduced|blocked` conclusion, self-review,
+  remaining risks, and human review request. `resolved` and `reduced` reports
+  must not contain unchecked AI self-review items.
 - `devctl issue create --attachments <manifest>`: create issue only after the
   body file and attachment manifest have both passed review and all attachment
   placeholders have been replaced with approved published URLs. Image MIME
@@ -174,6 +183,21 @@ devctl check issue-evidence --issue <number>
 `.xflow/issues/issue-<number>/` is local evidence and approval state only.
 Published attachment manifests and rendered remote bodies belong under
 `.xflow/publish/issues/issue-<number>/`.
+
+Problem/Gap Closure Loop:
+
+```text
+devctl check gap-analysis --issue <number>
+devctl check resolution-report --issue <number>
+```
+
+`gap-analysis.md` is created before implementation from the user's oral problem
+or gap report. It must contain local evidence and human recognition. After
+implementation, `resolution-report.md` records actual changes, local evidence,
+and a `resolved|reduced|blocked` conclusion. If AI self-review finds the report
+is not true, AI must rework and rewrite the report before human handoff.
+Gap/resolution evidence must remain under `.xflow/issues/issue-<number>/`, not
+in COS/OSS or object storage.
 
 Approved MR/PR creation:
 

@@ -46,6 +46,19 @@ Hard rules:
   `关联 issue: #<id>` in the body, and use Chinese bullet lines for key
   changes. Do not include local absolute paths, provider-only metadata, or
   AI-client signatures.
+- Browser Must Not Remain about:blank. When browser or Chrome validation is
+  required, identify the exact target URL, navigate to that URL, wait for load,
+  and verify the current URL is not `about:blank`. Opening Chrome alone is not
+  verification; if navigation fails, diagnose the service, URL, port, auth
+  state, or browser-control connection before claiming UI verification.
+- Problem/Gap Closure Loop. When the user orally reports a problem or gap,
+  create or update `.xflow/issues/issue-draft/gap-analysis.md` or
+  `.xflow/issues/issue-<id>/gap-analysis.md`, add evidence, clarify scope and
+  acceptance criteria, then stop for human recognition before implementation.
+  AI must not skip gap-analysis human approval. After implementation, write
+  `.xflow/issues/issue-<id>/resolution-report.md` with evidence and a
+  `resolved|reduced|blocked` conclusion. If self-review finds the report is
+  not true, AI must rework and rewrite the report before human handoff.
 - Do not add AI-client co-author trailers, including
   `Co-authored-by: Cursor <cursoragent@cursor.com>`.
 - Direct `main` maintenance is an exception only for the `xflow-devctl` and

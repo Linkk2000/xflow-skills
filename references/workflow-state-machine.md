@@ -58,6 +58,37 @@ state with the PR number/URL, creates a metadata-only state backfill commit,
 and pushes that commit to the same branch. This post-MR push is part of the
 `git-mr` approval scope and must not include business code.
 
+## Browser Verification Gate
+
+Browser Must Not Remain about:blank. If a phase uses browser or Chrome checks,
+the AI must navigate to an explicit target URL and verify the current URL is
+not `about:blank` before treating the browser as evidence. A newly opened
+empty tab is only a browser session, not verification.
+
+Browser evidence should record the target URL and at least one observable
+result: screenshot, page title, visible text, HTTP status, console state, or
+DOM assertion. If the browser remains on `about:blank`, diagnose the target
+service, URL, port, login/auth state, or browser-control connection before
+continuing the workflow.
+
+## Problem/Gap Closure Loop
+
+When the user orally reports a problem or gap, AI first prepares
+`gap-analysis.md` under `.xflow/issues/issue-draft/` or
+`.xflow/issues/issue-<id>/`. The analysis must clarify the gap, include local
+evidence, define scope, propose the modification plan, and list acceptance
+criteria. AI must stop for human recognition before implementation.
+
+After implementation, AI writes
+`.xflow/issues/issue-<id>/resolution-report.md`. The report must cite local
+evidence, describe actual changes, and use exactly one closure conclusion:
+`resolved|reduced|blocked`.
+
+For `resolved` or `reduced`, all AI self-review checklist items must be
+complete. If self-review shows the report is not true, AI must rework and rewrite the report
+before human handoff. If AI cannot continue, use `blocked`
+and name the human decision or external condition needed.
+
 ## Gate Meaning
 
 - `G1_APPROVE_ISSUE_CREATE`: human approves the issue body before remote issue
@@ -69,6 +100,8 @@ and pushes that commit to the same branch. This post-MR push is part of the
   task branch before implementation starts.
 - `G3_APPROVE_RESULT`: human reviews local evidence, test results, scope, and
   generated artifacts before commit or remote publication.
+  For problem/gap work, the resolution report and evidence must be ready before
+  this gate.
   If a large issue was split into subtasks, each subtask README and
   repository-local evidence directory must be ready for review.
   Local issue evidence under `.xflow/issues/issue-<id>/` must remain free of

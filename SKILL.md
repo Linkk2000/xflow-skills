@@ -105,6 +105,20 @@ This is a phase-selected reference index. If unsure which file applies, read
     provider-specific metadata that would not travel across GitHub/Gitee.
 15. Do not add AI-client co-author trailers. In particular, never add
     `Co-authored-by: Cursor <cursoragent@cursor.com>`.
+16. Browser Must Not Remain about:blank. When browser or Chrome validation is
+    part of the task, first identify the exact target URL, then navigate to an explicit target URL,
+    wait for load, and verify the current URL is not `about:blank`.
+    Opening a browser window or tab alone is not verification.
+    If the page stays on `about:blank`, treat it as a failed navigation and
+    diagnose the missing URL, stopped dev server, bad port, auth redirect, or
+    browser-control failure before claiming UI verification.
+17. Problem/Gap Closure Loop. When the user orally reports a problem or gap,
+    AI must first create or update `gap-analysis.md`, add evidence, clarify
+    the gap, scope, proposed fix, and acceptance criteria, then stop for human
+    recognition before implementation. After implementation, AI must create
+    `resolution-report.md` with evidence and a `resolved|reduced|blocked`
+    conclusion. If AI self-review finds the gap is not actually closed or
+    reduced, AI must rework and rewrite the report before human handoff.
 
 ## Required Flow
 
@@ -143,6 +157,52 @@ This is a phase-selected reference index. If unsure which file applies, read
     After PR/MR creation, devctl records the PR number/URL, creates a
     metadata-only state backfill commit, and pushes that commit to the same
     branch under the `git-mr` approval scope.
+
+## Browser Verification
+
+### Browser Must Not Remain about:blank
+
+Use this rule whenever Codex, Cursor, ClaudeCode, Gemini/Antigravity, or any
+browser automation is asked to verify a page:
+
+1. Confirm the target service exists or start it with the repository-local
+   command.
+2. Navigate to an explicit target URL such as `http://localhost:5173/path`.
+3. Wait for the page to load or fail with a clear error.
+4. Verify the current URL is not `about:blank`.
+5. Capture proof: screenshot, DOM text, page title, HTTP status, or console
+   state relevant to the task.
+
+Do not report browser verification from a tab that is still `about:blank`.
+If the browser opens on `about:blank`, continue to the explicit URL. If it
+cannot navigate, record the failure and diagnose the service, URL, port,
+login/auth state, or browser-control connection.
+
+## Problem/Gap Closure Loop
+
+Use this loop when the user describes a problem, discrepancy, missing behavior,
+quality gap, workflow gap, or "差距":
+
+1. Convert the oral report into `.xflow/issues/issue-draft/gap-analysis.md` or
+   `.xflow/issues/issue-<id>/gap-analysis.md`.
+2. Add evidence, clarify the problem/gap, define scope boundaries, propose the
+   modification plan, and write acceptance criteria.
+3. Stop for human recognition of the gap analysis before modifying source or
+   workflow files.
+4. After implementation, write
+   `.xflow/issues/issue-<id>/resolution-report.md` with evidence.
+5. Set the closure conclusion to exactly `resolved|reduced|blocked`.
+6. If self-review shows the work did not satisfy the report, AI must rework and
+   rewrite the report. Do not present an unmet report as complete.
+
+`resolved` means the problem is solved. `reduced` means the gap is smaller but
+remaining work is documented. `blocked` means AI cannot continue without human
+decision or an external condition.
+
+Gap analysis and resolution evidence under `.xflow/issues/` is local
+repository evidence. Do not store or cite COS/OSS/object-storage URLs as the
+evidence source for these reports. Publishing a report to GitHub/Gitee still
+requires the normal remote-write human gate.
 
 ## Core Remote Write Review Gate
 
@@ -195,6 +255,8 @@ Before each remote write:
 - Rendered remote body: `.xflow/publish/issues/issue-<id>/<body>.final.md`
 - Local subtask: `.xflow/issues/issue-<id>/subtask-001/README.md`
 - Local subtask evidence: `.xflow/issues/issue-<id>/subtask-001/evidence/`
+- Problem/gap analysis: `.xflow/issues/issue-<id>/gap-analysis.md`
+- Resolution report: `.xflow/issues/issue-<id>/resolution-report.md`
 - MR/PR draft: `.xflow/issues/issue-<id>/mr-draft.md`
 - Walkthrough/evidence: `.xflow/issues/issue-<id>/walkthrough.md`
 - Active local approval: `.xflow/issues/issue-<id>/approvals/local-review.md`

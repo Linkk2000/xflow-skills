@@ -140,6 +140,86 @@ files, but must not contain COS/OSS URLs, object-storage URLs, or non-null
 `publishedUrl` values. Store rendered remote bodies and published attachment
 manifests under `.xflow/publish/issues/issue-<id>/`.
 
+## gap-analysis.md
+
+Use this shape when the user orally reports a problem or gap. Store it at
+`.xflow/issues/issue-draft/gap-analysis.md` before issue creation, or at
+`.xflow/issues/issue-<id>/gap-analysis.md` for an existing issue. AI must stop
+for human recognition before implementation.
+
+```markdown
+# Problem/Gap Analysis
+
+## User Original Statement
+<verbatim or faithful summary of the user's oral problem/gap>
+
+## Clarified Problem Or Gap
+<the clarified problem, discrepancy, missing behavior, or workflow gap>
+
+## Gap Analysis
+- <what is missing or wrong>
+- <why this matters>
+
+## Evidence
+- [local evidence](evidence/<small-file-or-log>)
+
+## Scope Boundaries
+- Includes:
+- Excludes:
+
+## Proposed Modification Plan
+- [ ] <planned change>
+
+## Acceptance Criteria
+- [ ] <machine-checkable or human-reviewable criterion>
+
+## Human Recognition
+Recognized: no
+Reviewer:
+Notes:
+```
+
+AI may prepare this file, collect evidence, and ask clarifying questions. AI
+must not treat the analysis as approved until the human explicitly recognizes
+the gap and intended direction.
+
+## resolution-report.md
+
+Use this shape after implementation. Store it at
+`.xflow/issues/issue-<id>/resolution-report.md`. It explains whether the
+problem was solved or the gap was reduced, with evidence.
+
+```markdown
+# Resolution Report
+
+## Source Problem Or Gap
+- gap-analysis.md
+
+## Actual Changes
+- <what changed>
+
+## Evidence Index
+- [local evidence](evidence/<small-file-or-log>)
+
+## Closure Conclusion
+resolved|reduced|blocked: <reason>
+
+## AI Self-Review Result
+- [x] <criterion satisfied>
+
+## Remaining Risks
+- <none, or remaining risk>
+
+## Human Review Request
+- Please review the report, evidence, and conclusion.
+```
+
+Allowed conclusions are exactly `resolved|reduced|blocked`. For `resolved` and
+`reduced`, every AI self-review item must be checked. If self-review finds the
+report is not true, AI must rework and rewrite the report before handoff. If AI
+cannot continue, use `blocked` and state the human decision or external
+condition needed.
+
 ## subtask-001/README.md
 
 Use this shape when a large issue needs local subtasks. Store each subtask

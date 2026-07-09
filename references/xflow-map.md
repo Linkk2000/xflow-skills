@@ -255,6 +255,28 @@ Remote-published body files must be public-facing Markdown. Use hidden
 `<!-- xflow: ... -->` anchors for machine checks, and do not include internal
 draft headings such as `# Issue Draft`, `# MR Draft`, or `# PR Draft`.
 
+## Problem/Gap Closure Loop
+
+When a user orally reports a problem, discrepancy, missing behavior, quality
+gap, workflow gap, or "差距", create or update `gap-analysis.md` before
+implementation. Use `.xflow/issues/issue-draft/gap-analysis.md` before a remote
+issue exists, or `.xflow/issues/issue-<id>/gap-analysis.md` for an existing
+issue.
+
+`gap-analysis.md` clarifies the problem/gap, scope, proposed modification plan,
+acceptance criteria, human recognition state, and repository-local evidence.
+AI must not implement until the human recognizes the analysis.
+
+After implementation, write
+`.xflow/issues/issue-<id>/resolution-report.md`. It records actual changes,
+evidence, remaining risks, human review request, and a
+`resolved|reduced|blocked` conclusion. If self-review shows the conclusion is
+not true, AI must rework and rewrite the report before handoff.
+
+Gap and resolution evidence stays under `.xflow/issues/`; do not use COS/OSS or
+object storage as local evidence for these reports. Publishing either document
+to GitHub/Gitee is a separate remote-write gate.
+
 ## TDD Targets By Change Type
 
 - API behavior: test service/controller boundaries before implementation.
@@ -265,3 +287,16 @@ draft headings such as `# Issue Draft`, `# MR Draft`, or `# PR Draft`.
 
 Use focused commands first. Run broader builds only when the changed surface
 justifies it.
+
+## Browser Checks
+
+Browser Must Not Remain about:blank. When Codex, Cursor, ClaudeCode,
+Gemini/Antigravity, or another browser controller opens Chrome for verification,
+the AI must navigate to an explicit target URL, wait for load, and confirm the
+current URL is not `about:blank`.
+
+Opening Chrome or creating a tab is not evidence. Record the target URL plus a
+screenshot, page title, visible text, HTTP status, console state, or DOM
+assertion. If the browser stays on `about:blank`, treat it as a failed
+navigation and diagnose the missing URL, stopped dev server, wrong port,
+auth/login redirect, or browser-control failure before claiming success.
