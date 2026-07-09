@@ -74,17 +74,19 @@ Search anchor: Windows validation must not invoke bare `bash`.
   legacy generic-file path. It must not be used for images or screenshots;
   issue creation rejects image attachments before any GitHub issue or release
   upload request.
-- `devctl issue create --no-local-review`: create an issue without attachments
-  when the current user explicitly requested unattended operation for that exact
-  command.
+- `devctl issue create --no-local-review`: restricted exception for creating an
+  issue without attachments only when the current user explicitly authorizes
+  that exact unattended command in the current conversation. Search anchor:
+  create an issue without attachments.
 - `devctl issue comment --attachments <manifest>`: comment only after the body
   file and attachment manifest have both passed review. Image MIME types or
   Markdown image attachments require an approved object storage backend such as
   `aliyun-oss`; otherwise they fail before remote writes.
 - `devctl issue comment --attach-file <path> --upload-attachments github`:
   legacy generic-file path. It must not be used for images or screenshots.
-- `devctl issue comment --no-local-review`: comment without attachments when
-  explicitly authorized by the current user for that exact command.
+- `devctl issue comment --no-local-review`: restricted exception for commenting
+  without attachments only when explicitly authorized by the current user for
+  that exact command in the current conversation.
 - `devctl attachment add`: register or copy a pasted file/image into the
   XFlow attachment directory and update the manifest.
 - `devctl attachment check`: verify manifest hashes, MIME/size metadata,
@@ -109,13 +111,22 @@ Use these recipes as the normal command surface. Do not probe by retrying
 random flag combinations after an error; read the remote state or run the
 matching check command first.
 
-Plain unattended issue:
+Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
+command drafts, and review notes.
+AI must never satisfy a human gate itself.
+AI must never edit `Approved: no` to `Approved: yes`.
+AI must not use `--force`, `--no-local-review`, direct provider APIs, or manual
+approval-file edits to bypass review.
+
+Restricted unattended issue, only after current-turn explicit human
+authorization for this exact no-attachment issue command:
 
 ```text
 devctl issue create "<title>" --body-file issue.md --no-local-review
 ```
 
-Plain unattended comment:
+Restricted unattended comment, only after current-turn explicit human
+authorization for this exact no-attachment comment command:
 
 ```text
 devctl issue comment <number> --body-file comment.md --no-local-review
@@ -128,6 +139,21 @@ devctl approval prepare --issue <number> --action git-push --file .xflow/issues/
 devctl check local-review --issue <number> --file .xflow/issues/issue-<number>/walkthrough.md --action git-push
 devctl git push --issue <number> --file .xflow/issues/issue-<number>/walkthrough.md
 ```
+
+Portable scoped commit message:
+
+```text
+type(scope): 中文摘要
+
+关联 issue: #<number>
+
+- 中文说明关键变化
+- 中文说明验证或证据
+```
+
+`devctl git commit-msg` should generate or accept messages in this shape.
+Do not add AI-client co-author trailers, local absolute paths, or provider-only
+metadata to commit messages.
 
 Local subtask check:
 
@@ -190,6 +216,9 @@ image was first published through the approved attachment flow. Non-image files
 use normal Markdown links after an approved URL is recorded. `GITHUB_TOKEN` is
 required for GitHub issue/comment remote writes.
 If there are no attachments, omit all attachment flags.
+
+`--no-local-review` must not be used for push, MR/PR creation, merge, issue
+close, branch deletion, conflict resolution, or any destructive action.
 
 Plain text search anchors for agents: Issue/comment image attachments are disabled.
 Do not use GitHub release assets as an issue image store.

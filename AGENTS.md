@@ -28,6 +28,7 @@ Use the project devctl adapter for workflow operations. On Windows, use `devctl.
 ## Checks
 
 - Before commit: re-read project rules and run relevant tests/checks or `devctl check commit-msg` when available.
+- Commit messages must be portable, scoped, Chinese-dominant, multi-line, and issue-linked. Use `type(scope): 中文摘要`, include `关联 issue: #<id>`, and avoid AI-client trailers, local absolute paths, or provider-only metadata.
 - Before push: run branch scope and verification checks.
 - Before MR/PR: fetch the target branch, merge it into the task branch by default, resolve approved conflicts if any, rerun relevant checks, record the target branch SHA and sync result, then preview title/body, link issue, and list verification evidence.
 - Before final delivery: report checks run and any skipped verification with reasons.

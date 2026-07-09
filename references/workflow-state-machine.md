@@ -28,6 +28,18 @@ S10_DONE
 `S*` states are machine/AI work states. `G*` states are local human gates.
 The AI may prepare evidence for a gate, but must not approve the gate.
 
+## Human Approval Is Non-Delegable
+
+AI may prepare approval files, evidence, command drafts, and review notes, but
+AI must never satisfy a human gate itself.
+AI must never edit `Approved: no` to `Approved: yes`.
+AI must not use `--force`, `--no-local-review`, direct provider APIs, or manual
+approval-file edits to bypass review.
+
+Valid approval must explicitly name the exact next action. Vague replies such
+as "继续", "都可以", "你看着办", "go ahead", "looks good", or "测试过了就发" are
+not approval.
+
 ## Current Task File
 
 Each active task should have `.xflow/current-task.md`. It records the current
@@ -91,6 +103,11 @@ the strategy first.
 ## AI Constraints
 
 - Do not edit an approval file to set `Approved: yes`.
+- Do not treat the AI's own review, tests, or confidence as human approval.
+- Do not treat vague replies such as "继续", "你看着办", "go ahead", or
+  "looks good" as approval for a remote write.
+- Do not use `--force`, `--no-local-review`, direct provider APIs, or manual
+  approval-file edits to bypass a human gate.
 - Do not skip a `G*` state because tests pass.
 - Do not skip target branch synchronization before MR/PR creation.
 - Do not rely on memory. Read `.xflow/current-task.md` and run

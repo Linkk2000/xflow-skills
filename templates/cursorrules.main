@@ -39,6 +39,16 @@ Runtime rules:
 - Core remote writes are `issue-create`, `issue-comment`, `issue-close`, and
   `git-mr`; they require local human review of the exact file being published
   or used as evidence.
+- Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
+  command drafts, and review notes. AI must never satisfy a human gate itself.
+  AI must never edit `Approved: no` to `Approved: yes`. AI must not
+  treat vague replies such as "继续", "都可以", "你看着办", "go ahead", or
+  "looks good" as approval unless the user explicitly names the exact action.
+  AI must not use `--force`, `--no-local-review`, direct provider APIs, or
+  manual approval-file edits to bypass review.
+- Remote-write sequence: prepare the file, run the matching `devctl check`,
+  run `devctl approval prepare`, stop for human review, continue only after the
+  human sets `Approved: yes`, then run `devctl check local-review`.
 - Push and PR/MR creation are separate gates. Use `devctl git push` only after
   `Approved Action: git-push`; use `devctl git mr` only after separate
   `Approved Action: git-mr`. After PR/MR creation, devctl may create and push
@@ -50,6 +60,11 @@ Runtime rules:
 
 Git commit rules:
 
+- Commit messages must be portable, scoped, Chinese-dominant, multi-line, and
+  issue-linked. Use `type(scope): 中文摘要` on the first line, include
+  `关联 issue: #<id>` in the body, and use Chinese bullet lines for key
+  changes. Do not include local absolute paths, provider-only metadata, or
+  AI-client signatures.
 - Do not add Cursor co-author trailers.
 - Do not append `Co-authored-by: Cursor <cursoragent@cursor.com>` to commit
   messages.

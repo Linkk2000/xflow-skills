@@ -192,6 +192,8 @@ mechanical fields such as `Approved At`, `Approved File`, `Approved SHA256`,
 `git config user.name` and `git config user.email` when available; pass
 `--reviewer` to override it. The human reviewer should inspect the referenced
 artifact and then change `Approved: no` to `Approved: yes`.
+AI may prepare this file but must never make that approval edit. If AI changes
+`Approved: no` to `Approved: yes`, the approval is invalid.
 
 ```markdown
 # Local Review Approval
@@ -207,6 +209,11 @@ Attachment Manifest SHA256: <none|sha256>
 
 ## Decision
 Approved: no
+
+## Human Gate
+Prepared by AI or tooling does not mean approved.
+Only the human reviewer may change Approved: no to Approved: yes.
+If this file was approved by the AI, the approval is invalid.
 
 ## Notes
 <review notes and constraints>

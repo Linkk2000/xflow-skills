@@ -26,6 +26,13 @@ Hard rules:
   push, PR/MR creation, and cleanup.
 - Do not perform remote writes before local human review approves the exact
   file being published or used as evidence.
+- Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
+  command drafts, and review notes. AI must never satisfy a human gate itself.
+  AI must never edit `Approved: no` to `Approved: yes`. AI must not
+  treat vague replies such as "继续", "都可以", "你看着办", "go ahead", or
+  "looks good" as approval unless the user explicitly names the exact action.
+  AI must not use `--force`, `--no-local-review`, direct provider APIs, or
+  manual approval-file edits to bypass review.
 - Active approval file:
   `.xflow/issues/issue-<id>/approvals/local-review.md`.
 - For issue creation, use:
@@ -34,6 +41,11 @@ Hard rules:
 - Use `--body-file` for Issue, comment, and PR/MR bodies.
 - Run `git status --short --branch` before committing and include only
   task-related files.
+- Commit messages must be portable, scoped, Chinese-dominant, multi-line, and
+  issue-linked. Use `type(scope): 中文摘要` on the first line, include
+  `关联 issue: #<id>` in the body, and use Chinese bullet lines for key
+  changes. Do not include local absolute paths, provider-only metadata, or
+  AI-client signatures.
 - Do not add AI-client co-author trailers, including
   `Co-authored-by: Cursor <cursoragent@cursor.com>`.
 - Direct `main` maintenance is an exception only for the `xflow-devctl` and
@@ -48,6 +60,7 @@ Remote-write checklist:
 4. Run `devctl approval prepare --issue <id> --action <action> --file <file>`.
 5. Stop for human review.
 6. Continue only after the human sets `Approved: yes`.
+   If AI changes `Approved: no` to `Approved: yes`, the approval is invalid.
 7. Run `devctl check local-review --issue <id> --file <file> --action <action>`.
 8. Run the approved remote-write command.
 

@@ -27,8 +27,11 @@
 ## Commit Requirements
 
 - Before commit, re-read project rules or run the project-rule check.
-- Commit messages must follow project-level language and format rules.
-- If no project-specific format exists, use Chinese summary plus a concise body when the change is non-trivial.
+- Commit messages must be portable, scoped, Chinese-dominant, multi-line, and issue-linked.
+- First line format: `type(scope): 中文摘要`, where `scope` names the touched workflow, module, or issue area.
+- Body must include `关联 issue: #<id>` and Chinese bullet lines summarizing key changes or evidence.
+- Portable means plain Git text that travels across GitHub/Gitee: no AI-client trailers, no local absolute paths, no machine-specific usernames, and no provider-only metadata.
+- If no issue number is known, stop before committing and recover the active issue from the branch, `.xflow/current-task.md`, or the human reviewer.
 - Do not include unrelated formatting, drive-by refactors, or generated noise in the same commit.
 
 ## Issue Requirements Before Development

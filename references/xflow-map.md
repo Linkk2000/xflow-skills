@@ -116,7 +116,8 @@ compatibility scripts.
 
 For issue/comment creation, choose a single path before running commands:
 
-- No attachments and user explicitly authorized unattended remote write:
+- No attachments and the current user explicitly authorized this exact
+  unattended issue/comment command in the current conversation:
   `devctl issue create "<title>" --body-file issue.md --no-local-review`.
 - Issue/comment images or screenshots without an approved object storage
   backend: do not upload and do not use GitHub release assets. Keep local
@@ -176,6 +177,23 @@ The check does not approve work. It catches missing/stale state, including the
 case where local git metadata already records a PR but the task file still says
 the workflow is preparing or creating that PR.
 
+## Commit Message Format
+
+Commits must be portable, scoped, Chinese-dominant, multi-line, and
+issue-linked:
+
+```text
+type(scope): 中文摘要
+
+关联 issue: #<id>
+
+- 中文说明关键变化
+- 中文说明验证或证据
+```
+
+Portable commit text must not include AI-client trailers, local absolute paths,
+machine-specific usernames, or provider-only metadata.
+
 ## Pre-MR Target Branch Synchronization
 
 Before MR/PR creation, fetch the target branch and merge `origin/<base>` into
@@ -204,9 +222,21 @@ used as evidence. The active approval file is
 `.xflow/issues/issue-<id>/approvals/local-review.md`; for issue creation use
 `.xflow/issues/issue-draft/approvals/local-review.md`.
 
+Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
+command drafts, and review notes.
+AI must never satisfy a human gate itself.
+AI must never edit `Approved: no` to `Approved: yes`.
+AI must not use `--force`, `--no-local-review`, direct provider APIs, or manual
+approval-file edits to bypass review.
+
+Valid approval must explicitly name the exact next action. Vague replies such
+as "继续", "都可以", "你看着办", "go ahead", "looks good", or "测试过了就发" are
+not approval.
+
 Use `devctl approval prepare` to prefill mechanical fields such as timestamp,
 approved file, suggested command, and SHA256. The human reviewer inspects the
-artifact and changes `Approved: no` to `Approved: yes`.
+artifact and changes `Approved: no` to `Approved: yes`. If AI made that edit,
+the approval is invalid.
 
 ## Body Files
 

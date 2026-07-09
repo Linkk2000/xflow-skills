@@ -148,8 +148,8 @@ combinations.
 
 | Situation | Required command path |
 | --- | --- |
-| Plain unattended issue | `devctl issue create "<title>" --body-file issue.md --no-local-review` |
-| Plain unattended comment | `devctl issue comment <number> --body-file comment.md --no-local-review` |
+| Restricted unattended issue | Only after current-turn explicit human authorization for the exact no-attachment issue command: `devctl issue create "<title>" --body-file issue.md --no-local-review` |
+| Restricted unattended comment | Only after current-turn explicit human authorization for the exact no-attachment comment command: `devctl issue comment <number> --body-file comment.md --no-local-review` |
 | Issue/comment image or screenshot present without object storage approval | Do not upload. Keep local evidence and stop before remote write. |
 | Reviewed Aliyun OSS image issue | `attachment add --as image` -> `attachment publish --backend aliyun-oss` -> `attachment render` -> `approval prepare` -> `check local-review` -> `issue create --body-file issue.final.md --attachments manifest.json` |
 | Reviewed non-image issue attachment | `attachment add --as file` -> `attachment publish --backend manual --url att-001=https://public.example/file` -> `attachment render` -> `approval prepare` -> `check local-review` -> `issue create --body-file issue.final.md --attachments manifest.json` |

@@ -58,40 +58,52 @@ This is a phase-selected reference index. If unsure which file applies, read
    screenshots are present, publish them only through an approved object
    storage backend such as `aliyun-oss`; otherwise keep them as local evidence
    and stop.
-4. Maintain `.xflow/current-task.md` for active tasks and run
+4. Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
+   command drafts, and review notes. AI must never satisfy a human gate itself.
+   AI must never edit `Approved: no` to `Approved: yes`. AI must not
+   treat vague replies such as "继续", "都可以", "你看着办", "go ahead", or
+   "looks good" as approval unless the user explicitly names the exact action.
+   AI must not use `--force`, `--no-local-review`, direct provider APIs, or
+   manual approval-file edits to bypass review.
+5. Maintain `.xflow/current-task.md` for active tasks and run
    `devctl check current-task --issue <id>` before local approval, commit,
    push, MR/PR creation, and cleanup.
-5. Never create MR/PR before synchronizing the task branch with the target
+6. Never create MR/PR before synchronizing the task branch with the target
    branch and recording the sync evidence.
-6. The active approval file is always
+7. The active approval file is always
    `.xflow/issues/issue-<id>/approvals/local-review.md`; for issue creation use
    `.xflow/issues/issue-draft/approvals/local-review.md`.
-7. Do not invent alternate active approval names such as
+8. Do not invent alternate active approval names such as
    `local-review-mr.md`. Historical approvals may be archived under
    `approvals/history/`, but only `approvals/local-review.md` satisfies the
    gate.
-8. Use `--body-file` for Issue bodies, comments, and PR/MR bodies. Do not pass
+9. Use `--body-file` for Issue bodies, comments, and PR/MR bodies. Do not pass
    multiline Markdown, fenced code, JSON, shell snippets, backticks, or `$()`
    through inline command arguments.
-9. Do not publish local file paths or unresolved `xflow-attachment://`
+10. Do not publish local file paths or unresolved `xflow-attachment://`
    placeholders in remote Issues, comments, or PR/MR bodies. If a pasted file
    or image is referenced, use `references/attachment-policy.md`. Issue/comment
    image attachments are currently disabled unless an approved object storage
    backend published reviewed URLs; never use GitHub release assets as an
    issue/comment image store.
-10. `.xflow/issues/` is local evidence and approval workspace. Do not store
+11. `.xflow/issues/` is local evidence and approval workspace. Do not store
     COS/OSS URLs, object-storage URLs, or non-null `publishedUrl` values there.
     Rendered remote bodies and published attachment manifests belong under
     `.xflow/publish/issues/`.
-11. Large issues may be split into local subtask directories named
+12. Large issues may be split into local subtask directories named
     `.xflow/issues/issue-<id>/subtask-001`, `subtask-002`, and so on. Each
     subtask needs `README.md` and must pass `devctl check subtask --issue <id>`.
     Subtask evidence must stay under that subtask's `evidence/` directory in
     the repository; do not store it in COS/OSS or any object storage backend.
-12. Use the user's language for Git-related public text: commit messages,
+13. Use the user's language for Git-related public text: commit messages,
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
-13. Do not add AI-client co-author trailers. In particular, never add
+14. Commit messages must be portable, scoped, Chinese-dominant, multi-line,
+    and issue-linked. Use a first line like `type(scope): 中文摘要`, include
+    `关联 issue: #<id>` in the body, and describe key changes with Chinese
+    bullet lines. Do not include AI-client trailers, local absolute paths, or
+    provider-specific metadata that would not travel across GitHub/Gitee.
+15. Do not add AI-client co-author trailers. In particular, never add
     `Co-authored-by: Cursor <cursoragent@cursor.com>`.
 
 ## Required Flow
@@ -107,6 +119,7 @@ This is a phase-selected reference index. If unsure which file applies, read
    `devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md`.
 6. Stop for human review. The human reviewer must inspect the file and change
    `Approved: no` to `Approved: yes` before any remote write.
+   AI must not make that edit or treat its own review as approval.
 7. Create the remote issue only after approval:
    `devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md`.
 8. Start the task branch from the repository's base branch.
@@ -133,6 +146,18 @@ This is a phase-selected reference index. If unsure which file applies, read
 
 ## Core Remote Write Review Gate
 
+### Human Approval Is Non-Delegable
+
+AI may prepare approval files, evidence, command drafts, and review notes.
+AI must never satisfy a human gate itself.
+AI must never edit `Approved: no` to `Approved: yes`.
+AI must not use `--force`, `--no-local-review`, direct provider APIs, or manual
+approval-file edits to bypass review.
+
+Valid approval must explicitly name the exact next action, such as "创建 issue",
+"推送当前分支", "创建 MR", or "按方案 A 解决冲突". Vague replies such as "继续",
+"都可以", "你看着办", "go ahead", "looks good", or "测试过了就发" are not approval.
+
 Core remote writes are:
 
 - `issue-create`
@@ -157,6 +182,7 @@ Before each remote write:
 - `devctl approval prepare` should prefill the action, path, timestamp, and
   SHA256.
 - The human reviewer only needs to make a judgement and set `Approved: yes`.
+  If AI made that edit, the approval is invalid.
 - `devctl check local-review --issue <id> --file <file> --action <action>` must
   pass.
 
