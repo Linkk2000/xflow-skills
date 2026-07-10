@@ -43,8 +43,8 @@ Search anchor: Windows validation must not invoke bare `bash`.
 
 ## Command Semantics
 
-- `devctl init`: bootstrap a repository with XFlow project rules, cross-agent adapters, local devctl entrypoints, source/ref binding metadata, and default config templates. This is local-only and must not create issues, branches, commits, pushes, or MR/PRs.
-- `devctl restore`: rehydrate an existing XFlow repository on a new machine from `.xflow/xflow.json`. It restores cache/submodule sources, local devctl entrypoints, and `.xflow/devctl`. This is local-only and must not create issues, branches, commits, pushes, or MR/PRs.
+- `devctl init`: bootstrap a repository with XFlow project rules, cross-agent adapters, local devctl entrypoints, project-local `.xflow/ops/` tool binding metadata, and default config templates. This is local-only and must not create issues, branches, commits, pushes, or MR/PRs.
+- `devctl restore`: rehydrate an existing XFlow repository on a new machine from `.xflow/xflow.json`. It restores project-local `.xflow/ops/` tools, local devctl entrypoints, and `.xflow/devctl`. This is local-only and must not create issues, branches, commits, pushes, or MR/PRs.
 - `devctl issue create`: create issue only after duplicate check.
 - `devctl git push`: push current branch only after `Approved Action: git-push`.
 - `devctl git mr`: create MR/PR only, after push has already been approved or

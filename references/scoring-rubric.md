@@ -24,7 +24,7 @@ even when the numeric score is high.
 | --- | ---: | --- | --- | --- |
 | Trigger And Discovery | 8 | Frontmatter `description` states when to use the skill, names concrete symptoms, and avoids summarizing the workflow. Keywords match real user requests, tools, errors, and synonyms. | The skill is findable only when the user names it directly. | Agents cannot discover the skill from a natural task. |
 | Scope And Non-Use Boundaries | 6 | The skill says what it covers, what it does not cover, and when to ask or use another skill. | Scope is implied by examples but not explicit. | Agents apply it to unrelated tasks or miss relevant tasks. |
-| Precedence And Conflict Resolution | 8 | The skill states priority among current user instructions, project-local rules, project-bound XFlow submodules/config, tool docs, and model defaults. Conflict handling is explicit. | Precedence exists but omits project-local or user override cases. | Agents override project rules or ignore the latest user instruction. |
+| Precedence And Conflict Resolution | 8 | The skill states priority among current user instructions, project-local rules, project-bound XFlow config/local tools, tool docs, and model defaults. Conflict handling is explicit. | Precedence exists but omits project-local or user override cases. | Agents override project rules or ignore the latest user instruction. |
 | Phase And Human Gates | 10 | For workflow skills, phases, stop points, approval wording, and allowed unattended exceptions are explicit. For non-workflow skills, decision checkpoints are explicit. | Human gates are mentioned but not tied to exact actions. | Agents can continue through irreversible or externally visible actions without approval. |
 | Actionability And Recipes | 10 | Common cases map to exact commands, steps, or decision-table rows. Recipes are copyable and include required inputs/outputs. | The skill explains principles but requires agents to infer command combinations. | Agents must trial-and-error flags, files, or sequence order. |
 | Tool Contract Consistency | 9 | Skill text, command help, README, tests, environment variables, and actual tool behavior agree. Unsupported commands are not documented as supported. | Some commands are correct, but flags or defaults are stale. | Skill instructs agents to call nonexistent, unsafe, or over-bundled commands. |
@@ -77,13 +77,13 @@ Attach or cite these items when evaluating a skill:
 - Skill entrypoint: `SKILL.md` frontmatter and load-order section.
 - Reference routing: list of phase-specific files and when each is read.
 - Command contract: tool help, README, CLI parser, API wrapper, or script docs.
-- Rule precedence: user instruction, project rule, project-bound XFlow config/submodule, model default.
+- Rule precedence: user instruction, project rule, project-bound XFlow config/local tools, model default.
 - Human gates: exact approval files, wording, command flags, and exceptions.
 - Failure recovery: duplicate detection, read-before-retry, rollback or stop rule.
 - Platform proof: Windows and POSIX command examples, encoding and path rules.
 - Safety proof: secret handling, local-path rejection, attachment publishing.
 - Tests: retrieval tests, execution tests, pressure tests, and regression anchors.
-- Deployment proof: project submodule refs and repository-local wrappers match the recorded `.xflow/xflow.json` binding.
+- Deployment proof: project-local `.xflow/ops/` tools and repository-local wrappers match the recorded `.xflow/xflow.json` binding.
 
 ## Pressure Test Suite
 
@@ -144,7 +144,7 @@ For XFlow, apply the generic matrix plus these required checks:
 
 - Empty repositories must discover how to obtain XFlow and devctl without a
   pasted long prompt.
-- Project-bound source/ref/submodule settings are the runtime source of truth.
+- Project-bound source/ref/local tool settings are the runtime source of truth.
 - Issue, comment, attachment, branch, push, MR/PR, conflict, close, and cleanup
   actions must follow the state machine and human gates.
 - `devctl` and `devctl.ps1` are the supported workflow entrypoints. Normal

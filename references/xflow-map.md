@@ -11,7 +11,7 @@ do not hard-code a user's local project path or an academic paper layout here.
   devctl entrypoints.
 - `restore-policy.md`: how an existing XFlow repository is rehydrated on a new
   machine.
-- `source-resolution.md`: source/ref/submodule priority and project binding
+- `source-resolution.md`: source/ref/local ops tool priority and project binding
   rules.
 - `human-gates.md`: valid and invalid human approval wording.
 - `priority-and-overrides.md`: rule precedence and project override boundaries.
@@ -39,9 +39,10 @@ do not hard-code a user's local project path or an academic paper layout here.
    - `.cursorrules`
    - optional future entries such as `CLAUDE.md` or `GEMINI.md`
 
-The project-local tool submodules are the runtime source of truth. Do not use a
-global installed Skill or a user-level devctl PATH shim for repository work.
-Developer checkouts are maintenance workspaces only.
+The project-local tools under `.xflow/ops/` are the runtime source of truth.
+They may be local ignored vendor checkouts or explicitly approved submodules.
+Do not use a global installed Skill or a user-level devctl PATH shim for
+repository work.
 
 ## Provider Selection
 
@@ -85,7 +86,6 @@ Run from the owning repository.
 ./devctl approval prepare --issue <number> --action git-mr --file .xflow/issues/issue-<number>/mr-draft.md
 ./devctl check local-review --issue <number> --file .xflow/issues/issue-<number>/mr-draft.md --action git-mr
 ./devctl git mr --title "<title>" --body-file .xflow/issues/issue-<number>/mr-draft.md --issue <number>
-./devctl check submodule-hygiene
 ./devctl rules list
 ./devctl rules sync codex
 ./devctl rules sync cursor
@@ -98,7 +98,6 @@ On Windows, prefer:
 ```powershell
 .\devctl.ps1 preflight
 .\devctl.ps1 check current-task --issue <number>
-.\devctl.ps1 check submodule-hygiene
 ```
 
 Windows validation must use Python core checks, for example:
@@ -107,6 +106,9 @@ Windows validation must use Python core checks, for example:
 python tests/python-core.py
 python tests/entrypoint-routing.py
 ```
+
+Run `devctl check submodule-hygiene` only when the project explicitly uses
+submodules for `.xflow/ops/devctl` and `.xflow/ops/workflow`.
 
 Do not use bare `bash`, Git Bash, or WSL as the normal Windows validation path.
 `bash -n` is POSIX-only and applies only to intentionally changed shell

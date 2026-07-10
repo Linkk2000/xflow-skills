@@ -7,10 +7,9 @@ Use this when the target repository is empty or does not contain project-level X
 - XFlow Skill source: `git@github.com:Linkk2000/xflow-skills.git`
 - devctl source: `git@github.com:Linkk2000/xflow-devctl.git`
 
-Submodule mode is the default. Bootstrap should bind XFlow inside the target
-repository rather than relying on a user-level installed skill or PATH devctl.
-Developer checkouts may exist for maintaining XFlow itself, but they are not
-normal runtime sources for user projects.
+Local ignored vendor mode is the default. Bootstrap should bind XFlow inside
+the target repository under `.xflow/ops/` rather than relying on a user-level
+installed skill or PATH devctl.
 
 If the network source is unavailable and no project-bound copy exists, stop and
 ask the user where to obtain XFlow. Do not silently use a global installed
@@ -30,13 +29,13 @@ The agent executes the required local commands. Do not answer by making the user
 
 Before first-time bootstrap, ask the user to choose the XFlow source strategy when it is not already clear:
 
-1. Project-bound git submodules under `.xflow/ops/` on main branch.
-2. Project-bound git submodules on a specific branch for skill and/or devctl.
-3. Project-bound git submodules pinned to a specific tag or commit.
+1. Project-local ignored vendor checkouts under `.xflow/ops/` on main branch.
+2. Project-local ignored vendor checkouts on a specific branch for skill and/or devctl.
+3. Explicit project submodules pinned to a specific branch, tag, or commit.
 
-The project default is submodule mode on the main branch. A project may record
-source, ref, mode, and path in `.xflow/xflow.json`; that project binding is the
-authority for future restore.
+The project default is `local-ignored-vendor` mode on the main branch. A
+project may record source, ref, mode, and path in `.xflow/xflow.json`; that
+project binding is the authority for future restore.
 
 ## Bootstrap Trigger
 
@@ -89,11 +88,12 @@ The project should also contain:
 
 - `.xflow/ops/devctl`
 - `.xflow/ops/workflow`
-- `.gitmodules`
+- `.gitignore` entries for `.xflow/ops/devctl/`, `.xflow/ops/workflow/`, and
+  `.xflow/local/`
 
-The agent is responsible for adding or validating those submodules during
-bootstrap. Do not ask the user to run the submodule commands manually unless
-the current environment cannot execute Git commands.
+The agent is responsible for cloning or refreshing those project-local tool
+directories during bootstrap. Do not ask the user to run the Git commands
+manually unless the current environment cannot execute Git commands.
 
 ## Post-Bootstrap Stop
 
