@@ -37,6 +37,8 @@ This is a phase-selected reference index. If unsure which file applies, read
 - Issue creation and comments: `references/issue-policy.md`
 - Pasted files, screenshots, images, and comment attachments:
   `references/attachment-policy.md`
+- Difference analysis, reviewer-readable evidence, and completion proof:
+  `references/evidence-analysis.md`
 - Branch, commit, push, MR, merge, conflict handling: `references/git-policy.md`
 - `devctl` command semantics and default variables: `references/devctl-contract.md`
 - Windows, PowerShell, WSL, UTF-8, LF/CRLF: `references/platform-adapters.md`
@@ -186,8 +188,10 @@ quality gap, workflow gap, or "差距":
 
 1. Convert the oral report into `.xflow/issues/issue-draft/gap-analysis.md` or
    `.xflow/issues/issue-<id>/gap-analysis.md`.
-2. Add evidence, clarify the problem/gap, define scope boundaries, propose the
-   modification plan, and write acceptance criteria.
+2. Read `references/evidence-analysis.md`, then add reviewer-readable local
+   evidence. Each finding needs its own observation, direct evidence, analysis,
+   acceptance condition, and human-review checkbox; do not use a generic test
+   claim or code diff as proof.
 3. Stop for human recognition of the gap analysis before modifying source or
    workflow files.
 4. After implementation, write
@@ -201,9 +205,12 @@ remaining work is documented. `blocked` means AI cannot continue without human
 decision or an external condition.
 
 Gap analysis and resolution evidence under `.xflow/issues/` is local
-repository evidence. Do not store or cite COS/OSS/object-storage URLs as the
-evidence source for these reports. Publishing a report to GitHub/Gitee still
-requires the normal remote-write human gate.
+repository evidence. Keep issue-level artifacts under
+`.xflow/issues/issue-<id>/evidence/` and subtask artifacts under the subtask's
+`evidence/` directory. Do not store or cite COS/OSS/object-storage URLs as the
+evidence source for these reports. For UI findings, when browser access is
+available, retain both a live screenshot and DOM observation. Publishing a
+report to GitHub/Gitee still requires the normal remote-write human gate.
 
 ## Core Remote Write Review Gate
 
@@ -256,6 +263,7 @@ Before each remote write:
 - Rendered remote body: `.xflow/publish/issues/issue-<id>/<body>.final.md`
 - Local subtask: `.xflow/issues/issue-<id>/subtask-001/README.md`
 - Local subtask evidence: `.xflow/issues/issue-<id>/subtask-001/evidence/`
+- Issue-level local evidence: `.xflow/issues/issue-<id>/evidence/`
 - Problem/gap analysis: `.xflow/issues/issue-<id>/gap-analysis.md`
 - Resolution report: `.xflow/issues/issue-<id>/resolution-report.md`
 - MR/PR draft: `.xflow/issues/issue-<id>/mr-draft.md`

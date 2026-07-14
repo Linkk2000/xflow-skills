@@ -59,6 +59,13 @@ Hard rules:
   `.xflow/issues/issue-<id>/resolution-report.md` with evidence and a
   `resolved|reduced|blocked` conclusion. If self-review finds the report is
   not true, AI must rework and rewrite the report before human handoff.
+- Evidence must be reviewable, not merely asserted. Read
+  `references/evidence-analysis.md`: every gap-analysis finding and completion
+  criterion needs its own local evidence bundle under the relevant `evidence/`
+  directory, with observation, direct artifact, analysis/result, and a human
+  review checkbox. For UI work with browser access, retain both a live
+  screenshot and DOM observation. A code diff or "tests passed" statement is
+  not completion evidence.
 - Do not add AI-client co-author trailers, including
   `Co-authored-by: Cursor <cursoragent@cursor.com>`.
 - Direct `main` maintenance is an exception only for the `xflow-devctl` and

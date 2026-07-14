@@ -77,12 +77,16 @@ When the user orally reports a problem or gap, AI first prepares
 `gap-analysis.md` under `.xflow/issues/issue-draft/` or
 `.xflow/issues/issue-<id>/`. The analysis must clarify the gap, include local
 evidence, define scope, propose the modification plan, and list acceptance
-criteria. AI must stop for human recognition before implementation.
+criteria. Every finding must have its own reviewer-readable evidence bundle:
+observation, direct local artifact, analysis, acceptance condition, and human
+review checkbox. AI must stop for human recognition before implementation.
 
 After implementation, AI writes
 `.xflow/issues/issue-<id>/resolution-report.md`. The report must cite local
 evidence, describe actual changes, and use exactly one closure conclusion:
-`resolved|reduced|blocked`.
+`resolved|reduced|blocked`. Every claimed completion criterion needs fresh,
+direct verification evidence; do not treat a code diff or AI test claim as
+proof.
 
 For `resolved` or `reduced`, all AI self-review checklist items must be
 complete. If self-review shows the report is not true, AI must rework and rewrite the report

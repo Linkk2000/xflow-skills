@@ -33,7 +33,8 @@ even when the numeric score is high.
 | Data, Secret, And Publication Safety | 8 | The skill forbids secrets, local file paths, unresolved placeholders, and private temp paths in public outputs. Attachment/publication rules are explicit. | Safety rules exist but are not checked before publication. | Public issue/comment/MR bodies can leak local paths, placeholders, or secrets. |
 | Project Override Compliance | 7 | Project-level rules, local adapters, branch/ref bindings, language rules, and special repository policy override project-bound defaults. | Project override is stated but not tested under long context. | Agents ignore local `AGENTS.md`, `.cursorrules`, `CLAUDE.md`, or equivalent files. |
 | Verification And Pressure Testing | 10 | The skill has tests for retrieval, execution, pressure, long context, conflict, platform, and failure recovery. Baseline failure or regression anchors are recorded. | Tests check only text anchors or happy-path commands. | No evidence shows agents actually behave differently because of the skill. |
-| Context Economy And Maintainability | 7 | Main `SKILL.md` is short and routes to phase-specific references. Heavy details live in separate files. Duplicated rules are minimized. | Content is clear but too long or repetitive. | The skill bloats context, hides key rules deep in prose, or has inconsistent duplicates. |
+| Evidence Reviewability | 5 | Each finding and completion claim has direct, local, human-readable artifacts. UI evidence distinguishes live screenshots and DOM observations; code changes alone are never accepted as proof. | Evidence exists but is global, ambiguous, stale, or requires the reviewer to infer the claim. | The AI can declare completion using only a diff, a generic screenshot, or its own test assertion. |
+| Context Economy And Maintainability | 2 | Main `SKILL.md` is short and routes to phase-specific references. Heavy details live in separate files. Duplicated rules are minimized. | Content is clear but too long or repetitive. | The skill bloats context, hides key rules deep in prose, or has inconsistent duplicates. |
 
 ## Hard Fail Gates
 
@@ -54,6 +55,7 @@ Fail the skill immediately if any item is true:
 - Push and PR/MR creation are bundled when policy says they require separate
   approval.
 - No verification evidence exists beyond reading the skill manually.
+- A finding or completion claim has no direct artifact that lets a human judge it.
 
 ## Evaluator Workflow
 
@@ -83,6 +85,8 @@ Attach or cite these items when evaluating a skill:
 - Platform proof: Windows and POSIX command examples, encoding and path rules.
 - Safety proof: secret handling, local-path rejection, attachment publishing.
 - Tests: retrieval tests, execution tests, pressure tests, and regression anchors.
+- Reviewability: per-finding observation/evidence/analysis bundles and fresh
+  per-criterion completion verification artifacts.
 - Deployment proof: project-local `.xflow/ops/` tools and repository-local wrappers match the recorded `.xflow/xflow.json` binding.
 
 ## Pressure Test Suite
@@ -125,7 +129,8 @@ Dimension scores:
 - Data, Secret, And Publication Safety: /8
 - Project Override Compliance: /7
 - Verification And Pressure Testing: /10
-- Context Economy And Maintainability: /7
+- Evidence Reviewability: /5
+- Context Economy And Maintainability: /2
 
 Evidence:
 - Files:

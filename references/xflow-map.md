@@ -24,6 +24,8 @@ do not hard-code a user's local project path or an academic paper layout here.
   retry safety.
 - `attachment-policy.md`: pasted files, screenshots, image manifests, backend
   publishing, and placeholder guards for issue/comment/MR bodies.
+- `evidence-analysis.md`: difference analysis, direct local evidence bundles,
+  UI screenshot/DOM proof, and completion verification.
 - `scoring-rubric.md`: 100-point effectiveness rubric and hard-fail conditions.
 - `ops-lessons.md`: concise operational lessons for remote writes, shell
   boundaries, and context drift.
@@ -267,13 +269,19 @@ issue.
 
 `gap-analysis.md` clarifies the problem/gap, scope, proposed modification plan,
 acceptance criteria, human recognition state, and repository-local evidence.
+Each finding requires a direct evidence bundle with an observation, local
+artifact, analysis, acceptance condition, and human-review checkbox. Store
+issue-level artifacts under `.xflow/issues/issue-<id>/evidence/`; for UI work
+with browser access, retain both `evidence/screenshots/` and `evidence/dom/`.
 AI must not implement until the human recognizes the analysis.
 
 After implementation, write
 `.xflow/issues/issue-<id>/resolution-report.md`. It records actual changes,
 evidence, remaining risks, human review request, and a
-`resolved|reduced|blocked` conclusion. If self-review shows the conclusion is
-not true, AI must rework and rewrite the report before handoff.
+`resolved|reduced|blocked` conclusion. Each claimed criterion requires fresh,
+direct verification evidence; a code diff or an AI test claim is not proof. If
+self-review shows the conclusion is not true, AI must rework and rewrite the
+report before handoff.
 
 Gap and resolution evidence stays under `.xflow/issues/`; do not use COS/OSS or
 object storage as local evidence for these reports. Publishing either document

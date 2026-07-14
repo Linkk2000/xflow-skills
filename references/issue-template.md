@@ -163,6 +163,34 @@ for human recognition before implementation.
 ## Evidence
 - [local evidence](evidence/<small-file-or-log>)
 
+## Evidence-Backed Findings
+
+### Finding F-001: <short observable discrepancy>
+
+#### Finding Type
+ui|non-ui
+
+#### Observation
+<what was directly observed and how it was reproduced>
+
+#### User Impact
+<why this discrepancy matters>
+
+#### Evidence
+- [direct local artifact](evidence/<screenshots|dom|logs|fixtures>/<file>)
+
+#### Analysis
+<proven cause, supported hypothesis, or explicit unknown>
+
+#### Proposed Change
+<smallest change that addresses the finding>
+
+#### Acceptance
+- [ ] <observable acceptance condition>
+
+#### Human Review
+- [ ] Confirm the observation, evidence, and proposed change.
+
 ## Scope Boundaries
 - Includes:
 - Excludes:
@@ -181,7 +209,10 @@ Notes:
 
 AI may prepare this file, collect evidence, and ask clarifying questions. AI
 must not treat the analysis as approved until the human explicitly recognizes
-the gap and intended direction.
+the gap and intended direction. Read `evidence-analysis.md`: every finding
+needs a direct evidence bundle. For `ui`, include both a live screenshot under
+`evidence/screenshots/` and a DOM observation under `evidence/dom/` when a
+browser is available.
 
 ## resolution-report.md
 
@@ -201,6 +232,25 @@ problem was solved or the gap was reduced, with evidence.
 ## Evidence Index
 - [local evidence](evidence/<small-file-or-log>)
 
+## Completion Verification
+
+### Criterion C-001: <acceptance criterion being verified>
+
+#### Verification Type
+ui|non-ui
+
+#### Expected Result
+<the observable result that would satisfy the criterion>
+
+#### Evidence
+- [fresh post-change artifact](evidence/<screenshots|dom|logs|fixtures>/<file>)
+
+#### Actual Result
+<what the linked evidence shows>
+
+#### Human Review
+- [ ] Confirm the evidence supports this result.
+
 ## Closure Conclusion
 resolved|reduced|blocked: <reason>
 
@@ -219,6 +269,10 @@ Allowed conclusions are exactly `resolved|reduced|blocked`. For `resolved` and
 report is not true, AI must rework and rewrite the report before handoff. If AI
 cannot continue, use `blocked` and state the human decision or external
 condition needed.
+
+Read `evidence-analysis.md` before declaring `resolved` or `reduced`. Each
+completion criterion needs fresh, local, reviewer-readable evidence; a code
+diff or the AI's own test claim is not enough.
 
 ## subtask-001/README.md
 
