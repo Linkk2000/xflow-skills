@@ -1,0 +1,34 @@
+# Enums:
+#   type: child-feature | shared-infrastructure | external
+#   status: discovered | active | available | integrated | superseded
+#   blockingAssessment: none | partial | full
+#   decision: continue | pause-affected-scope | wait | use-temporary-adapter
+# Evidence paths are relative to .xflow/issues/issue-IK152D/ and must stay in
+# the repository. Do not publish dependency evidence to object storage.
+version: 0.1.0
+issue: IK152D
+dependencies:
+  - issue: IK17AW
+    repository: xflow-web
+    type: shared-infrastructure
+    requiredFor:
+      - xflow.verify.case.stable-edge-anchor
+    integrationTarget: mainline
+    status: integrated
+    blockingAssessment: partial
+    decision: continue
+    rationale: 属性编辑可继续，最终画布验证依赖统一端点能力。
+    delivery:
+      branch: fix/IK17AW-canonical-endpoints
+      commit: abc1234
+      mergeRequest: "56"
+    integration:
+      commit: def5678
+      verifiedBy:
+        - C-004
+      evidence:
+        - evidence/logs/c-004-integration-tests.txt
+    closureAssessment:
+      affectsClosure: true
+      decision: integrated
+      rationale: 相关验收已在主功能分支重新验证。
