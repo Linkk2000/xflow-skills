@@ -34,12 +34,19 @@ in `.xflow/issues/issue-<id>/dependencies.yaml` after its identity is known.
 
 AI may prepare classification analysis, Issue text, traceability, and approval
 material. Creating a remote dependency Issue remains a remote write protected
-by Human Approval Is Non-Delegable. AI must wait for exact human approval of
-that action unless a valid task-scoped unattended state already exists.
+by Human Approval Is Non-Delegable by default. After running current-task,
+Issue draft structure, evidence, attachment, provider/platform, and applicable
+test checks, choose exactly one path:
+
+- Default human path: prepare the approval file, wait for exact human approval,
+  and validate it with `devctl check local-review` before Issue creation.
+- Valid task-scoped unattended path: verify the bound state and covered action,
+  then skip approval-file preparation, human wait, and local-review validation.
+  The current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
 
 ## Advisory Blocking Assessment
 
-Every dependency records:
+Every dependency records its development decision:
 
 - `blockingAssessment`: `none|partial|full`
 - `decision`: `continue|pause-affected-scope|wait|use-temporary-adapter`
@@ -76,11 +83,12 @@ Simple in-scope work stays directly on the main feature branch.
 
 ## Parent Closure Assessment
 
-Each dependency records `closureAssessment.affectsClosure`, `decision`, and
-`rationale`:
+Each dependency records `closureAssessment.affectsClosure`, closure `decision`
+(`integrated|not-required|superseded`), and `rationale`:
 
 - An unintegrated dependency may support `resolved` only when
-  `affectsClosure: false` has sufficient evidence and rationale.
+  `affectsClosure: false` uses `decision: not-required` with sufficient evidence
+  and rationale.
 - An unintegrated dependency affecting some acceptance conditions keeps the
   parent conclusion at `reduced`.
 - A dependency preventing all useful progress may support `blocked`.

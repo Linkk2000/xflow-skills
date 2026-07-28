@@ -34,11 +34,11 @@ Runtime rules:
   - `.xflow/issues/issue-draft/issue-draft.md`
   - `.xflow/issues/issue-<id>/comment-draft.md`
   - `.xflow/issues/issue-<id>/mr-draft.md`
-- Run `devctl check issue-draft`, `devctl check mr-draft`, and
-  `devctl check local-review` before remote writes.
+- Run `devctl check issue-draft`, `devctl check mr-draft`, and all applicable
+  mechanical checks before remote writes. On the default human path, run `devctl check local-review` before remote writes.
 - Core remote writes are `issue-create`, `issue-comment`, `issue-close`, and
-  `git-mr`; they require local human review of the exact file being published
-  or used as evidence.
+  `git-mr`; they require local human review of the exact file on the default
+  human path, or a valid task-scoped unattended state for the current action.
 - Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
   command drafts, and review notes. AI must never satisfy a human gate itself.
   AI must never edit `Approved: no` to `Approved: yes`. AI must not
@@ -57,12 +57,19 @@ Runtime rules:
   In all modes, force push, history rewrite, destructive deletion, and secret or permission changes remain excluded.
   On mismatch, task switch, completion, or invalid state, fail closed and
   restore ordinary human review. `--no-local-review` alone is invalid.
-- Remote-write sequence: prepare the file, run the matching `devctl check`,
-  run `devctl approval prepare`, stop for human review, continue only after the
-  human sets `Approved: yes`, then run `devctl check local-review`.
-- Push and PR/MR creation are separate gates. Use `devctl git push` only after
-  `Approved Action: git-push`; use `devctl git mr` only after separate
-  `Approved Action: git-mr`. After PR/MR creation, devctl may create and push
+- Remote-write common checks: prepare the body/evidence file, run
+  `devctl check current-task --issue <id>`, and run the matching draft,
+  structure, evidence, attachment, provider/platform, and test checks.
+- Default human path: run `devctl approval prepare`, stop for human review,
+  continue only after the human sets `Approved: yes`, then run
+  `devctl check local-review`. AI must not edit the approval.
+- Valid task-scoped unattended path: verify the bound state and action, then
+  skip approval-file prepare, human wait, and local-review check. The
+  current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
+- On the default human path, push and PR/MR creation are separate human gates:
+  use `Approved Action: git-push` for push and a separate
+  `Approved Action: git-mr` for PR/MR creation. Under valid task-scoped unattended mode, each push or PR/MR action must be covered by the bound state and pass its mechanical checks; approval-file steps are skipped.
+  After PR/MR creation, devctl may create and push
   one metadata-only state backfill commit containing the PR number/URL. Do not
   create another PR only to commit post-merge state metadata.
 - Use the user's language for Git-related public text: commit messages, remote

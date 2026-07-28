@@ -62,6 +62,18 @@ Gitee endpoints directly from an AI workflow.
 
 Run from the owning repository.
 
+### Project-Local Compatibility Gate
+
+This map spans multiple devctl versions. Before using `unattended`,
+`check dependencies`, or extended `check commit-msg` options, inspect the
+project-local `devctl help` output and relevant subcommand help. On Windows use
+`.\devctl.ps1 help`; on POSIX use `./devctl help`. If a capability is missing,
+stop and update or restore the project-local devctl from the project's bound
+XFlow source. AI must not probe by trying commands or pretend the capability is available.
+
+Do not mark the commands permanently unavailable; support is determined by the
+project-local version.
+
 ```bash
 ./devctl help
 ./devctl preflight
@@ -124,23 +136,27 @@ compatibility scripts.
 
 ## Issue And Attachment Command Choice
 
-For issue/comment creation, choose a single path before running commands:
+For issue/comment creation, first run common current-task, draft structure,
+evidence, attachment, sensitive-data, provider/platform, and applicable test
+checks:
 
-- A valid repository/worktree/task-bound unattended state may replace the
-  ordinary approval gate. The compatibility flag alone never authorizes it.
 - Issue/comment images or screenshots without an approved object storage
   backend: do not upload and do not use GitHub release assets. Keep local
   evidence and stop before remote write.
 - Issue/comment images or screenshots with approved Aliyun OSS config: use
   `attachment add --as image`, `attachment publish --backend aliyun-oss`,
-  `attachment render`, `approval prepare`, `check local-review`, then the
-  final `issue create` or `issue comment` command with
-  `--attachments manifest.json`.
-- Non-image attachments and normal human gate required: use `attachment add`,
+  and `attachment render` before the remote command.
+- For non-image attachments, use `attachment add`,
   `attachment publish --backend manual` with an approved public URL,
-  `attachment render` when needed, `approval prepare`, `check local-review`,
-  then the final `issue create` or `issue comment` command with
-  `--attachments manifest.json`.
+  and `attachment render` when needed.
+
+After common checks and attachment preparation, choose one gate path:
+
+- Default human path: run `approval prepare`, wait for the human decision, and
+  run `check local-review` before the final issue/comment command.
+- Valid task-scoped unattended path: verify the bound state and action, then
+  skip approval-file preparation, human wait, and local-review validation.
+  All common checks and attachment preparation remain mandatory. The compatibility flag alone never authorizes it.
 
 Issue/comment image attachments are disabled unless the manifest shows an
 approved object storage backend such as `aliyun-oss`. Other files may render as
@@ -255,8 +271,8 @@ to the same branch under the `git-mr` approval scope.
 
 ## Remote-Write Gate
 
-Core remote writes require local review of the exact file being published or
-used as evidence. The active approval file is
+On the default human path, core remote writes require local review of the exact
+file being published or used as evidence. The active approval file is
 `.xflow/issues/issue-<id>/approvals/local-review.md`; for issue creation use
 `.xflow/issues/issue-draft/approvals/local-review.md`.
 
@@ -272,10 +288,15 @@ Valid approval must explicitly name the exact next action. Vague replies such
 as "继续", "都可以", "你看着办", "go ahead", "looks good", or "测试过了就发" are
 not approval.
 
-Use `devctl approval prepare` to prefill mechanical fields such as timestamp,
-approved file, suggested command, and SHA256. The human reviewer inspects the
-artifact and changes `Approved: no` to `Approved: yes`. If AI made that edit,
-the approval is invalid.
+Choose one gate path after all mechanical checks:
+
+- Default human path: use `devctl approval prepare` to prefill timestamp,
+  approved file, suggested command, and SHA256. The human reviewer inspects the
+  artifact and changes `Approved: no` to `Approved: yes`, then local-review
+  validation must pass. If AI made that edit, the approval is invalid.
+- Valid task-scoped unattended path: verify the bound state and action, skip
+  approval-file preparation, human wait, and local-review validation, then run
+  the remote command through devctl. All non-approval checks remain mandatory.
 
 ## Body Files
 

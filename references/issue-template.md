@@ -288,7 +288,7 @@ Parent closure examples:
 # Dependency does not affect the accepted completion criteria.
 closureAssessment:
   affectsClosure: false
-  decision: continue
+  decision: not-required
   rationale: 未覆盖当前 Issue 的验收条件，后续独立交付。
 
 # Parent consumed the dependency and gathered fresh integration evidence.

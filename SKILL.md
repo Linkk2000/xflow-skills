@@ -1,6 +1,6 @@
 ---
 name: xflow-tdd-workflow
-description: Generic Git, Issue, TDD, local-review, pre-merge synchronization, and PR/MR workflow for software-development repositories. Use when an AI assistant must turn a user request into a reviewed issue-driven branch workflow with local human approval before remote writes.
+description: Generic Git, Issue, TDD, local-review, pre-merge synchronization, and PR/MR workflow for software-development repositories. Use when an AI assistant must turn a user request into a reviewed issue-driven branch workflow with default local human approval or valid task-scoped unattended authorization before remote writes.
 ---
 
 # XFlow TDD Workflow
@@ -149,31 +149,38 @@ This is a phase-selected reference index. If unsure which file applies, read
    `references/workflow-state-machine.md`.
 4. Run `devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md`
    and `devctl check current-task`.
-5. Prepare approval with
-   `devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md`.
-6. Stop for human review. The human reviewer must inspect the file and change
-   `Approved: no` to `Approved: yes` before any remote write.
-   AI must not make that edit or treat its own review as approval.
-7. Create the remote issue only after approval:
+5. Choose exactly one remote-write path:
+   - Default human path: run
+     `devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md`,
+     stop for the human to set `Approved: yes`, then run
+     `devctl check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create`.
+     AI must not make the approval edit or treat its own review as approval.
+   - Valid task-scoped unattended path: verify the repository/worktree/task
+     state, then skip `devctl approval prepare`, human wait, and `devctl check local-review`.
+     The current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
+6. Create the remote issue through devctl:
    `devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md`.
-8. Start the task branch from the repository's base branch.
-9. Follow TDD: write or identify a failing test/check first, then implement the
+7. Start the task branch from the repository's base branch.
+8. Follow TDD: write or identify a failing test/check first, then implement the
    smallest change to pass it.
-10. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
+9. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
     If the issue is too large, create `.xflow/issues/issue-<id>/subtask-001/`
     style local subtasks and record their plans, evidence, review checkpoints,
     and conclusions in each subtask README.
-11. Before commit, push, PR/MR creation, or cleanup, run
+10. Before commit, push, PR/MR creation, or cleanup, run
     `devctl check current-task --issue <id>`.
-12. Before requesting MR/PR approval, fetch the target branch, merge
+11. Before requesting MR/PR approval, fetch the target branch, merge
     `origin/<base>` into the task branch by default, resolve approved
     conflicts, rerun relevant checks, and record the target branch SHA plus
     sync result.
-13. Prepare `Approved Action: git-push`, stop for human review, then run
-    `devctl git push --issue <id> --file .xflow/issues/issue-<id>/walkthrough.md`.
-14. Draft `.xflow/issues/issue-<id>/mr-draft.md`, run
-    `devctl check mr-draft --issue <id>`, prepare `Approved Action: git-mr`,
-    stop for human review, then run `devctl git mr --body-file ... --issue <id>`.
+12. For push, run applicable mechanical checks, then use the same chosen path:
+    the default human path prepares and validates `Approved Action: git-push`;
+    the valid task-scoped unattended path skips only those approval-file steps.
+    Run `devctl git push --issue <id> --file .xflow/issues/issue-<id>/walkthrough.md`.
+13. Draft `.xflow/issues/issue-<id>/mr-draft.md` and run
+    `devctl check mr-draft --issue <id>`, then use the same default human or
+    valid task-scoped unattended path before
+    `devctl git mr --body-file ... --issue <id>`.
     After PR/MR creation, devctl records the PR number/URL, creates a
     metadata-only state backfill commit, and pushes that commit to the same
     branch under the `git-mr` approval scope.
@@ -264,12 +271,16 @@ Before each remote write:
 - A valid task-scoped unattended state may replace the ordinary human gate for
   an in-scope remote write. Image attachments still fail closed unless the
   approved object storage flow has produced valid public URLs.
-- `devctl approval prepare` should prefill the action, path, timestamp, and
-  SHA256.
-- The human reviewer only needs to make a judgement and set `Approved: yes`.
-  If AI made that edit, the approval is invalid.
-- `devctl check local-review --issue <id> --file <file> --action <action>` must
-  pass.
+
+Choose one gate path after the common checks:
+
+- Default human path: `devctl approval prepare` prefills action, path,
+  timestamp, and SHA256; the human reviewer sets `Approved: yes`; then
+  `devctl check local-review --issue <id> --file <file> --action <action>` must
+  pass. If AI made the approval edit, the approval is invalid.
+- Valid task-scoped unattended path: verify the bound state and covered action,
+  then skip `devctl approval prepare`, human wait, and `devctl check local-review`.
+  The current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
 
 ## Task-Scoped Unattended Mode
 

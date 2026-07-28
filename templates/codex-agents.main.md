@@ -24,7 +24,7 @@ Hard rules:
 - Maintain `.xflow/current-task.md` for active tasks and run
   `devctl check current-task --issue <id>` before local approval, commit,
   push, PR/MR creation, and cleanup.
-- Do not perform remote writes before local human review approves the exact
+- Outside valid Task-Scoped Unattended Mode, do not perform remote writes before local human review approves the exact
   file being published or used as evidence.
 - Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
   command drafts, and review notes. AI must never satisfy a human gate itself.
@@ -90,21 +90,24 @@ Hard rules:
   `xflow-skills` tool repositories when the user explicitly requests it. Do
   not apply that exception to ordinary user projects.
 
-Remote-write checklist:
+Remote-write common checks:
 
 1. Create the body/evidence file.
 2. Run `devctl check current-task --issue <id>`.
 3. Run the matching `devctl check ...` command.
-4. Run `devctl approval prepare --issue <id> --action <action> --file <file>`.
-5. Stop for human review.
-6. Continue only after the human sets `Approved: yes`.
-   If AI changes `Approved: no` to `Approved: yes`, the approval is invalid.
-7. Run `devctl check local-review --issue <id> --file <file> --action <action>`.
-8. Run the approved remote-write command.
+4. Choose one path:
+   - Default human path: run `devctl approval prepare`, stop for human review,
+     continue only after the human sets `Approved: yes`, then run
+     `devctl check local-review`. If AI edits the approval, it is invalid.
+   - Valid task-scoped unattended path: verify the bound state and action, then
+     skip approval-file prepare, human wait, and local-review check. The
+     current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
+5. Run the remote-write command through devctl.
 
-Push and PR/MR creation are separate gates. Use `devctl git push` only after
-`Approved Action: git-push`; use `devctl git mr` only after separate
-`Approved Action: git-mr`. After PR/MR creation, devctl may create and push one
+On the default human path, push and PR/MR creation are separate human gates:
+use `Approved Action: git-push` for push and a separate
+`Approved Action: git-mr` for PR/MR creation. Under valid task-scoped unattended mode, each push or PR/MR action must be covered by the bound state and pass its mechanical checks; approval-file steps are skipped.
+After PR/MR creation, devctl may create and push one
 metadata-only state backfill commit containing the PR number/URL. Do not create
 another PR only to commit post-merge state metadata.
 

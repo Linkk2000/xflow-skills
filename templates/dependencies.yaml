@@ -2,7 +2,8 @@
 #   type: child-feature | shared-infrastructure | external
 #   status: discovered | active | available | integrated | superseded
 #   blockingAssessment: none | partial | full
-#   decision: continue | pause-affected-scope | wait | use-temporary-adapter
+#   development decision: continue | pause-affected-scope | wait | use-temporary-adapter
+#   closure decision: integrated | not-required | superseded
 # Evidence paths are relative to .xflow/issues/issue-IK152D/ and must stay in
 # the repository. Do not publish dependency evidence to object storage.
 version: 0.1.0

@@ -12,6 +12,19 @@
 
 Search anchor: Windows validation must not invoke bare `bash`.
 
+## Project-Local Compatibility Gate
+
+This file is a cross-version Skill contract. Before using newer commands or
+options such as `unattended`, `check dependencies`, or the extended
+`check commit-msg`, inspect the project-local `devctl help` output (on Windows,
+`.\devctl.ps1 help`; on POSIX, `./devctl help`) and the relevant subcommand
+help. If support is absent, stop and update or restore the project-local devctl
+from the project's configured XFlow source before continuing. AI must not probe by trying commands or pretend the capability is available.
+
+Do not permanently label these commands unimplemented: availability depends on
+the project-local devctl version. Project-local help is authoritative for the
+current repository.
+
 ## Default Variable Locations
 
 - XFlow Skill source: `git@github.com:Linkk2000/xflow-skills.git`
