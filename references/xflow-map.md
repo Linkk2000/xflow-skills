@@ -205,13 +205,15 @@ Commits must be portable, scoped, Chinese-dominant, multi-line, and
 issue-linked:
 
 ```text
-type(scope): 中文摘要
+type(scope): 中文核心摘要[#Issue编号]
 
-关联 issue: #<id>
-
-- 中文说明关键变化
-- 中文说明验证或证据
+- 中文说明实际修改
+- 中文说明对应的契约、Finding 或验收条件
+- 中文说明测试结果和证据位置
 ```
+
+Ordinary commits use one direct-owner Issue ID. Explicit integration commits
+may use both the parent and dependency Issue IDs.
 
 Portable commit text must not include AI-client trailers, local absolute paths,
 machine-specific usernames, or provider-only metadata.

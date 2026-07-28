@@ -117,9 +117,11 @@ This is a phase-selected reference index. If unsure which file applies, read
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
 15. Commit messages must be portable, scoped, Chinese-dominant, multi-line,
-    and issue-linked. Use a first line like `type(scope): 中文摘要`, include
-    `关联 issue: #<id>` in the body, and describe key changes with Chinese
-    bullet lines. Do not include AI-client trailers, local absolute paths, or
+    and issue-linked. Use `type(scope): 中文核心摘要[#Issue编号]` on the first
+    line and Chinese bullet lines for actual changes, contracts or acceptance
+    conditions, tests, and evidence. Ordinary commits use one direct-owner
+    Issue ID. An explicit integration commit may use both parent and dependency
+    Issue IDs. Do not include AI-client trailers, local absolute paths, or
     provider-specific metadata that would not travel across GitHub/Gitee.
 16. Do not add AI-client co-author trailers. In particular, never add
     `Co-authored-by: Cursor <cursoragent@cursor.com>`.

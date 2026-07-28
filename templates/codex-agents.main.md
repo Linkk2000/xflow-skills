@@ -41,11 +41,18 @@ Hard rules:
 - Use `--body-file` for Issue, comment, and PR/MR bodies.
 - Run `git status --short --branch` before committing and include only
   task-related files.
+- Advisory Dependency Issue Workflow: compare discovered work with the accepted
+  main Issue scope. Keep in-scope work on the main feature branch and local
+  subtasks as local decomposition. Use `child-feature|shared-infrastructure|external`
+  only for independently owned dependencies, retain exact human approval for
+  remote dependency Issue creation, treat dependency state as advisory, and
+  require fresh parent-side evidence before `integrated`.
 - Commit messages must be portable, scoped, Chinese-dominant, multi-line, and
-  issue-linked. Use `type(scope): 中文摘要` on the first line, include
-  `关联 issue: #<id>` in the body, and use Chinese bullet lines for key
-  changes. Do not include local absolute paths, provider-only metadata, or
-  AI-client signatures.
+  issue-linked. Use `type(scope): 中文核心摘要[#Issue编号]`; ordinary commits
+  use one direct-owner Issue, while explicit integration commits may use the
+  parent and dependency Issue IDs. Use Chinese bullet lines for changes,
+  acceptance conditions, tests, and evidence. Do not include local absolute
+  paths, provider-only metadata, or AI-client signatures.
 - Browser Must Not Remain about:blank. When browser or Chrome validation is
   required, identify the exact target URL, navigate to that URL, wait for load,
   and verify the current URL is not `about:blank`. Opening Chrome alone is not

@@ -58,6 +58,13 @@ Search anchor: Windows validation must not invoke bare `bash`.
 - `devctl doctor`: check environment health.
 - `devctl check encoding`: check UTF-8/LF and shell syntax health.
 - `devctl check commit-msg`: validate commit message against project rules.
+- `devctl check commit-msg --file <path> --issue <id>`: validate a prepared
+  feature-branch commit message, including direct-owner Issue linkage, before
+  commit.
+- `devctl check dependencies --issue <id>`: validate dependency YAML structure,
+  enums, required fields, evidence paths, and integration consistency. Results
+  are structural warnings/checks, not business blocking decisions; dependency
+  state alone does not block development, commits, tests, or evidence.
 - `devctl check branch-scope`: validate current branch is issue-bound.
 - `devctl check issue-evidence --issue <id> [--publish-root .xflow/publish/issues/issue-<id>]`:
   validate that `.xflow/issues/issue-<id>/` remains a local evidence workspace
@@ -152,17 +159,32 @@ devctl git push --issue <number> --file .xflow/issues/issue-<number>/walkthrough
 Portable scoped commit message:
 
 ```text
-type(scope): 中文摘要
+type(scope): 中文核心摘要[#Issue编号]
 
-关联 issue: #<number>
+- 中文说明实际修改
+- 中文说明对应的契约、Finding 或验收条件
+- 中文说明测试结果和证据位置
+```
 
-- 中文说明关键变化
-- 中文说明验证或证据
+Feature branches run:
+
+```text
+devctl check commit-msg --file .xflow/local/commit-message.txt --issue IK152D
 ```
 
 `devctl git commit-msg` should generate or accept messages in this shape.
 Do not add AI-client co-author trailers, local absolute paths, or provider-only
 metadata to commit messages.
+
+Advisory dependency check:
+
+```text
+devctl check dependencies --issue IK152D
+```
+
+This check validates structure and consistency. It must not decide whether
+development should pause or treat `discovered`, `active`, or `available` as a
+business hard block.
 
 Local subtask check:
 

@@ -28,11 +28,32 @@
 
 - Before commit, re-read project rules or run the project-rule check.
 - Commit messages must be portable, scoped, Chinese-dominant, multi-line, and issue-linked.
-- First line format: `type(scope): 中文摘要`, where `scope` names the touched workflow, module, or issue area.
-- Body must include `关联 issue: #<id>` and Chinese bullet lines summarizing key changes or evidence.
+- First line format: `type(scope): 中文核心摘要[#Issue编号]`, where `scope`
+  names the touched workflow, module, or issue area.
+- The body uses Chinese-dominant bullet lines to describe actual changes, the
+  corresponding contract, Finding, or acceptance condition, and test results
+  with repository-relative evidence paths.
+- Direct main-feature commits use the main Issue ID.
+- Child-feature and shared-infrastructure commits use their direct dependency
+  Issue ID and link the parent or known consumers in the body.
+- Ordinary subjects contain one direct-owner Issue ID. An explicit integration
+  commit may contain two IDs, for example
+  `merge(canvas): 集成统一容器事务能力[#IK152D][#IK17AW]`.
+- GitHub numeric IDs and Gitee alphanumeric IDs are both valid, for example
+  `[#123]` and `[#IK17AW]`.
 - Portable means plain Git text that travels across GitHub/Gitee: no AI-client trailers, no local absolute paths, no machine-specific usernames, and no provider-only metadata.
 - If no issue number is known, stop before committing and recover the active issue from the branch, `.xflow/current-task.md`, or the human reviewer.
 - Do not include unrelated formatting, drive-by refactors, or generated noise in the same commit.
+
+Required downstream shape:
+
+```text
+type(scope): 中文核心摘要[#Issue编号]
+
+- 中文说明实际修改
+- 中文说明对应的契约、Finding 或验收条件
+- 中文说明测试结果和证据位置
+```
 
 ## Issue Requirements Before Development
 
