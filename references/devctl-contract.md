@@ -66,6 +66,13 @@ Search anchor: Windows validation must not invoke bare `bash`.
   are structural warnings/checks, not business blocking decisions; dependency
   state alone does not block development, commits, tests, or evidence.
 - `devctl check branch-scope`: validate current branch is issue-bound.
+- `devctl unattended enable --issue <id|draft> --confirm XFLOW_HUMAN_UNATTENDED_ALL`:
+  enable task-scoped unattended state only after the Skill has verified that
+  the exact safety word came from the user's current message.
+- `devctl unattended status`: report active, inactive, or invalid state without
+  exposing credentials or the safety word.
+- `devctl unattended disable`: idempotently remove the local state and restore
+  ordinary human gates.
 - `devctl check issue-evidence --issue <id> [--publish-root .xflow/publish/issues/issue-<id>]`:
   validate that `.xflow/issues/issue-<id>/` remains a local evidence workspace
   without COS/OSS published URLs or non-null `publishedUrl` values.
@@ -90,19 +97,19 @@ Search anchor: Windows validation must not invoke bare `bash`.
   legacy generic-file path. It must not be used for images or screenshots;
   issue creation rejects image attachments before any GitHub issue or release
   upload request.
-- `devctl issue create --no-local-review`: restricted exception for creating an
-  issue without attachments only when the current user explicitly authorizes
-  that exact unattended command in the current conversation. Search anchor:
-  create an issue without attachments.
+- `devctl issue create --no-local-review`: compatibility flag accepted only
+  when a valid task-scoped unattended state covers the current Issue and
+  action. The flag alone is invalid. Search anchor: create an issue without
+  attachments.
 - `devctl issue comment --attachments <manifest>`: comment only after the body
   file and attachment manifest have both passed review. Image MIME types or
   Markdown image attachments require an approved object storage backend such as
   `aliyun-oss`; otherwise they fail before remote writes.
 - `devctl issue comment --attach-file <path> --upload-attachments github`:
   legacy generic-file path. It must not be used for images or screenshots.
-- `devctl issue comment --no-local-review`: restricted exception for commenting
-  without attachments only when explicitly authorized by the current user for
-  that exact command in the current conversation.
+- `devctl issue comment --no-local-review`: compatibility flag accepted only
+  when a valid task-scoped unattended state covers the current Issue and
+  action. The flag alone is invalid.
 - `devctl attachment add`: register or copy a pasted file/image into the
   XFlow attachment directory and update the manifest.
 - `devctl attachment check`: verify manifest hashes, MIME/size metadata,
@@ -131,22 +138,40 @@ Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
 command drafts, and review notes.
 AI must never satisfy a human gate itself.
 AI must never edit `Approved: no` to `Approved: yes`.
-AI must not use `--force`, `--no-local-review`, direct provider APIs, or manual
-approval-file edits to bypass review.
+Outside valid Task-Scoped Unattended Mode, AI must not use `--force`,
+`--no-local-review`, direct provider APIs, or manual approval-file edits to
+bypass review.
 
-Restricted unattended issue, only after current-turn explicit human
-authorization for this exact no-attachment issue command:
-
-```text
-devctl issue create "<title>" --body-file issue.md --no-local-review
-```
-
-Restricted unattended comment, only after current-turn explicit human
-authorization for this exact no-attachment comment command:
+Task-scoped unattended commands:
 
 ```text
-devctl issue comment <number> --body-file comment.md --no-local-review
+devctl unattended enable --issue IK152D --confirm XFLOW_HUMAN_UNATTENDED_ALL
+devctl unattended status
+devctl unattended disable
 ```
+
+The enable command is valid only when the exact safety word came from the
+user's current message. State is stored in ignored
+`.xflow/local/unattended.json` and bound to repository, worktree, and
+task/Issue. It contains no safety word or credentials. A `draft` state migrates
+atomically only after confirmed Issue creation. Any mismatch or invalid state
+fails closed; task switch, completion, cleanup, and `devctl git done` remove or
+invalidate it.
+
+Covered actions skip ordinary human gates only after their normal mechanical
+checks pass. Evidence, tests, attachment and sensitive-data checks, provider
+limitations, branch protection, and platform policy remain mandatory. Force
+push, history rewrite, destructive deletion, and secret or permission changes
+remain excluded.
+
+Each valid bypass prints:
+
+```text
+[UNATTENDED] Human approval gate bypassed for current task IK152D.
+```
+
+The audit line identifies approval provenance only; it is not proof that any
+business, evidence, attachment, test, or provider check passed.
 
 Approved branch push:
 

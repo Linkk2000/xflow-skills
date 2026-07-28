@@ -28,6 +28,21 @@ S10_DONE
 `S*` states are machine/AI work states. `G*` states are local human gates.
 The AI may prepare evidence for a gate, but must not approve the gate.
 
+Task-scoped unattended mode is an optional gate source, not a replacement
+workflow:
+
+```text
+HUMAN_REVIEW_REQUIRED -> UNATTENDED_ACTIVE -> REMOTE_WRITE
+UNATTENDED_ACTIVE -> HUMAN_REVIEW_REQUIRED  # task/worktree/repository mismatch
+UNATTENDED_ACTIVE -> HUMAN_REVIEW_REQUIRED  # task switch or disable
+UNATTENDED_ACTIVE -> DONE                   # completion invalidates state
+```
+
+`UNATTENDED_ACTIVE` applies only after the current user's exact safety word has
+enabled a repository/worktree/task-bound state. It bypasses the ordinary human
+approval step for covered actions while all mechanical checks and evidence
+requirements remain in force. Any mismatch fails closed.
+
 ## Human Approval Is Non-Delegable
 
 AI may prepare approval files, evidence, command drafts, and review notes, but
