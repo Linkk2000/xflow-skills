@@ -39,6 +39,8 @@ This is a phase-selected reference index. If unsure which file applies, read
   `references/attachment-policy.md`
 - Difference analysis, reviewer-readable evidence, and completion proof:
   `references/evidence-analysis.md`
+- Independently owned work discovered during implementation or verification:
+  `references/dependency-issue-workflow.md`
 - Branch, commit, push, MR, merge, conflict handling: `references/git-policy.md`
 - `devctl` command semantics and default variables: `references/devctl-contract.md`
 - Windows, PowerShell, WSL, UTF-8, LF/CRLF: `references/platform-adapters.md`
@@ -98,24 +100,37 @@ This is a phase-selected reference index. If unsure which file applies, read
     subtask needs `README.md` and must pass `devctl check subtask --issue <id>`.
     Subtask evidence must stay under that subtask's `evidence/` directory in
     the repository; do not store it in COS/OSS or any object storage backend.
-13. Use the user's language for Git-related public text: commit messages,
+13. Advisory Dependency Issue Workflow. Compare discovered work with the
+    accepted main Issue scope. Keep ordinary in-scope work on the main feature
+    branch, and use a local `subtask-*` only for local decomposition and
+    repository-owned evidence. Propose an independently owned dependency Issue
+    only after classifying it as `child-feature|shared-infrastructure|external`.
+    Prepare analysis and remote Issue material, then wait for exact human
+    approval before creation unless a valid task-scoped unattended state
+    exists. After the dependency identity is known, update
+    `.xflow/issues/issue-<id>/dependencies.yaml`. Dependency state is advisory
+    and must not automatically block development, commits, tests, or evidence collection.
+    Before claiming `integrated`, collect fresh parent-side integration
+    evidence. Read `references/dependency-issue-workflow.md` for branch,
+    lifecycle, ownership, and closure rules.
+14. Use the user's language for Git-related public text: commit messages,
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
-14. Commit messages must be portable, scoped, Chinese-dominant, multi-line,
+15. Commit messages must be portable, scoped, Chinese-dominant, multi-line,
     and issue-linked. Use a first line like `type(scope): 中文摘要`, include
     `关联 issue: #<id>` in the body, and describe key changes with Chinese
     bullet lines. Do not include AI-client trailers, local absolute paths, or
     provider-specific metadata that would not travel across GitHub/Gitee.
-15. Do not add AI-client co-author trailers. In particular, never add
+16. Do not add AI-client co-author trailers. In particular, never add
     `Co-authored-by: Cursor <cursoragent@cursor.com>`.
-16. Browser Must Not Remain about:blank. When browser or Chrome validation is
+17. Browser Must Not Remain about:blank. When browser or Chrome validation is
     part of the task, first identify the exact target URL, then navigate to an explicit target URL,
     wait for load, and verify the current URL is not `about:blank`.
     Opening a browser window or tab alone is not verification.
     If the page stays on `about:blank`, treat it as a failed navigation and
     diagnose the missing URL, stopped dev server, bad port, auth redirect, or
     browser-control failure before claiming UI verification.
-17. Problem/Gap Closure Loop. When the user orally reports a problem or gap,
+18. Problem/Gap Closure Loop. When the user orally reports a problem or gap,
     AI must first create or update `gap-analysis.md`, add evidence, clarify
     the gap, scope, proposed fix, and acceptance criteria, then stop for human
     recognition before implementation. After implementation, AI must create
@@ -263,6 +278,7 @@ Before each remote write:
 - Rendered remote body: `.xflow/publish/issues/issue-<id>/<body>.final.md`
 - Local subtask: `.xflow/issues/issue-<id>/subtask-001/README.md`
 - Local subtask evidence: `.xflow/issues/issue-<id>/subtask-001/evidence/`
+- Advisory dependency graph: `.xflow/issues/issue-<id>/dependencies.yaml`
 - Issue-level local evidence: `.xflow/issues/issue-<id>/evidence/`
 - Problem/gap analysis: `.xflow/issues/issue-<id>/gap-analysis.md`
 - Resolution report: `.xflow/issues/issue-<id>/resolution-report.md`

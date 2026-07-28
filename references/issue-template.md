@@ -274,6 +274,39 @@ Read `evidence-analysis.md` before declaring `resolved` or `reduced`. Each
 completion criterion needs fresh, local, reviewer-readable evidence; a code
 diff or the AI's own test claim is not enough.
 
+## dependencies.yaml
+
+This optional issue-level artifact records independently owned dependency
+Issues or external dependencies. Start from `templates/dependencies.yaml` and
+validate it with `devctl check dependencies --issue <id>`. It is separate from
+the optional `subtask-001/` local decomposition below: a local subtask does not
+create a remote Issue or branch.
+
+Parent closure examples:
+
+```yaml
+# Dependency does not affect the accepted completion criteria.
+closureAssessment:
+  affectsClosure: false
+  decision: continue
+  rationale: 未覆盖当前 Issue 的验收条件，后续独立交付。
+
+# Parent consumed the dependency and gathered fresh integration evidence.
+closureAssessment:
+  affectsClosure: true
+  decision: integrated
+  rationale: 已在主功能分支完成联合验证。
+
+# An approved design decision removed the dependency.
+closureAssessment:
+  affectsClosure: true
+  decision: superseded
+  rationale: 经人工审核的设计调整已移除该依赖。
+```
+
+Dependency delivery evidence establishes `available`, not `integrated`.
+`integrated` requires fresh evidence from the parent branch after consumption.
+
 ## subtask-001/README.md
 
 Use this shape when a large issue needs local subtasks. Store each subtask

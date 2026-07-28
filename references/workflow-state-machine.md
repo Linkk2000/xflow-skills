@@ -71,6 +71,26 @@ DOM assertion. If the browser remains on `about:blank`, diagnose the target
 service, URL, port, login/auth state, or browser-control connection before
 continuing the workflow.
 
+## Optional Dependency Discovery Transitions
+
+Dependency discovery is an optional branch from implementation, not a gate in
+every Issue:
+
+```text
+IN_PROGRESS -> DEPENDENCY_DISCOVERED -> HUMAN_DEPENDENCY_DECISION
+HUMAN_DEPENDENCY_DECISION -> IN_PROGRESS
+DEPENDENCY_AVAILABLE -> PARENT_INTEGRATION_VERIFY -> IN_PROGRESS
+```
+
+`HUMAN_DEPENDENCY_DECISION` is required before creating a remote dependency
+Issue. It does not block unrelated local implementation, commits, tests, or
+evidence collection. A local subtask does not enter these transitions.
+
+After a dependency is `available`, the parent enters
+`PARENT_INTEGRATION_VERIFY` only when it consumes that dependency. Fresh
+parent-side evidence is required before recording `integrated` and returning
+to normal implementation or closure assessment.
+
 ## Problem/Gap Closure Loop
 
 When the user orally reports a problem or gap, AI first prepares

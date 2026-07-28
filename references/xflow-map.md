@@ -26,6 +26,9 @@ do not hard-code a user's local project path or an academic paper layout here.
   publishing, and placeholder guards for issue/comment/MR bodies.
 - `evidence-analysis.md`: difference analysis, direct local evidence bundles,
   UI screenshot/DOM proof, and completion verification.
+- `dependency-issue-workflow.md`: advisory dependency classification,
+  ownership, lifecycle, integration, and parent closure assessment.
+- `../templates/dependencies.yaml`: reusable issue-local dependency graph.
 - `scoring-rubric.md`: 100-point effectiveness rubric and hard-fail conditions.
 - `ops-lessons.md`: concise operational lessons for remote writes, shell
   boundaries, and context drift.
@@ -64,6 +67,7 @@ Run from the owning repository.
 ./devctl preflight
 ./devctl check current-task --issue <number>
 ./devctl check subtask --issue <number> --path .xflow/issues/issue-<number>/subtask-001
+./devctl check dependencies --issue <number>
 ./devctl check issue-evidence --issue <number>
 ./devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md
 ./devctl attachment add --issue draft --file /path/to/notes.txt --as file
@@ -163,6 +167,20 @@ before using the subtask as workflow evidence.
 Subtask evidence must stay in the repository under `subtask-001/evidence/`.
 Do not upload subtask evidence to COS/OSS or object storage. Object storage is
 only for rendered remote issue/comment/PR bodies.
+
+## Advisory Dependencies
+
+Use `.xflow/issues/issue-<id>/dependencies.yaml` only for independently owned
+`child-feature|shared-infrastructure|external` work. Start from
+`templates/dependencies.yaml` and read `dependency-issue-workflow.md`.
+
+A local `subtask-*` is not a dependency Issue: it decomposes one Issue without
+creating a remote Issue or branch. Dependency Issue creation remains a
+human-gated remote write. Dependency states and blocking assessments are
+advisory; they must not automatically block development, commits, tests, or
+evidence collection. Run `devctl check dependencies --issue <id>` for
+structure and consistency, then collect fresh parent-side evidence before
+claiming `integrated`.
 
 ## Current Task State
 
