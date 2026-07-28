@@ -19,9 +19,11 @@
 - Object storage credentials such as `ALIYUN_OSS_ACCESS_KEY_SECRET` belong in
   user or project env files and must not appear in issues, comments, commits,
   Markdown guides, or manifests.
-- If there are no attachments, `devctl issue create ... --no-local-review`
-  remains valid when the current user explicitly authorized unattended issue
-  creation for that exact command.
+- Task-Scoped Unattended Mode may replace the ordinary Issue approval gate only
+  when a valid repository/worktree/task-bound state covers the current action.
+  `--no-local-review` alone is invalid and cannot create that state.
+- Unattended mode does not bypass issue structure, duplicate detection,
+  attachment, sensitive-data, evidence, provider, or platform checks.
 - If an issue is too large, create local subtasks under
   `.xflow/issues/issue-<id>/subtask-001/` and run
   `devctl check subtask --issue <id>`. Subtask evidence must stay in the

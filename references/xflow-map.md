@@ -264,8 +264,9 @@ Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
 command drafts, and review notes.
 AI must never satisfy a human gate itself.
 AI must never edit `Approved: no` to `Approved: yes`.
-AI must not use `--force`, `--no-local-review`, direct provider APIs, or manual
-approval-file edits to bypass review.
+Outside valid Task-Scoped Unattended Mode, AI must not use `--force`,
+`--no-local-review`, direct provider APIs, or manual approval-file edits to
+bypass review. Unattended mode never authorizes `--force`.
 
 Valid approval must explicitly name the exact next action. Vague replies such
 as "继续", "都可以", "你看着办", "go ahead", "looks good", or "测试过了就发" are

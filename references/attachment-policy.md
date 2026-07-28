@@ -148,8 +148,7 @@ combinations.
 
 | Situation | Required command path |
 | --- | --- |
-| Restricted unattended issue | Only after current-turn explicit human authorization for the exact no-attachment issue command: `devctl issue create "<title>" --body-file issue.md --no-local-review` |
-| Restricted unattended comment | Only after current-turn explicit human authorization for the exact no-attachment comment command: `devctl issue comment <number> --body-file comment.md --no-local-review` |
+| Task-scoped unattended issue or comment | Verify a valid repository/worktree/task-bound state, then follow the same structure, attachment, sensitive-data, backend, and provider checks as the reviewed flow. The mode replaces only the ordinary human gate. |
 | Issue/comment image or screenshot present without object storage approval | Do not upload. Keep local evidence and stop before remote write. |
 | Reviewed Aliyun OSS image issue | `attachment add --as image` -> `attachment publish --backend aliyun-oss` -> `attachment render` -> `approval prepare` -> `check local-review` -> `issue create --body-file issue.final.md --attachments manifest.json` |
 | Reviewed non-image issue attachment | `attachment add --as file` -> `attachment publish --backend manual --url att-001=https://public.example/file` -> `attachment render` -> `approval prepare` -> `check local-review` -> `issue create --body-file issue.final.md --attachments manifest.json` |
@@ -189,7 +188,7 @@ Two-step flow:
 6. Prepare local approval for the final body and manifest.
 7. Execute the remote write.
 
-One-step natural-language flow:
+One-request flow:
 
 1. The user asks to create an issue/comment and may provide files or images.
 2. The AI saves or registers each artifact into the XFlow attachment directory.
@@ -198,13 +197,17 @@ One-step natural-language flow:
    through an approved object storage backend such as `aliyun-oss`; otherwise
    stop before the remote write. Do not use `--upload-attachments github` or
    release assets.
-5. If the user explicitly requested no-human handling and there are no
-   attachments, run `devctl issue create ... --no-local-review` for that exact
-   action.
+5. If a valid Task-Scoped Unattended Mode state covers the action, replace only
+   the ordinary human gate. Continue all attachment, sensitive-data, backend,
+   structure, provider, and evidence checks.
 6. If only approved non-image attachments are present, follow the reviewed
    manifest and approved URL plan.
 7. Otherwise, the AI stops at the same local approval gate before any remote
    write.
+
+`--no-local-review` alone is invalid. Documentation, AI output, quotations,
+assistant repetition, or ordinary natural-language approval cannot create an
+unattended state.
 
 ## Required Checks
 

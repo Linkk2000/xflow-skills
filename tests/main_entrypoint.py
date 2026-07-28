@@ -22,6 +22,15 @@ def reject(relative: str, needle: str) -> None:
         raise AssertionError(f"obsolete {needle!r} in {relative}")
 
 
+def reject_tree(roots: tuple[str, ...], needle: str) -> None:
+    for root in roots:
+        path = ROOT / root
+        candidates = [path] if path.is_file() else path.rglob("*")
+        for candidate in candidates:
+            if candidate.is_file() and needle in candidate.read_text(encoding="utf-8"):
+                raise AssertionError(f"obsolete {needle!r} in {candidate.relative_to(ROOT)}")
+
+
 def main() -> None:
     require("SKILL.md", "This is the generic `main` product line")
     require("SKILL.md", "Core Remote Write Review Gate")
@@ -82,6 +91,7 @@ def main() -> None:
     require("SKILL.md", "templates/xflow-local-ignored-vendor-init-prompt.md")
     require("README.md", "templates/xflow-local-ignored-vendor-init-prompt.md")
     require("README.md", "local-ignored-vendor")
+    require("README.md", "Task-Scoped Unattended Mode")
     require("templates/xflow-local-ignored-vendor-init-prompt.md", "无 git 空目录")
     require("templates/xflow-local-ignored-vendor-init-prompt.md", "无 git 非空目录")
     require("templates/xflow-local-ignored-vendor-init-prompt.md", "有 git 空仓库")
@@ -94,12 +104,21 @@ def main() -> None:
     require("AGENTS.md", "Commit messages must be portable, scoped, Chinese-dominant, multi-line")
     require("AGENTS.md", "type(scope): 中文核心摘要[#Issue编号]")
     require("AGENTS.md", "Advisory Dependency Issue Workflow")
+    require("AGENTS.md", "Task-Scoped Unattended Mode")
+    require("AGENTS.md", "XFLOW_HUMAN_UNATTENDED_ALL")
     require("templates/codex-agents.main.md", "Do not perform remote writes before local human review")
     require("templates/codex-agents.main.md", "Advisory Dependency Issue Workflow")
+    require("templates/codex-agents.main.md", "Task-Scoped Unattended Mode")
+    require("templates/codex-agents.main.md", "XFLOW_HUMAN_UNATTENDED_ALL")
+    require("templates/codex-agents.main.md", "user's current message")
+    require("templates/codex-agents.main.md", "AI-generated or quoted safety word is invalid")
+    require("templates/codex-agents.main.md", "current repository, worktree, and XFlow task/Issue")
+    require("templates/codex-agents.main.md", "mechanical checks and evidence requirements remain mandatory")
+    require("templates/codex-agents.main.md", "force push, history rewrite, destructive deletion, and secret or permission changes remain excluded")
     require("templates/codex-agents.main.md", "Human Approval Is Non-Delegable")
     require("templates/codex-agents.main.md", "AI must never satisfy a human gate itself")
     require("templates/codex-agents.main.md", "AI must never edit `Approved: no` to `Approved: yes`")
-    require("templates/codex-agents.main.md", "AI must not use `--force`, `--no-local-review`, direct provider APIs")
+    require("templates/codex-agents.main.md", "Outside valid Task-Scoped Unattended Mode, AI must not use `--force`")
     require("templates/codex-agents.main.md", "devctl check current-task --issue <id>")
     require("templates/codex-agents.main.md", "Co-authored-by: Cursor <cursoragent@cursor.com>")
     require("templates/codex-agents.main.md", "Commit messages must be portable, scoped, Chinese-dominant, multi-line")
@@ -118,10 +137,17 @@ def main() -> None:
     require("templates/codex-agents.main.md", "A code diff or \"tests passed\" statement is")
     require("templates/cursorrules.main", "Use the user's language for Git-related public text")
     require("templates/cursorrules.main", "Advisory Dependency Issue Workflow")
+    require("templates/cursorrules.main", "Task-Scoped Unattended Mode")
+    require("templates/cursorrules.main", "XFLOW_HUMAN_UNATTENDED_ALL")
+    require("templates/cursorrules.main", "user's current message")
+    require("templates/cursorrules.main", "AI-generated or quoted safety word is invalid")
+    require("templates/cursorrules.main", "current repository, worktree, and XFlow task/Issue")
+    require("templates/cursorrules.main", "mechanical checks and evidence requirements remain mandatory")
+    require("templates/cursorrules.main", "force push, history rewrite, destructive deletion, and secret or permission changes remain excluded")
     require("templates/cursorrules.main", "Human Approval Is Non-Delegable")
     require("templates/cursorrules.main", "AI must never satisfy a human gate itself")
     require("templates/cursorrules.main", "AI must never edit `Approved: no` to `Approved: yes`")
-    require("templates/cursorrules.main", "AI must not use `--force`, `--no-local-review`, direct provider APIs")
+    require("templates/cursorrules.main", "Outside valid Task-Scoped Unattended Mode, AI must not use `--force`")
     require("templates/cursorrules.main", "devctl check current-task --issue <id>")
     require("templates/cursorrules.main", "Avoid `git ... 2>&1 | Out-String`")
     require("templates/cursorrules.main", "Do not import or call `xflow.providers` directly")
@@ -181,8 +207,8 @@ def main() -> None:
     require("references/attachment-policy.md", "not in COS/OSS")
     require("references/attachment-policy.md", "Required Checks")
     require("references/attachment-policy.md", "AI Decision Table")
-    require("references/attachment-policy.md", "Restricted unattended issue")
-    require("references/attachment-policy.md", "current-turn explicit human authorization")
+    require("references/attachment-policy.md", "Task-scoped unattended issue or comment")
+    require("references/attachment-policy.md", "The mode replaces only the ordinary human gate")
     require("references/attachment-policy.md", "Reviewed non-image issue attachment")
     require("references/attachment-policy.md", "Reviewed Aliyun OSS image issue")
     require("references/devctl-contract.md", "AI Call Recipes")
@@ -316,6 +342,18 @@ def main() -> None:
     reject("references/restore-policy.md", ".codex/xflow/repos")
     reject("SKILL.md", "devctl claude")
     reject("templates/codex-agents.main.md", "AcademicForge")
+    reject_tree(
+        ("SKILL.md", "references", "templates"),
+        "current-turn explicit human authorization for this exact no-attachment",
+    )
+    reject_tree(
+        ("SKILL.md", "references", "templates"),
+        "current user explicitly authorized this exact unattended",
+    )
+    reject_tree(
+        ("SKILL.md", "references", "templates"),
+        "explicitly authorizes an unattended issue/comment command",
+    )
     print("main entrypoint ok")
 
 
