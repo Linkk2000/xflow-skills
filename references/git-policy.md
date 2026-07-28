@@ -15,7 +15,7 @@
 | Resolve conflicts | During pull/rebase/merge | Yes for non-trivial conflicts | Conflict file list, strategy preview | Native git plus explicit file edits |
 | Merge MR/PR | Remote review phase | Human performs or explicitly authorizes | CI/review status known | Provider UI/API only if authorized |
 | Close issue | After merge or explicit cancellation | Yes: approve close | Confirm MR merged or task canceled | `devctl issue close <number>` |
-| Delete branch / cleanup | After merge/close | Yes: approve cleanup | Confirm base updated, branch merged | `devctl git done` |
+| Delete branch / cleanup | After merge/close | Yes: exact `git-cleanup`; forced deletion uses exact `git-cleanup-force` | Confirm base updated, branch merged | `devctl git done --issue <id> --file <resolution-report.md>` |
 
 ## Branch Requirements
 
@@ -36,14 +36,21 @@
 - Direct main-feature commits use the main Issue ID.
 - Child-feature and shared-infrastructure commits use their direct dependency
   Issue ID and link the parent or known consumers in the body.
-- Ordinary subjects contain one direct-owner Issue ID. An explicit integration
-  commit may contain two IDs, for example
+- Ordinary subjects contain one direct-owner Issue ID. Only `merge(...)` integration subjects may contain two Issue IDs, for example
   `merge(canvas): 集成统一容器事务能力[#IK152D][#IK17AW]`.
 - GitHub numeric IDs and Gitee alphanumeric IDs are both valid, for example
   `[#123]` and `[#IK17AW]`.
 - Portable means plain Git text that travels across GitHub/Gitee: no AI-client trailers, no local absolute paths, no machine-specific usernames, and no provider-only metadata.
 - If no issue number is known, stop before committing and recover the active issue from the branch, `.xflow/current-task.md`, or the human reviewer.
 - Do not include unrelated formatting, drive-by refactors, or generated noise in the same commit.
+
+## Cleanup Approval Boundary
+
+Task-scoped unattended mode never satisfies `git-cleanup` or `git-cleanup-force`.
+Normal cleanup uses only `git branch -d` after exact
+human approval and fails when Git reports the branch is not merged. There is
+no implicit fallback to forced deletion. `--force` is a separate destructive
+choice and requires exact human approval for `git-cleanup-force`.
 
 Required downstream shape:
 

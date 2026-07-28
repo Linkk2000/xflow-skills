@@ -60,10 +60,16 @@ removal condition.
 
 ## Lifecycle
 
+Before a remote Issue identity exists, record discovery, classification,
+evidence, and the proposed split in `gap-analysis.md` or a dependency proposal.
+This is the pre-ledger `discovered` stage and must not write `discovered` to `dependencies.yaml`.
+Once the approved remote Issue identity is known, add the
+ledger entry with `status: active`.
+
 The normal lifecycle is:
 
 ```text
-discovered -> active -> available -> integrated
+pre-ledger discovered -> active -> available -> integrated
 ```
 
 `superseded` is an explicit alternative when an approved design change removes
@@ -110,7 +116,7 @@ directory and must remain inside the repository.
 Direct parent-feature commits use the parent Issue ID. Child-feature and
 shared-infrastructure commits use their direct dependency Issue ID and link
 the parent or known consumers in the body. Ordinary commits have one direct
-owner Issue; an explicit integration commit may include the parent and
+owner Issue. Only a `merge(...)` integration commit may include the parent and
 dependency IDs.
 
 ## devctl Checks

@@ -1,6 +1,8 @@
 # Enums:
 #   type: child-feature | shared-infrastructure | external
-#   status: discovered | active | available | integrated | superseded
+#   status: active | available | integrated | superseded
+# "discovered" is a pre-ledger analysis stage kept in gap-analysis or the
+# dependency proposal until a remote Issue identity exists.
 #   blockingAssessment: none | partial | full
 #   development decision: continue | pause-affected-scope | wait | use-temporary-adapter
 #   closure decision: integrated | not-required | superseded

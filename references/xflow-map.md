@@ -174,6 +174,9 @@ It replaces ordinary human gates for covered actions only. Mechanical checks,
 tests, evidence, attachment policy, provider limitations, and high-risk
 exclusions remain effective. State mismatch, task switch, disable, cleanup, or
 completion invalidates the state and restores normal review.
+Task-scoped unattended mode never authorizes local branch deletion.
+`devctl git done` requires exact human approval for `git-cleanup`, while
+`--force` requires exact `git-cleanup-force`; failed cleanup preserves state.
 
 `.xflow/issues/issue-<id>/` is local evidence and approval state only. It must
 not contain COS/OSS URLs, object-storage URLs, or non-null `publishedUrl`

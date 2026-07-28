@@ -12,7 +12,7 @@
 
 - Work only in `D:\04-code\020-skill-dev\xflow-skills`.
 - This repository defines rules for downstream repositories; its own maintenance commits use the repository's current contribution conventions and do not need a fabricated downstream Issue ID.
-- Dependency state is advisory during development, local commit, test, and evidence collection. Never describe `discovered`, `active`, or `available` as an automatic stop condition.
+- Dependency state is advisory during development, local commit, test, and evidence collection. `discovered` is pre-ledger; never describe `active` or `available` as an automatic stop condition.
 - Creating a remote dependency Issue remains a non-delegable human-gated remote write.
 - A simple main Issue may stay on its main feature branch without a child Issue or child branch.
 - `subtask-*` remains a local work breakdown; `dependencies.yaml` records independently owned Issues or external dependencies. Do not merge these concepts.
@@ -33,7 +33,7 @@ require("SKILL.md", "Advisory Dependency Issue Workflow")
 require("SKILL.md", "dependencies.yaml")
 require("SKILL.md", "child-feature|shared-infrastructure|external")
 require("SKILL.md", "must not automatically block development, commits, tests, or evidence collection")
-require("references/dependency-issue-workflow.md", "discovered -> active -> available -> integrated")
+require("references/dependency-issue-workflow.md", "pre-ledger discovered -> active -> available -> integrated")
 require("references/dependency-issue-workflow.md", "A local subtask is not a dependency Issue")
 require("references/git-policy.md", "type(scope): 中文核心摘要[#Issue编号]")
 require("templates/codex-agents.main.md", "Advisory Dependency Issue Workflow")
@@ -87,7 +87,7 @@ Specify exactly:
 - `child-feature`: branch from the parent feature branch and merge back into it.
 - `shared-infrastructure`: branch from target mainline, merge independently, then sync the parent feature branch and re-verify.
 - `external`: record provider/version/entry point without inventing local commits.
-- Lifecycle is `discovered -> active -> available -> integrated`, with `superseded` as an explicit alternative.
+- Lifecycle is `pre-ledger discovered -> active -> available -> integrated`, with `superseded` as an explicit alternative.
 - `blockingAssessment` is `none|partial|full`; `decision` is `continue|pause-affected-scope|wait|use-temporary-adapter`.
 - These fields record developer judgment and must not automatically block development, commits, tests, or evidence collection.
 - `available` proves only that the dependency can be consumed; the parent must gather fresh integration evidence before `integrated`.
@@ -229,7 +229,7 @@ State that:
 - Direct main-feature commits use the main Issue ID.
 - Child-feature and shared-infrastructure commits use their direct dependency Issue ID and link the parent or known consumers in the body.
 - Ordinary subjects contain one direct-owner Issue ID.
-- An explicit integration commit may contain two IDs, for example `merge(canvas): 集成统一容器事务能力[#IK152D][#IK17AW]`.
+- Only a `merge(...)` integration commit may contain two IDs, for example `merge(canvas): 集成统一容器事务能力[#IK152D][#IK17AW]`.
 - Both GitHub numeric IDs and Gitee alphanumeric IDs are valid.
 - The body is Chinese-dominant and multi-line; no AI trailers, absolute local paths, or provider-only metadata.
 

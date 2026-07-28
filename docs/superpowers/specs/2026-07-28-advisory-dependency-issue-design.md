@@ -101,11 +101,11 @@ dependencies:
 依赖状态采用：
 
 ```text
-discovered -> active -> available -> integrated
+pre-ledger discovered -> active -> available -> integrated
                             \-> superseded
 ```
 
-- `discovered`：已发现，尚未完成人工分类或远端 Issue 创建。
+- `discovered`：ledger 前阶段，尚未完成人工分类或远端 Issue 创建；仅记录在 gap-analysis/依赖提案中，不写入 dependencies.yaml。
 - `active`：依赖 Issue 已建立并正在开发。
 - `available`：依赖自身已经完成，可以被主功能使用。
 - `integrated`：主功能已经引入依赖并重新完成联合验证。
@@ -121,7 +121,7 @@ discovered -> active -> available -> integrated
 
 ## 6. 建议性而非硬阻塞
 
-devctl 可以提示存在未完成依赖，但不得因为依赖处于 `discovered`、`active` 或 `available` 而禁止：
+devctl 可以提示存在未完成依赖，但不得因为 ledger 中依赖处于 `active` 或 `available` 而禁止：
 
 - 继续开发不受影响的部分。
 - 创建本地提交。

@@ -42,6 +42,9 @@ Hard rules:
   It replaces ordinary human gates only; mechanical checks and evidence requirements remain mandatory.
   Attachment, sensitive-data, provider, test, and platform checks still apply.
   In all modes, force push, history rewrite, destructive deletion, and secret or permission changes remain excluded.
+  Task-scoped unattended mode never authorizes local branch deletion.
+  `devctl git done` requires exact human approval for `git-cleanup`; `--force`
+  requires the separate exact action `git-cleanup-force`.
   On mismatch, task switch, completion, or invalid state, fail closed and
   restore ordinary human review. `--no-local-review` alone is invalid.
 - Active approval file:
@@ -60,8 +63,8 @@ Hard rules:
   require fresh parent-side evidence before `integrated`.
 - Commit messages must be portable, scoped, Chinese-dominant, multi-line, and
   issue-linked. Use `type(scope): 中文核心摘要[#Issue编号]`; ordinary commits
-  use one direct-owner Issue, while explicit integration commits may use the
-  parent and dependency Issue IDs. Use Chinese bullet lines for changes,
+  use one direct-owner Issue. Only `merge(...)` integration commits may use
+  the parent and dependency Issue IDs. Use Chinese bullet lines for changes,
   acceptance conditions, tests, and evidence. Do not include local absolute
   paths, provider-only metadata, or AI-client signatures.
 - Browser Must Not Remain about:blank. When browser or Chrome validation is

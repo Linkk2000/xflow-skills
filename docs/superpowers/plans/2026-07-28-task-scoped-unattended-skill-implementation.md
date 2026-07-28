@@ -104,7 +104,7 @@ Remove prose that makes `--no-local-review` appear usable after ordinary natural
 
 Run: `python tests/main_entrypoint.py`
 
-Expected: exit 0.
+Expected: `main entrypoint ok` and exit 0.
 
 Run: `git diff --check`
 
@@ -116,4 +116,3 @@ Expected: no whitespace errors.
 git add templates/codex-agents.main.md templates/cursorrules.main AGENTS.md README.md references/issue-policy.md references/attachment-policy.md tests/main_entrypoint.py
 git commit -m "docs(agent): 统一无人值守模式入口约束"
 ```
-

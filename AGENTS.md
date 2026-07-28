@@ -39,7 +39,7 @@ Use the project devctl adapter for workflow operations. On Windows, use `devctl.
 
 - Before commit: re-read project rules and run relevant tests/checks or `devctl check commit-msg` when available.
 - Advisory Dependency Issue Workflow: keep in-scope work on the main feature branch; use local subtasks only for local decomposition; classify independently owned work as `child-feature|shared-infrastructure|external`; retain the remote Issue creation human gate; treat dependency state as advisory; and require fresh parent-side evidence before `integrated`.
-- Commit messages must be portable, scoped, Chinese-dominant, multi-line, and issue-linked. Use `type(scope): 中文核心摘要[#Issue编号]`; ordinary commits use one direct-owner Issue, while explicit integration commits may use parent and dependency Issue IDs. Avoid AI-client trailers, local absolute paths, or provider-only metadata.
+- Commit messages must be portable, scoped, Chinese-dominant, multi-line, and issue-linked. Use `type(scope): 中文核心摘要[#Issue编号]`; ordinary commits use one direct-owner Issue, while only `merge(...)` integration commits may use parent and dependency Issue IDs. Avoid AI-client trailers, local absolute paths, or provider-only metadata.
 - Before push: run branch scope and verification checks.
 - Before MR/PR: fetch the target branch, merge it into the task branch by default, resolve approved conflicts if any, rerun relevant checks, record the target branch SHA and sync result, then preview title/body, link issue, and list verification evidence.
 - Before final delivery: report checks run and any skipped verification with reasons.
@@ -50,3 +50,6 @@ When the user explicitly requests maintenance of `xflow-skills` or
 `xflow-devctl`, direct work on that tool repository's `main` branch and local
 commits do not require a fabricated downstream Issue ID. This exception does
 not apply to repositories consuming XFlow.
+The downstream multi-line and Issue-link policy does not constrain
+`xflow-skills` and `xflow-devctl` maintenance commits themselves; do not
+rewrite existing tool-repository history to retrofit it.

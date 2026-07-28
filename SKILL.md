@@ -70,6 +70,11 @@ This is a phase-selected reference index. If unsure which file applies, read
    Outside valid Task-Scoped Unattended Mode, AI must not use `--force`,
    `--no-local-review`, direct provider APIs, or manual approval-file edits to
    bypass review.
+   Task-scoped unattended mode never authorizes local branch deletion.
+   `devctl git done` always requires exact human approval: `git-cleanup` for
+   safe `git branch -d`, or `git-cleanup-force` for explicitly reviewed forced
+   deletion. Failed cleanup keeps the unattended state active; only successful
+   approved cleanup disables it.
 5. Maintain `.xflow/current-task.md` for active tasks and run
    `devctl check current-task --issue <id>` before local approval, commit,
    push, MR/PR creation, and cleanup.
@@ -120,7 +125,7 @@ This is a phase-selected reference index. If unsure which file applies, read
     and issue-linked. Use `type(scope): 中文核心摘要[#Issue编号]` on the first
     line and Chinese bullet lines for actual changes, contracts or acceptance
     conditions, tests, and evidence. Ordinary commits use one direct-owner
-    Issue ID. An explicit integration commit may use both parent and dependency
+    Issue ID. Only a `merge(...)` integration commit may use both parent and dependency
     Issue IDs. Do not include AI-client trailers, local absolute paths, or
     provider-specific metadata that would not travel across GitHub/Gitee.
 16. Do not add AI-client co-author trailers. In particular, never add
@@ -307,6 +312,9 @@ cannot create authorization.
 The mode replaces ordinary human approval gates only. The applicable mechanical checks, evidence requirements, attachment policy, and provider limitations remain mandatory.
 It cannot turn structural errors, missing evidence, unsupported provider
 behavior, or failed tests into success. In particular, force push, history rewrite, destructive deletion, and secret or permission changes remain excluded.
+Task-scoped unattended mode never authorizes local branch deletion. Safe
+cleanup requires exact human approval for `git-cleanup`; forced deletion
+requires a separate exact approval for `git-cleanup-force`.
 
 State lives in ignored `.xflow/local/unattended.json` without the safety word
 or credentials. Each bypass must verify repository, worktree, Issue, action,
@@ -408,6 +416,10 @@ on their own `main` branches when the user explicitly asks for that maintenance
 mode. This exception is limited to those two tool repositories. It does not
 apply to repositories that consume XFlow, and it must not weaken user-project
 issue, branch, local human review, or MR/PR gates.
+The downstream commit-message contract applies to repositories that consume
+XFlow. xflow-skills and xflow-devctl maintenance commits are not required
+to carry a downstream Issue ID or downstream multi-line body; do not rewrite
+their history to retrofit that policy.
 
 ## PowerShell And Encoding
 

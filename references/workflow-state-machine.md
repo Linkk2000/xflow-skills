@@ -101,6 +101,10 @@ DEPENDENCY_AVAILABLE -> PARENT_INTEGRATION_VERIFY -> IN_PROGRESS
 `HUMAN_DEPENDENCY_DECISION` is required before creating a remote dependency
 Issue. It does not block unrelated local implementation, commits, tests, or
 evidence collection. A local subtask does not enter these transitions.
+`DEPENDENCY_DISCOVERED` is a pre-ledger analysis state recorded in
+`gap-analysis.md` or a dependency proposal. It must not be written to
+`dependencies.yaml`; after the approved remote Issue identity exists, create
+the ledger entry as `active`.
 
 After a dependency is `available`, the parent enters
 `PARENT_INTEGRATION_VERIFY` only when it consumes that dependency. Fresh
@@ -156,6 +160,9 @@ and name the human decision or external condition needed.
   and URL are known.
 - `G6_APPROVE_CLEANUP`: human confirms cleanup, issue close, or archival
   actions after remote review finishes.
+  Task-scoped unattended mode never satisfies this gate. Safe branch cleanup
+  uses exact action `git-cleanup`; forced deletion uses exact action
+  `git-cleanup-force`.
 
 ## Pre-Merge Synchronization Checkpoint
 

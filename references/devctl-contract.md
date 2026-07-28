@@ -176,6 +176,10 @@ checks pass. Evidence, tests, attachment and sensitive-data checks, provider
 limitations, branch protection, and platform policy remain mandatory. Force
 push, history rewrite, destructive deletion, and secret or permission changes
 remain excluded.
+Task-scoped unattended mode never authorizes local branch deletion. Run
+`devctl git done --issue <id> --file <resolution-report.md>` only after exact
+human approval for `git-cleanup`; `--force` requires exact
+`git-cleanup-force` approval. Failed cleanup must not disable the state.
 
 Each valid bypass prints:
 
@@ -221,8 +225,9 @@ devctl check dependencies --issue IK152D
 ```
 
 This check validates structure and consistency. It must not decide whether
-development should pause or treat `discovered`, `active`, or `available` as a
-business hard block.
+development should pause or treat `active` or `available` as a business hard
+block. `discovered` is a pre-ledger analysis stage; after remote Issue identity
+creation, the first YAML status is `active`.
 
 Local subtask check:
 

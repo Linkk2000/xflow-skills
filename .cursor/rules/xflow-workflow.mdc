@@ -4,8 +4,10 @@ globs: ["**/*"]
 alwaysApply: true
 ---
 
-Read `AGENTS.md` first and treat it as canonical. Follow the human-gated XFlow workflow for issue, branch, commit, push, PR/MR, conflict handling, and close or cleanup work.
+Read `AGENTS.md` first and treat it as canonical. Follow XFlow's default human-gated workflow or its valid Task-Scoped Unattended Mode for issue, branch, commit, push, and PR/MR work.
 
-Do not create issues, push branches, create MR/PRs, close issues, delete or clean up local branches, or choose a non-trivial conflict resolution strategy without explicit approval for that exact action.
+Human Approval Is Non-Delegable by default. Task-Scoped Unattended Mode is valid only when the exact `XFLOW_HUMAN_UNATTENDED_ALL` safety word came from the user's current message and devctl confirms the state is bound to the current repository, worktree, and task. It replaces only ordinary remote-write approval gates; mechanical checks and evidence requirements remain mandatory.
+
+Unattended mode never authorizes local branch deletion, force push, history rewrite, destructive deletion, secret or permission changes, or non-trivial conflict resolution. `devctl git done` always needs exact human approval for `git-cleanup`; forced deletion needs `git-cleanup-force`.
 
 On Windows, use `devctl.ps1` rather than WSL shell chains. On POSIX, use `devctl`.
