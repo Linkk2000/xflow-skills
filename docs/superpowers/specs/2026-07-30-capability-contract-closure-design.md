@@ -298,6 +298,7 @@ Base
 Allowed Actions
 Forbidden Actions
 Human Gate
+Human Approval Ref
 ```
 
 ### 4.1 语义退出条件
@@ -434,6 +435,8 @@ COS/OSS 仅用于远端 Issue、评论和 PR/MR 正文发布，不能替代仓�
 
 历史记录包含仓库、worktree、分支、Issue、动作、文件哈希、审核身份摘要、执行结果和 `reusable: false`，不能再次满足门禁。
 
+能力设计认可使用同一条不可代替原则，但必须额外记录契约 ID、版本、文件 SHA256 和明确认可的对象 ID。契约 YAML 中的 `status: accepted-design` 只是候选声明，不能单独证明人工已经认可；Issue 任务状态必须通过 `Human Approval Ref` 引用匹配的认可记录。
+
 项目可以显式配置 `issueWorkspace.mode: local`，但必须在项目规则中说明原因。工具不能擅自把 tracked 项目切换成 local，也不能擅自修改旧项目 `.gitignore`。
 
 ## 9. devctl 命令合同
@@ -442,6 +445,7 @@ COS/OSS 仅用于远端 Issue、评论和 PR/MR 正文发布，不能替代仓�
 
 ```text
 devctl contract lint --file <contract.yaml>
+devctl contract accept --issue <id> --file <contract.yaml> --objects <id,id,...>
 devctl contract diff --old <old.yaml> --new <new.yaml>
 devctl trace check --issue <id> --contract <contract.yaml> \
   --matrix .xflow/issues/issue-<id>/traceability-matrix.yaml
@@ -456,6 +460,8 @@ devctl trace check --issue <id> --contract <contract.yaml> \
 - 核心约束至少被一个验证场景追踪。
 - `current` 上下文没有阻止当前阶段的开放问题。
 - `future` 能力没有被当前验证矩阵当成必需结果。
+
+`contract accept` 只消费动作精确为 `contract-acceptance` 的本地人工审批，不支持无人值守。它不会修改契约或任务状态，只生成不可复用的认可记录。语义阶段进入 `accepted-design` 时，任务状态引用的记录必须匹配当前仓库、worktree、分支、Issue、契约 ID、版本、文件 SHA256 和被认可对象 ID。
 
 `contract diff` 按稳定 ID 输出新增、删除、修改和版本变化，标记可能改变合法行为集合的字段，并列出需要人工复核的验证和工程投影。工具不自行判定业务兼容性。
 
@@ -563,6 +569,7 @@ Approved SHA256
 - 验证矩阵为空但已经存在工程投影。
 - 稳定 ID 重复或引用断裂。
 - worktree、分支、Issue 或审批绑定不一致。
+- `accepted-design` 只由 YAML 状态声明、没有匹配的人工认可记录。
 - `resolved` 缺少直接变更后证据。
 - UI 证据把独立测试页声明为真实产品页。
 - 从 A 的审批文件执行 B 的动作。
@@ -588,6 +595,7 @@ Approved SHA256
 - 重复 ID、断裂引用、非法版本和未覆盖约束。
 - 开放阻塞问题和 future/current 混用。
 - 分类、任务绑定、审批隔离和追溯矩阵。
+- 契约认可拒绝 `Approved: no`、无人值守、错误 worktree、变化后的文件哈希和不存在的对象 ID。
 
 ### 14.2 CLI 集成测试
 
@@ -674,6 +682,7 @@ Approved SHA256
 ### 第三阶段：契约与追溯检查器
 
 - 实现 contract lint、contract diff、classification check 和 trace check。
+- 实现 contract accept 与任务状态中的认可记录校验。
 - 增加结构、引用、版本、证据和跨路径安全测试。
 
 ### 第四阶段：压力测试与真实回放
@@ -688,6 +697,7 @@ Approved SHA256
 
 - Skill 能先查契约再稳定分类。
 - 新能力不能在未认可时进入实现。
+- `accepted-design` 必须由不可复用且精确绑定的人工认可记录支持，YAML 状态本身不能自证。
 - 验证矩阵先于工程投影。
 - 普通小 bug 不被迫创建大型契约。
 - `.xflow/issues/` 默认随仓库管理，敏感本机状态保持忽略。
