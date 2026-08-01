@@ -180,7 +180,7 @@ def logical_rules(text: str) -> tuple[str, ...]:
     flush()
 
     rules: list[str] = []
-    sentence_boundary = re.compile(r"(?<=[。！？!?])|(?<=\.)\s+(?=[A-Z])")
+    sentence_boundary = re.compile(r"(?<=[。！？!?])|(?<=\.)\s+(?=[A-Z`])")
     for block in blocks:
         rules.extend(part.strip() for part in sentence_boundary.split(block) if part.strip())
     return tuple(rules)
@@ -193,148 +193,124 @@ def issue_paths(statement: str) -> tuple[str, ...]:
     )
 
 
-def is_issue_ignore_denial(statement: str) -> bool:
+def policy_clauses(statement: str) -> tuple[str, ...]:
+    return tuple(part.strip() for part in re.split(r"[,，;；]", statement) if part.strip())
+
+
+def issue_ignore_claims(clause: str) -> tuple[re.Match[str], ...]:
+    issue_path = r"`?\.xflow/issues/[^`\s,，;；:：]*`?"
     patterns = (
-        r"`?\.xflow/issues/[^`\s]*`?\s+"
-        r"(?:must|should|may|can)\s+not\s+be\s+ignored\b",
-        r"\b(?:do not|never)\s+ignore\s+(?:the\s+|all\s+)?`?\.xflow/issues/",
-        r"`?\.xflow/issues/[^`\s]*`?\s+(?:is\s+)?not\s+ignored\b",
-        r"不得(?:将|把|添加)?[^。！？；;]{0,60}`?\.xflow/issues/",
-        r"`?\.xflow/issues/[^`\s]*`?[^。！？；;]{0,40}(?:不得|不能|未被忽略)",
+        rf"\bignore(?:d)?\s+(?:the\s+|all\s+)?{issue_path}",
+        rf"{issue_path}\s+(?:is|are|remain|remains|must\s+be|should\s+be)\s+"
+        r"(?:fully\s+|entirely\s+)?ignored\b",
+        rf"{issue_path}[^,，;；]{{0,40}}"
+        r"(?:local-only|local evidence workspace only|local evidence and approval state only)",
+        r"(?:local-only|local evidence workspace only|local evidence and approval state only)"
+        rf"[^,，;；]{{0,40}}{issue_path}",
+        rf"忽略[^,，;；。！？]{{0,60}}{issue_path}",
+        rf"{issue_path}[^,，;；。！？]{{0,60}}(?:忽略|加入[^,，;；。！？]{{0,30}}gitignore)",
     )
-    return any(re.search(pattern, statement, re.IGNORECASE) for pattern in patterns)
+    matches: list[re.Match[str]] = []
+    seen: set[tuple[int, int]] = set()
+    for pattern in patterns:
+        for match in re.finditer(pattern, clause, re.IGNORECASE):
+            if match.span() not in seen:
+                matches.append(match)
+                seen.add(match.span())
+    return tuple(sorted(matches, key=lambda match: match.start()))
 
 
-def is_explicit_local_issue_rule(statement: str) -> bool:
-    mode = re.search(
-        r"(?:only\s+)?(?:in|under|when)\s+(?:an?\s+)?(?:explicit\s+)?"
-        r"(?:project\s+)?`?(?:issueWorkspace\.)?mode:\s*local`?",
-        statement,
-        re.IGNORECASE,
-    )
-    if not mode:
-        return False
-    claim = statement[mode.end() :]
-    return bool(
-        re.search(
-            r"(?:\bignore\b.{0,100}\.xflow/issues/|"
-            r"\.xflow/issues/.{0,100}\b(?:ignored|local-only)\b)",
-            claim,
+def issue_claim_is_allowed(clause: str, match: re.Match[str]) -> bool:
+    claim = match.group(0)
+    prefix = clause[: match.start()]
+    immediate_prefix = prefix[-80:]
+    if re.search(r"(?:\bdo\s+not|\bnever)\s+$", immediate_prefix, re.IGNORECASE):
+        return True
+    if re.search(r"(?:不得|不能)(?:将|把|添加)?[^,，;；。！？]{0,40}$", immediate_prefix):
+        return True
+    if re.search(r"\bnot\s+(?:be\s+)?ignored\b|未被忽略|不得|不能", claim, re.IGNORECASE):
+        return True
+
+    paths = issue_paths(claim)
+    if paths and all(path == ".xflow/issues/**/approvals/local-review.md" for path in paths):
+        return True
+
+    local_modes = tuple(
+        re.finditer(
+            r"(?:only\s+)?(?:in|under|when)\s+(?:an?\s+)?(?:explicit\s+)?"
+            r"(?:project\s+)?`?(?:issueWorkspace\.)?mode:\s*local`?",
+            prefix,
             re.IGNORECASE,
         )
     )
-
-
-def is_exact_local_issue_ignore(statement: str) -> bool:
-    paths = issue_paths(statement)
-    return bool(paths) and all(
-        path == ".xflow/issues/**/approvals/local-review.md" for path in paths
-    )
-
-
-def has_direct_whole_issue_ignore(statement: str) -> bool:
-    whole_issue = r"`?\.xflow/issues/(?:[*/]+)?`?"
-    patterns = (
-        rf"\bignore(?:d)?\s+(?:the\s+|all\s+)?{whole_issue}(?=\s|[.,;:]|$)",
-        rf"{whole_issue}\s+(?:is|are|must\s+be|should\s+be|remain|remains)\s+"
-        r"(?:fully\s+|entirely\s+)?ignored\b",
-    )
-    return any(re.search(pattern, statement, re.IGNORECASE) for pattern in patterns)
-
-
-def is_tracked_issue_rule_with_local_exclusions(statement: str) -> bool:
-    if has_direct_whole_issue_ignore(statement):
+    if not local_modes:
         return False
-    tracked = re.search(
-        r"\.xflow/issues/`?\s+is\s+tracked\s+by\s+default",
-        statement,
+    qualifier = prefix[local_modes[-1].end() :]
+    return len(qualifier) <= 120 and not re.search(
+        r"\b(?:tracked\s+mode|but|however|while|whereas)\b|(?:但|然而|而)",
+        qualifier,
         re.IGNORECASE,
     )
-    local_exclusions = re.search(
-        r"(?:machine-local|runtime|active\s+approvals|approvals/local-review\.md)"
-        r".{0,140}\b(?:remain|stays?|are)\s+ignored\b",
-        statement,
-        re.IGNORECASE,
-    )
-    return bool(tracked and local_exclusions)
 
 
-def is_operational_current_task_rule(statement: str) -> bool:
-    patterns = (
-        r"\b(?:read|re-read|recover|maintain)\b(?!-)[^.;。！？]{0,200}"
-        r"\.xflow/current-task\.md",
-        r"\bsource\b[^.;。！？]{0,160}\.xflow/current-task\.md",
-        r"\.xflow/current-task\.md[^.;。！？]{0,160}"
-        r"\b(?:active\s+)?(?:source|authority|source of truth)\b",
-    )
-    return any(re.search(pattern, statement, re.IGNORECASE) for pattern in patterns)
-
-
-def is_explicit_current_task_migration(statement: str) -> bool:
-    operation = r"(?:read|re-read|recover|maintain)"
+def current_task_operations(clause: str) -> tuple[re.Match[str], ...]:
     current_task = r"`?\.xflow/current-task\.md`?"
     patterns = (
-        rf"\b{operation}\b(?!-)[^.;。！？]{{0,120}}{current_task}"
-        rf"[^.;。！？]{{0,80}}\b(?:only|solely)\b[^.;。！？]{{0,80}}"
-        r"\bmigrate-current\b",
-        r"\b(?:when|while)\s+(?:explicitly\s+)?running\s+[^.;。！？]{0,80}"
-        rf"\bmigrate-current\b[^.;。！？]{{0,120}}\b{operation}\b(?!-)"
-        rf"[^.;。！？]{{0,120}}{current_task}",
+        rf"\b(?:read|re-read|recover|maintain)\b(?!-)[^,，;；。！？]{{0,160}}?{current_task}",
+        rf"\b(?:use|treat)\b[^,，;；。！？]{{0,120}}?{current_task}"
+        r"[^,，;；。！？]{0,80}\b(?:source|authority|source of truth)\b",
     )
-    return any(re.search(pattern, statement, re.IGNORECASE) for pattern in patterns)
+    matches: list[re.Match[str]] = []
+    seen: set[tuple[int, int]] = set()
+    for pattern in patterns:
+        for match in re.finditer(pattern, clause, re.IGNORECASE):
+            if match.span() not in seen:
+                matches.append(match)
+                seen.add(match.span())
+    return tuple(sorted(matches, key=lambda match: match.start()))
 
 
-def is_negative_current_task_operation(statement: str) -> bool:
+def current_task_operation_is_allowed(
+    clause: str, match: re.Match[str], operation_end: int
+) -> bool:
+    prefix = clause[: match.start()]
+    if re.search(r"(?:\bdo\s+not|\bnever|\bmust\s+not)\s+$", prefix[-40:], re.IGNORECASE):
+        return True
+    operation = clause[match.start() : operation_end]
     return bool(
         re.search(
-            r"\b(?:do not|never|must not)\s+(?:read|re-read|recover|maintain)\b"
-            r"(?!-)[^.;。！？]{0,160}\.xflow/current-task\.md",
-            statement,
+            r"\.xflow/current-task\.md`?\s+(?:only|solely)\s+when\s+"
+            r"(?:explicitly\s+)?running\s+[^,，;；。！？]{0,80}\bmigrate-current\b",
+            operation,
             re.IGNORECASE,
         )
     )
 
 
 def reject_production_contradictions() -> None:
-    local_only = re.compile(
-        r"(?:\.xflow/issues/.{0,160}(?:local-only|local evidence workspace only|local evidence and approval state only)|"
-        r"(?:local-only|local evidence workspace only|local evidence and approval state only).{0,160}\.xflow/issues/)",
-        re.IGNORECASE | re.DOTALL,
-    )
-    issue_ignore = re.compile(
-        r"(?:\.xflow/issues/.{0,160}\b(?:is|are|remain|remains|must be|should be)\s+(?:fully\s+|entirely\s+)?ignored\b|"
-        r"\bignore(?:d)?\s+(?:the\s+|all\s+)?\.xflow/issues/)",
-        re.IGNORECASE | re.DOTALL,
-    )
-    issue_ignore_zh = re.compile(
-        r"(?:\.xflow/issues/[^\r\n]{0,120}(?:忽略|加入[^\r\n]{0,40}gitignore)|"
-        r"忽略[^\r\n]{0,120}\.xflow/issues/)",
-        re.IGNORECASE,
-    )
     for path in production_text_files():
         text = path.read_text(encoding="utf-8")
         relative = path.relative_to(ROOT)
         for statement in logical_rules(text):
-            for pattern in (local_only, issue_ignore, issue_ignore_zh):
-                for match in pattern.finditer(statement):
-                    if (
-                        is_issue_ignore_denial(statement)
-                        or is_explicit_local_issue_rule(statement)
-                        or is_exact_local_issue_ignore(statement)
-                        or is_tracked_issue_rule_with_local_exclusions(statement)
-                    ):
-                        continue
-                    raise AssertionError(
-                        f"default-local Issue workspace contradiction in {relative}: {statement!r}"
+            for clause in policy_clauses(statement):
+                for match in issue_ignore_claims(clause):
+                    if not issue_claim_is_allowed(clause, match):
+                        raise AssertionError(
+                            "default-local Issue workspace contradiction in "
+                            f"{relative}: {match.group(0)!r} within {clause!r}"
+                        )
+                operations = current_task_operations(clause)
+                for index, match in enumerate(operations):
+                    operation_end = (
+                        operations[index + 1].start()
+                        if index + 1 < len(operations)
+                        else len(clause)
                     )
-            if (
-                is_operational_current_task_rule(statement)
-                and not is_explicit_current_task_migration(statement)
-                and not is_negative_current_task_operation(statement)
-            ):
-                raise AssertionError(
-                    f"legacy current-task used as active authority in {relative}: {statement!r}"
-                )
+                    if not current_task_operation_is_allowed(clause, match, operation_end):
+                        raise AssertionError(
+                            "legacy current-task used as active authority in "
+                            f"{relative}: {match.group(0)!r} within {clause!r}"
+                        )
 
 
 def is_whole_issue_pattern(pattern: str) -> bool:
@@ -539,6 +515,52 @@ def require_fail_closed_mutation_cases() -> None:
         ),
         failures,
     )
+    require_mutation_rejected(
+        "denied Issue-ignore claim beside a contradictory Issue-ignore claim",
+        lambda: run_contradiction_mutation(
+            "`.xflow/issues/` must not be ignored; ignore `.xflow/issues/` "
+            "for generated evidence.",
+            "mutations/issue-denial-then-ignore.md",
+        ),
+        failures,
+    )
+    require_mutation_rejected(
+        "local-mode Issue-ignore claim beside a tracked-mode Issue-ignore claim",
+        lambda: run_contradiction_mutation(
+            "Only in explicit mode: local may a project ignore `.xflow/issues/`; "
+            "tracked mode must ignore `.xflow/issues/` too.",
+            "mutations/local-then-tracked-ignore.md",
+        ),
+        failures,
+    )
+    require_mutation_rejected(
+        "operational current-task read beside a migrate-current write restriction",
+        lambda: run_contradiction_mutation(
+            "Read `.xflow/current-task.md` before every commit, only "
+            "`migrate-current` may write legacy state.",
+            "mutations/read-then-migration-write.md",
+        ),
+        failures,
+    )
+    require_mutation_rejected(
+        "negative current-task read beside a contradictory operational read",
+        lambda: run_contradiction_mutation(
+            "Do not read `.xflow/current-task.md` during migration; read "
+            "`.xflow/current-task.md` before every commit.",
+            "mutations/negative-then-read.md",
+        ),
+        failures,
+    )
+    require_mutation_rejected(
+        "unqualified current-task read before a separately qualified read",
+        lambda: run_contradiction_mutation(
+            "Read `.xflow/current-task.md` before every commit and read "
+            "`.xflow/current-task.md` only when explicitly running devctl task "
+            "migrate-current.",
+            "mutations/two-current-task-reads.md",
+        ),
+        failures,
+    )
 
     require_mutation_accepted(
         "same-sentence explicit local-mode exception",
@@ -553,6 +575,14 @@ def require_fail_closed_mutation_cases() -> None:
         lambda: run_contradiction_mutation(
             "Read .xflow/current-task.md only when explicitly running devctl task migrate-current.",
             "mutations/migrate-current.md",
+        ),
+        failures,
+    )
+    require_mutation_accepted(
+        "directly negated current-task read",
+        lambda: run_contradiction_mutation(
+            "Do not read `.xflow/current-task.md` during migration.",
+            "mutations/negative-current-task-read.md",
         ),
         failures,
     )
