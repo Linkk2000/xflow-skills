@@ -180,7 +180,7 @@ def logical_rules(text: str) -> tuple[str, ...]:
     flush()
 
     rules: list[str] = []
-    sentence_boundary = re.compile(r"(?<=[。！？!?])|(?<=\.)\s+(?=[A-Z`])")
+    sentence_boundary = re.compile(r"(?<=[。！？!?])|(?<=\.)\s+")
     for block in blocks:
         rules.extend(part.strip() for part in sentence_boundary.split(block) if part.strip())
     return tuple(rules)
@@ -530,6 +530,15 @@ def require_fail_closed_mutation_cases() -> None:
             "Only in explicit mode: local may a project ignore `.xflow/issues/`; "
             "tracked mode must ignore `.xflow/issues/` too.",
             "mutations/local-then-tracked-ignore.md",
+        ),
+        failures,
+    )
+    require_mutation_rejected(
+        "lowercase sentence must not inherit local-mode Issue-ignore allowance",
+        lambda: run_contradiction_mutation(
+            "Only in explicit mode: local may a project ignore `.xflow/issues/`. "
+            "then ignore `.xflow/issues/` in tracked mode.",
+            "mutations/local-then-lowercase-tracked-ignore.md",
         ),
         failures,
     )
