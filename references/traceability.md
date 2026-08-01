@@ -37,6 +37,7 @@ the task state must reference the exact acceptance history record, contract
 digest, accepted object set, Issue, branch/worktree binding, and
 `accepted-design` decision. Keep `gap-analysis.md`, `issue-draft.md`, tests,
 before/after evidence, and `resolution-report.md` under the tracked Issue
-workspace. Do not move local evidence to COS/OSS/object storage. A final
+workspace. Do not move local evidence to COS/OSS/object storage or HTTP URLs.
+A final
 `resolution-report.md` must use one of `resolved|reduced|blocked` and cite the
 fresh verification evidence for every claimed criterion.

@@ -50,4 +50,5 @@ out-of-scope work. Record uncertainty as a precondition with its exact
 Linting proves only structure. A design enters `accepted-design` only after the
 human accepts exact contract objects through the contract-acceptance workflow
 and the matching tracked acceptance record is retained in the Issue workspace.
-See `contract-authoring.md` and `traceability.md` before entering development.
+See `contract-authoring.md`, `scope-routing.md`, and `traceability.md` before
+entering development.

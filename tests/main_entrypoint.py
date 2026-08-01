@@ -5,7 +5,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DEVCTL_SCHEMA = ROOT.parent / "xflow-devctl" / "schemas" / "capability-contract.schema.json"
+CAPABILITY_CONTRACT_SCHEMA_SHA256 = "15cd0caf488c2ffbf5488ff8bf2b362dc9db77204089945f7788ecebe44e2a6f"
+CAPABILITY_CONTRACT_TEMPLATE_SHA256 = "8dd258230cc6605ec03614305bb54247d847443751ac3d8dfc888e8077c65cbf"
 
 
 def read(relative: str) -> str:
@@ -33,6 +34,19 @@ def reject_tree(roots: tuple[str, ...], needle: str) -> None:
                 raise AssertionError(f"obsolete {needle!r} in {candidate.relative_to(ROOT)}")
 
 
+def require_all(relative: str, needles: tuple[str, ...]) -> None:
+    text = read(relative)
+    for needle in needles:
+        if needle not in text:
+            raise AssertionError(f"missing {needle!r} in {relative}")
+
+
+def require_sha256(relative: str, expected: str) -> None:
+    actual = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
+    if actual != expected:
+        raise AssertionError(f"SHA-256 drift in {relative}: expected {expected}, found {actual}")
+
+
 def main() -> None:
     require("references/contract-authoring.md", "先回答能力问题，再填写 YAML")
     require("references/contract-authoring.md", "purpose → constraints → context")
@@ -41,8 +55,78 @@ def main() -> None:
     require("references/contract-evolution.md", "MAJOR")
     require("references/traceability.md", "contract → interaction → verification → issue → test → evidence → conclusion")
     require("templates/task-state.md", "Semantic Phase:")
-    if hashlib.sha256(read("schemas/capability-contract.schema.json").encode("utf-8")).digest() != hashlib.sha256(DEVCTL_SCHEMA.read_bytes()).digest():
-        raise AssertionError("capability contract schema SHA-256 differs from xflow-devctl")
+    require_all(
+        "references/capability-contract-method.md",
+        (
+            "1. Which participant gains or loses a dependable outcome?",
+            "2. What purpose does that participant rely on, without naming a technical solution?",
+            "3. What request/value enters the interaction?",
+            "4. What observable value or stable refusal must leave it?",
+            "5. Which state, permission, ordering, or safety rule must remain true?",
+            "6. In what context is the interaction allowed to begin and complete?",
+            "7. Which role owns the decision, and what explicitly does that role not own?",
+            "8. Which failure reasons are distinguishable, and what does each preserve?",
+            "9. What Given/When/Then observation can prove success and rejection?",
+            "10. Which dependency, unanswered precondition, or future capability is outside this commitment?",
+            "Do not ask a stakeholder to approve a large YAML blob.",
+            "See `contract-authoring.md`, `scope-routing.md`, and `traceability.md` before",
+        ),
+    )
+    require_all(
+        "references/contract-authoring.md",
+        (
+            "Never reuse an ID for a different meaning.",
+            "`MAJOR.MINOR.PATCH` versioning.",
+            "YAML `status: accepted-design` alone is not approval.",
+            "exact tracked acceptance record under",
+            "`.xflow/issues/issue-<id>/approvals/history/`",
+            "repository, worktree/recorded branch, Issue, approved file, contract ID and",
+            "`semanticDecision: accepted-design`",
+            "`source: local-review`, `action: contract-acceptance`",
+            "normalized existing",
+            "`acceptedObjects`",
+            "Human Approval Is Non-Delegable.",
+        ),
+    )
+    require_all(
+        "references/scope-routing.md",
+        (
+            "| `capability-change` | `contractChangeRequired: true`; found or not-found | `contract-change-proposal.md` |",
+            "| `implementation-gap` | `false`; found contract | `gap-analysis.md` |",
+            "| `ui-defect` | `false`; found contract | `issue-draft.md` |",
+            "| `infrastructure` | `false`; found or not-found | `dependency-issue-proposal.md` |",
+            "| `governance` | `false`; found or not-found | `issue-draft.md` |",
+            "| `future` | `false`; found or not-found | `futureCapabilitiesOutOfScope` or `future-task-proposal.md` |",
+            "`child-feature|shared-infrastructure|external`",
+            "Use a local subtask for work owned by the same feature branch.",
+            "`.xflow/issues/issue-<id>/dependencies.yaml`",
+            "must not automatically block development, commits, tests, or",
+            "repository-local evidence, not a dependency's completion statement.",
+        ),
+    )
+    require_all(
+        "references/traceability.md",
+        (
+            "`contract → interaction → verification → issue → test → evidence → conclusion`",
+            "`.xflow/issues/issue-<id>/traceability-matrix.yaml`",
+            "`contractObjects` must exactly match the verification's `traces`",
+            "Every active contract verification has",
+            "`resolved|reduced` entries require fresh non-empty `evidence.after`",
+            "Do not move local evidence to COS/OSS/object storage or HTTP URLs.",
+            "A code diff or an AI statement that tests",
+        ),
+    )
+    require_all(
+        "templates/traceability-matrix.yaml",
+        (
+            "# Paths below are relative to that Issue directory and must stay in the repository.",
+            "contractObjects:",
+            "acceptanceCriterion:",
+            "evidence:",
+        ),
+    )
+    require_sha256("schemas/capability-contract.schema.json", CAPABILITY_CONTRACT_SCHEMA_SHA256)
+    require_sha256("templates/capability-contract.yaml", CAPABILITY_CONTRACT_TEMPLATE_SHA256)
     require("SKILL.md", "This is the generic `main` product line")
     require("SKILL.md", "default local human approval or valid task-scoped unattended authorization before remote writes")
     require("SKILL.md", "Core Remote Write Review Gate")
