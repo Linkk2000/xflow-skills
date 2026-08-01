@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Callable
 from pathlib import Path
 
 
@@ -158,6 +159,142 @@ def production_text_files() -> tuple[Path, ...]:
     return tuple(files)
 
 
+def logical_rules(text: str) -> tuple[str, ...]:
+    blocks: list[str] = []
+    current: list[str] = []
+
+    def flush() -> None:
+        if current:
+            blocks.append(" ".join(current))
+            current.clear()
+
+    for raw_line in text.splitlines():
+        line = raw_line.strip()
+        if not line:
+            flush()
+            continue
+        starts_structure = re.match(r"^(?:[-*+]\s+|\d+\.\s+|#{1,6}\s+|\|)", line)
+        if starts_structure:
+            flush()
+        current.append(line)
+    flush()
+
+    rules: list[str] = []
+    sentence_boundary = re.compile(r"(?<=[。！？!?])|(?<=\.)\s+(?=[A-Z])")
+    for block in blocks:
+        rules.extend(part.strip() for part in sentence_boundary.split(block) if part.strip())
+    return tuple(rules)
+
+
+def issue_paths(statement: str) -> tuple[str, ...]:
+    return tuple(
+        match.rstrip(".,;:，。；：)）]}>")
+        for match in re.findall(r"\.xflow/issues/[^\s`'\"<]*", statement)
+    )
+
+
+def is_issue_ignore_denial(statement: str) -> bool:
+    patterns = (
+        r"`?\.xflow/issues/[^`\s]*`?\s+"
+        r"(?:must|should|may|can)\s+not\s+be\s+ignored\b",
+        r"\b(?:do not|never)\s+ignore\s+(?:the\s+|all\s+)?`?\.xflow/issues/",
+        r"`?\.xflow/issues/[^`\s]*`?\s+(?:is\s+)?not\s+ignored\b",
+        r"不得(?:将|把|添加)?[^。！？；;]{0,60}`?\.xflow/issues/",
+        r"`?\.xflow/issues/[^`\s]*`?[^。！？；;]{0,40}(?:不得|不能|未被忽略)",
+    )
+    return any(re.search(pattern, statement, re.IGNORECASE) for pattern in patterns)
+
+
+def is_explicit_local_issue_rule(statement: str) -> bool:
+    mode = re.search(
+        r"(?:only\s+)?(?:in|under|when)\s+(?:an?\s+)?(?:explicit\s+)?"
+        r"(?:project\s+)?`?(?:issueWorkspace\.)?mode:\s*local`?",
+        statement,
+        re.IGNORECASE,
+    )
+    if not mode:
+        return False
+    claim = statement[mode.end() :]
+    return bool(
+        re.search(
+            r"(?:\bignore\b.{0,100}\.xflow/issues/|"
+            r"\.xflow/issues/.{0,100}\b(?:ignored|local-only)\b)",
+            claim,
+            re.IGNORECASE,
+        )
+    )
+
+
+def is_exact_local_issue_ignore(statement: str) -> bool:
+    paths = issue_paths(statement)
+    return bool(paths) and all(
+        path == ".xflow/issues/**/approvals/local-review.md" for path in paths
+    )
+
+
+def has_direct_whole_issue_ignore(statement: str) -> bool:
+    whole_issue = r"`?\.xflow/issues/(?:[*/]+)?`?"
+    patterns = (
+        rf"\bignore(?:d)?\s+(?:the\s+|all\s+)?{whole_issue}(?=\s|[.,;:]|$)",
+        rf"{whole_issue}\s+(?:is|are|must\s+be|should\s+be|remain|remains)\s+"
+        r"(?:fully\s+|entirely\s+)?ignored\b",
+    )
+    return any(re.search(pattern, statement, re.IGNORECASE) for pattern in patterns)
+
+
+def is_tracked_issue_rule_with_local_exclusions(statement: str) -> bool:
+    if has_direct_whole_issue_ignore(statement):
+        return False
+    tracked = re.search(
+        r"\.xflow/issues/`?\s+is\s+tracked\s+by\s+default",
+        statement,
+        re.IGNORECASE,
+    )
+    local_exclusions = re.search(
+        r"(?:machine-local|runtime|active\s+approvals|approvals/local-review\.md)"
+        r".{0,140}\b(?:remain|stays?|are)\s+ignored\b",
+        statement,
+        re.IGNORECASE,
+    )
+    return bool(tracked and local_exclusions)
+
+
+def is_operational_current_task_rule(statement: str) -> bool:
+    patterns = (
+        r"\b(?:read|re-read|recover|maintain)\b(?!-)[^.;。！？]{0,200}"
+        r"\.xflow/current-task\.md",
+        r"\bsource\b[^.;。！？]{0,160}\.xflow/current-task\.md",
+        r"\.xflow/current-task\.md[^.;。！？]{0,160}"
+        r"\b(?:active\s+)?(?:source|authority|source of truth)\b",
+    )
+    return any(re.search(pattern, statement, re.IGNORECASE) for pattern in patterns)
+
+
+def is_explicit_current_task_migration(statement: str) -> bool:
+    operation = r"(?:read|re-read|recover|maintain)"
+    current_task = r"`?\.xflow/current-task\.md`?"
+    patterns = (
+        rf"\b{operation}\b(?!-)[^.;。！？]{{0,120}}{current_task}"
+        rf"[^.;。！？]{{0,80}}\b(?:only|solely)\b[^.;。！？]{{0,80}}"
+        r"\bmigrate-current\b",
+        r"\b(?:when|while)\s+(?:explicitly\s+)?running\s+[^.;。！？]{0,80}"
+        rf"\bmigrate-current\b[^.;。！？]{{0,120}}\b{operation}\b(?!-)"
+        rf"[^.;。！？]{{0,120}}{current_task}",
+    )
+    return any(re.search(pattern, statement, re.IGNORECASE) for pattern in patterns)
+
+
+def is_negative_current_task_operation(statement: str) -> bool:
+    return bool(
+        re.search(
+            r"\b(?:do not|never|must not)\s+(?:read|re-read|recover|maintain)\b"
+            r"(?!-)[^.;。！？]{0,160}\.xflow/current-task\.md",
+            statement,
+            re.IGNORECASE,
+        )
+    )
+
+
 def reject_production_contradictions() -> None:
     local_only = re.compile(
         r"(?:\.xflow/issues/.{0,160}(?:local-only|local evidence workspace only|local evidence and approval state only)|"
@@ -174,64 +311,254 @@ def reject_production_contradictions() -> None:
         r"忽略[^\r\n]{0,120}\.xflow/issues/)",
         re.IGNORECASE,
     )
-    operational_legacy = re.compile(
-        r"(?:read|re-read|recover|maintain|source|authority).{0,200}\.xflow/current-task\.md",
-        re.IGNORECASE | re.DOTALL,
-    )
     for path in production_text_files():
         text = path.read_text(encoding="utf-8")
         relative = path.relative_to(ROOT)
-        for paragraph in re.split(r"\r?\n\s*\r?\n", text):
+        for statement in logical_rules(text):
             for pattern in (local_only, issue_ignore, issue_ignore_zh):
-                for match in pattern.finditer(paragraph):
-                    context = paragraph[max(0, match.start() - 180) : match.end() + 180]
-                    lowered = context.lower()
-                    allowed = (
-                        "mode: local" in context
-                        or "must not be ignored" in lowered
-                        or "do not ignore" in lowered
-                        or "not ignored" in lowered
-                        or "不得" in context
-                        or "不能" in context
-                        or "未被忽略" in context
-                        or "remains ignored" in lowered and "local-review.md" in context
-                        or "stay ignored" in lowered and "local-review.md" in context
-                        or "tracked by default" in lowered
-                        and "active approvals" in lowered
-                        and "runtime" in lowered
-                    )
-                    if allowed:
+                for match in pattern.finditer(statement):
+                    if (
+                        is_issue_ignore_denial(statement)
+                        or is_explicit_local_issue_rule(statement)
+                        or is_exact_local_issue_ignore(statement)
+                        or is_tracked_issue_rule_with_local_exclusions(statement)
+                    ):
                         continue
                     raise AssertionError(
-                        f"default-local Issue workspace contradiction in {relative}: {context.strip()!r}"
+                        f"default-local Issue workspace contradiction in {relative}: {statement!r}"
                     )
-            for match in operational_legacy.finditer(paragraph):
-                context = paragraph[max(0, match.start() - 180) : match.end() + 180]
-                lowered = context.lower()
-                allowed = any(
-                    marker in lowered
-                    for marker in ("migration", "migrate-current", "legacy", "compatibility", "read-only")
+            if (
+                is_operational_current_task_rule(statement)
+                and not is_explicit_current_task_migration(statement)
+                and not is_negative_current_task_operation(statement)
+            ):
+                raise AssertionError(
+                    f"legacy current-task used as active authority in {relative}: {statement!r}"
                 )
-                if not allowed:
-                    raise AssertionError(
-                        f"legacy current-task used as active authority in {relative}: {context.strip()!r}"
-                    )
+
+
+def is_whole_issue_pattern(pattern: str) -> bool:
+    if not pattern.startswith(".xflow/issues/"):
+        return False
+    suffix = pattern.removeprefix(".xflow/issues/")
+    return not suffix or bool(re.fullmatch(r"[*/]+", suffix))
+
+
+def parse_tracked_ignore_patterns(prompt: str) -> tuple[str, ...]:
+    try:
+        section = prompt.split("3. 更新 .gitignore，确保包含：", 1)[1].split(
+            "4. 初始化工具：", 1
+        )[0]
+    except IndexError as error:
+        raise AssertionError("tracked-mode ignore section markers are missing") from error
+
+    patterns: list[str] = []
+    pattern_row = re.compile(
+        r"^(?:`(?P<quoted>\.xflow/[^`\s]+)`|(?P<bare>\.xflow/[^`\s#]+))"
+        r"(?:\s+#(?:\s*.*)?)?$"
+    )
+    for line_number, line in enumerate(section.splitlines(), start=1):
+        if ".xflow/" not in line:
+            continue
+        bullet = re.match(r"^\s*[-*+]\s+(?P<body>.*?)\s*$", line)
+        if not bullet:
+            raise AssertionError(
+                f"unparseable .xflow ignore-section line {line_number}: {line.strip()!r}"
+            )
+        body = bullet.group("body")
+        if re.fullmatch(
+            r"不得添加\s+`\.xflow/issues/`、`\.xflow/issues/\*\*`\s+"
+            r"或其他会忽略整个 Issue workspace 的规则。?",
+            body,
+        ):
+            continue
+        match = pattern_row.fullmatch(body)
+        if not match:
+            raise AssertionError(
+                f"unparseable .xflow ignore-list bullet {line_number}: {body!r}"
+            )
+        pattern = match.group("quoted") or match.group("bare")
+        if is_whole_issue_pattern(pattern):
+            raise AssertionError(
+                f"tracked mode must not ignore the whole Issue workspace: {pattern!r}"
+            )
+        if pattern not in TRACKED_MODE_IGNORE_RULES:
+            raise AssertionError(f"tracked mode does not allow ignore pattern: {pattern!r}")
+        if pattern in patterns:
+            raise AssertionError(f"duplicate tracked-mode ignore pattern: {pattern!r}")
+        patterns.append(pattern)
+    return tuple(patterns)
 
 
 def require_tracked_mode_ignore_rules() -> None:
     prompt = read("templates/xflow-local-ignored-vendor-init-prompt.md")
-    section = prompt.split("3. 更新 .gitignore，确保包含：", 1)[1].split("4. 初始化工具：", 1)[0]
-    declared = {
-        match.group(2)
-        for match in re.finditer(r"^\s+-\s+(`?)(\.xflow/[^`\s]+)\1\s*$", section, re.MULTILINE)
-    }
+    declared = set(parse_tracked_ignore_patterns(prompt))
     if declared != TRACKED_MODE_IGNORE_RULES:
         raise AssertionError(
             f"tracked-mode ignore rules mismatch: expected {sorted(TRACKED_MODE_IGNORE_RULES)}, found {sorted(declared)}"
         )
-    forbidden = {".xflow/issues/", ".xflow/issues/**", ".xflow/issues/*"}
-    if declared & forbidden:
-        raise AssertionError(f"tracked mode must not ignore the whole Issue workspace: {sorted(declared & forbidden)}")
+
+
+class MutationDocument:
+    def __init__(self, text: str, name: str) -> None:
+        self.text = text
+        self.name = name
+
+    def read_text(self, encoding: str) -> str:
+        return self.text
+
+    def relative_to(self, root: Path) -> Path:
+        return Path(self.name)
+
+
+def run_ignore_rule_mutation(prompt: str) -> None:
+    original_read = globals()["read"]
+    globals()["read"] = lambda relative: (
+        prompt
+        if relative == "templates/xflow-local-ignored-vendor-init-prompt.md"
+        else original_read(relative)
+    )
+    try:
+        require_tracked_mode_ignore_rules()
+    finally:
+        globals()["read"] = original_read
+
+
+def run_contradiction_mutation(text: str, name: str) -> None:
+    original_files = globals()["production_text_files"]
+    globals()["production_text_files"] = lambda: (MutationDocument(text, name),)
+    try:
+        reject_production_contradictions()
+    finally:
+        globals()["production_text_files"] = original_files
+
+
+def require_mutation_rejected(
+    label: str, action: Callable[[], None], failures: list[str]
+) -> None:
+    try:
+        action()
+    except AssertionError:
+        return
+    failures.append(f"mutation survived: {label}")
+
+
+def require_mutation_accepted(
+    label: str, action: Callable[[], None], failures: list[str]
+) -> None:
+    try:
+        action()
+    except AssertionError as error:
+        failures.append(f"legal mutation rejected: {label}: {error}")
+
+
+def require_fail_closed_mutation_cases() -> None:
+    prompt = read("templates/xflow-local-ignored-vendor-init-prompt.md")
+    failures: list[str] = []
+
+    for whole_tree_pattern in (
+        ".xflow/issues/",
+        ".xflow/issues/*",
+        ".xflow/issues/**",
+        ".xflow/issues/**/*",
+    ):
+        commented_forbidden = prompt.replace(
+            "   - 不得添加",
+            f"   - {whole_tree_pattern} # ignore generated evidence\n   - 不得添加",
+            1,
+        )
+        require_mutation_rejected(
+            f"tracked whole-Issue ignore with inline comment: {whole_tree_pattern}",
+            lambda mutated=commented_forbidden: run_ignore_rule_mutation(mutated),
+            failures,
+        )
+
+    malformed_xflow = prompt.replace(
+        "   - 不得添加",
+        "   - keep .xflow/mystery/ somewhere local\n   - 不得添加",
+        1,
+    )
+    require_mutation_rejected(
+        "unparseable .xflow ignore-list bullet",
+        lambda: run_ignore_rule_mutation(malformed_xflow),
+        failures,
+    )
+
+    commented_legal = prompt.replace(
+        "   - .xflow/local/",
+        "   - `.xflow/local/`   # machine-local state",
+        1,
+    )
+    require_mutation_accepted(
+        "legal local pattern with backticks, whitespace, and inline comment",
+        lambda: run_ignore_rule_mutation(commented_legal),
+        failures,
+    )
+
+    require_mutation_rejected(
+        "tracked ignore claim beside unrelated local-mode allowance",
+        lambda: run_contradiction_mutation(
+            "Tracked mode must ignore .xflow/issues/ for generated evidence. "
+            "A separate project may use mode: local.",
+            "mutations/issue-ignore.md",
+        ),
+        failures,
+    )
+    require_mutation_rejected(
+        "tracked ignore claim beside unrelated must-not denial",
+        lambda: run_contradiction_mutation(
+            "Tracked mode must ignore .xflow/issues/; .xflow/local/ must not be ignored.",
+            "mutations/issue-ignore-denial.md",
+        ),
+        failures,
+    )
+    require_mutation_rejected(
+        "tracked-default rule containing an added whole-Issue ignore command",
+        lambda: run_contradiction_mutation(
+            ".xflow/issues/ is tracked by default; ignore .xflow/issues/ too; "
+            "active approvals remain ignored.",
+            "mutations/tracked-with-hidden-ignore.md",
+        ),
+        failures,
+    )
+    require_mutation_rejected(
+        "operational current-task instruction beside migration vocabulary",
+        lambda: run_contradiction_mutation(
+            "Read .xflow/current-task.md before every commit. "
+            "Legacy migration input elsewhere is read-only compatibility data.",
+            "mutations/current-task.md",
+        ),
+        failures,
+    )
+    require_mutation_rejected(
+        "operational current-task instruction with unrelated same-rule migrate-current words",
+        lambda: run_contradiction_mutation(
+            "Read .xflow/current-task.md before every commit, while devctl task "
+            "migrate-current is only for legacy read-only migration.",
+            "mutations/current-task-same-rule.md",
+        ),
+        failures,
+    )
+
+    require_mutation_accepted(
+        "same-sentence explicit local-mode exception",
+        lambda: run_contradiction_mutation(
+            "Only in explicit mode: local may a project ignore .xflow/issues/.",
+            "mutations/local-mode.md",
+        ),
+        failures,
+    )
+    require_mutation_accepted(
+        "same-rule explicit current-task migration",
+        lambda: run_contradiction_mutation(
+            "Read .xflow/current-task.md only when explicitly running devctl task migrate-current.",
+            "mutations/migrate-current.md",
+        ),
+        failures,
+    )
+
+    if failures:
+        raise AssertionError("fail-closed mutation cases failed:\n- " + "\n- ".join(failures))
 
 
 def require_initialized_adapter_routes() -> None:
@@ -297,6 +624,7 @@ def main() -> None:
     require_initialized_adapter_routes()
     require_tracked_mode_ignore_rules()
     reject_production_contradictions()
+    require_fail_closed_mutation_cases()
     require_in_order(
         "SKILL.md",
         (
