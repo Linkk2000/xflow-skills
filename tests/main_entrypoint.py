@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+DEVCTL_SCHEMA = ROOT.parent / "xflow-devctl" / "schemas" / "capability-contract.schema.json"
 
 
 def read(relative: str) -> str:
@@ -32,6 +34,15 @@ def reject_tree(roots: tuple[str, ...], needle: str) -> None:
 
 
 def main() -> None:
+    require("references/contract-authoring.md", "先回答能力问题，再填写 YAML")
+    require("references/contract-authoring.md", "purpose → constraints → context")
+    require("references/contract-evolution.md", "PATCH")
+    require("references/contract-evolution.md", "MINOR")
+    require("references/contract-evolution.md", "MAJOR")
+    require("references/traceability.md", "contract → interaction → verification → issue → test → evidence → conclusion")
+    require("templates/task-state.md", "Semantic Phase:")
+    if hashlib.sha256(read("schemas/capability-contract.schema.json").encode("utf-8")).digest() != hashlib.sha256(DEVCTL_SCHEMA.read_bytes()).digest():
+        raise AssertionError("capability contract schema SHA-256 differs from xflow-devctl")
     require("SKILL.md", "This is the generic `main` product line")
     require("SKILL.md", "default local human approval or valid task-scoped unattended authorization before remote writes")
     require("SKILL.md", "Core Remote Write Review Gate")

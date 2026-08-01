@@ -1,0 +1,21 @@
+# Write this file at .xflow/issues/issue-<id>/traceability-matrix.yaml.
+# Paths below are relative to that Issue directory and must stay in the repository.
+version: 0.1.0
+issue: "101"
+contract:
+  id: example.contract.capability-name
+  version: 0.1.0
+  file: contracts/contract.yaml
+entries:
+  - id: trace-001
+    contractObjects:
+      - example.interaction.perform-operation
+    verification: example.verify.case.operation-success
+    acceptanceCriterion: criterion-001
+    tests:
+      - path: tests/test_operation.py
+        selector: test_operation_success
+    evidence:
+      before: [evidence/api/operation-before.json]
+      after: [evidence/api/operation-after.json]
+    conclusion: resolved

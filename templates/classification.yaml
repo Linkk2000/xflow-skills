@@ -1,0 +1,13 @@
+# Write this file at .xflow/issues/issue-<id>/classification.yaml.
+# status: found | not-found; classification and nextArtifact must follow scope-routing.md.
+version: 0.1.0
+request:
+  originalStatement: Describe the user's original request.
+contractSearch:
+  status: not-found
+  refs: []
+classification: capability-change
+contractChangeRequired: true
+reason: Describe the participant-visible capability change and boundary.
+nextArtifact: contract-change-proposal.md
+decisionSource: ai-proposed
