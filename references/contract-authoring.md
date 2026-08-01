@@ -41,8 +41,13 @@ PATCH/MINOR/MAJOR rules in `contract-evolution.md`.
 
 ## Human Acceptance Is A Gate
 
-Run the worktree-local recipe after the selected Issue has a classified,
-lintable contract:
+Contract acceptance starts only after the remote Issue ID exists, safe draft
+artifacts have moved to `.xflow/issues/issue-<id>/`, canonical task state exists,
+and that Issue is active in the current worktree. Before Issue creation, a
+candidate may be reviewed under `.xflow/issues/issue-draft/`, but there is no
+pre-Issue contract-acceptance command and AI must not implement it.
+
+Materialize the exact candidate under the configured contract root, then run:
 
 ```text
 devctl task activate --issue <id>
@@ -51,6 +56,10 @@ devctl contract lint --file <contract.yaml>
 devctl approval prepare --issue <id> --action contract-acceptance --file <contract.yaml> --objects <approved-id-list>
 devctl contract accept --issue <id> --file <contract.yaml> --objects <approved-id-list>
 ```
+
+Issue-create approval does not satisfy this recipe. A successful acceptance
+binds `accepted-design`; it does not approve entering development. Obtain the
+separate development-start approval before branch creation or implementation.
 
 Human Approval Is Non-Delegable. AI may prepare the file, object list,
 evidence, and command draft, but it must never satisfy the gate or edit

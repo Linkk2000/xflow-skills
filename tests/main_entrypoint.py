@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from pathlib import Path
 
 
@@ -31,7 +32,7 @@ CAPABILITY_ENTRYPOINT_ANCHORS = (
     "One worktree may activate only one remote Issue",
 )
 
-CAPABILITY_METHOD_LINKS = (
+SKILL_CAPABILITY_ROUTES = (
     "references/capability-contract-method.md",
     "references/contract-authoring.md",
     "references/contract-evolution.md",
@@ -42,6 +43,26 @@ CAPABILITY_METHOD_LINKS = (
     "templates/task-state.md",
     "templates/traceability-matrix.yaml",
 )
+
+XFLOW_MAP_CAPABILITY_ROUTES = (
+    "capability-contract-method.md",
+    "contract-authoring.md",
+    "contract-evolution.md",
+    "scope-routing.md",
+    "traceability.md",
+    "../templates/capability-contract.yaml",
+    "../templates/classification.yaml",
+    "../templates/task-state.md",
+    "../templates/traceability-matrix.yaml",
+)
+
+TRACKED_MODE_IGNORE_RULES = {
+    ".xflow/ops/devctl/",
+    ".xflow/ops/workflow/",
+    ".xflow/local/",
+    ".xflow/runtime/",
+    ".xflow/issues/**/approvals/local-review.md",
+}
 
 AI_RULE_MAPPINGS = (
     ("codex", "AGENTS.md", "codex-agents.main.md"),
@@ -93,6 +114,149 @@ def require_sha256(relative: str, expected: str) -> None:
         raise AssertionError(f"SHA-256 drift in {relative}: expected {expected}, found {actual}")
 
 
+def require_in_order(relative: str, needles: tuple[str, ...]) -> None:
+    text = re.sub(r"\s+", " ", read(relative))
+    cursor = -1
+    for needle in needles:
+        normalized = re.sub(r"\s+", " ", needle)
+        position = text.find(normalized, cursor + 1)
+        if position < 0:
+            raise AssertionError(f"missing ordered marker {needle!r} in {relative}")
+        cursor = position
+
+
+def require_declared_routes(relative: str, routes: tuple[str, ...]) -> None:
+    declaring_file = ROOT / relative
+    text = read(relative)
+    for route in routes:
+        if route not in text:
+            raise AssertionError(f"missing route {route!r} in {relative}")
+        resolved = (declaring_file.parent / route).resolve()
+        if not resolved.is_relative_to(ROOT.resolve()):
+            raise AssertionError(f"route {route!r} in {relative} escapes the workflow repository")
+        if not resolved.is_file():
+            raise AssertionError(
+                f"route {route!r} in {relative} resolves to missing {resolved}"
+            )
+
+
+def production_text_files() -> tuple[Path, ...]:
+    roots = (
+        ROOT / "SKILL.md",
+        ROOT / "AGENTS.md",
+        ROOT / "CLAUDE.md",
+        ROOT / "GEMINI.md",
+        ROOT / "README.md",
+        ROOT / "references",
+        ROOT / "templates",
+        ROOT / ".cursor",
+    )
+    files: list[Path] = []
+    for root in roots:
+        candidates = [root] if root.is_file() else root.rglob("*")
+        files.extend(candidate for candidate in candidates if candidate.is_file())
+    return tuple(files)
+
+
+def reject_production_contradictions() -> None:
+    local_only = re.compile(
+        r"(?:\.xflow/issues/.{0,160}(?:local-only|local evidence workspace only|local evidence and approval state only)|"
+        r"(?:local-only|local evidence workspace only|local evidence and approval state only).{0,160}\.xflow/issues/)",
+        re.IGNORECASE | re.DOTALL,
+    )
+    issue_ignore = re.compile(
+        r"(?:\.xflow/issues/.{0,160}\b(?:is|are|remain|remains|must be|should be)\s+(?:fully\s+|entirely\s+)?ignored\b|"
+        r"\bignore(?:d)?\s+(?:the\s+|all\s+)?\.xflow/issues/)",
+        re.IGNORECASE | re.DOTALL,
+    )
+    issue_ignore_zh = re.compile(
+        r"(?:\.xflow/issues/[^\r\n]{0,120}(?:忽略|加入[^\r\n]{0,40}gitignore)|"
+        r"忽略[^\r\n]{0,120}\.xflow/issues/)",
+        re.IGNORECASE,
+    )
+    operational_legacy = re.compile(
+        r"(?:read|re-read|recover|maintain|source|authority).{0,200}\.xflow/current-task\.md",
+        re.IGNORECASE | re.DOTALL,
+    )
+    for path in production_text_files():
+        text = path.read_text(encoding="utf-8")
+        relative = path.relative_to(ROOT)
+        for paragraph in re.split(r"\r?\n\s*\r?\n", text):
+            for pattern in (local_only, issue_ignore, issue_ignore_zh):
+                for match in pattern.finditer(paragraph):
+                    context = paragraph[max(0, match.start() - 180) : match.end() + 180]
+                    lowered = context.lower()
+                    allowed = (
+                        "mode: local" in context
+                        or "must not be ignored" in lowered
+                        or "do not ignore" in lowered
+                        or "not ignored" in lowered
+                        or "不得" in context
+                        or "不能" in context
+                        or "未被忽略" in context
+                        or "remains ignored" in lowered and "local-review.md" in context
+                        or "stay ignored" in lowered and "local-review.md" in context
+                        or "tracked by default" in lowered
+                        and "active approvals" in lowered
+                        and "runtime" in lowered
+                    )
+                    if allowed:
+                        continue
+                    raise AssertionError(
+                        f"default-local Issue workspace contradiction in {relative}: {context.strip()!r}"
+                    )
+            for match in operational_legacy.finditer(paragraph):
+                context = paragraph[max(0, match.start() - 180) : match.end() + 180]
+                lowered = context.lower()
+                allowed = any(
+                    marker in lowered
+                    for marker in ("migration", "migrate-current", "legacy", "compatibility", "read-only")
+                )
+                if not allowed:
+                    raise AssertionError(
+                        f"legacy current-task used as active authority in {relative}: {context.strip()!r}"
+                    )
+
+
+def require_tracked_mode_ignore_rules() -> None:
+    prompt = read("templates/xflow-local-ignored-vendor-init-prompt.md")
+    section = prompt.split("3. 更新 .gitignore，确保包含：", 1)[1].split("4. 初始化工具：", 1)[0]
+    declared = {
+        match.group(2)
+        for match in re.finditer(r"^\s+-\s+(`?)(\.xflow/[^`\s]+)\1\s*$", section, re.MULTILINE)
+    }
+    if declared != TRACKED_MODE_IGNORE_RULES:
+        raise AssertionError(
+            f"tracked-mode ignore rules mismatch: expected {sorted(TRACKED_MODE_IGNORE_RULES)}, found {sorted(declared)}"
+        )
+    forbidden = {".xflow/issues/", ".xflow/issues/**", ".xflow/issues/*"}
+    if declared & forbidden:
+        raise AssertionError(f"tracked mode must not ignore the whole Issue workspace: {sorted(declared & forbidden)}")
+
+
+def require_initialized_adapter_routes() -> None:
+    payload = json.loads(read("templates/ai-rules.json"))
+    for rule in payload["rules"]:
+        template = ROOT / "templates" / rule["template"]
+        if not template.is_file():
+            raise AssertionError(f"missing adapter template for {rule['target']}: {template}")
+
+    cursor = read("templates/cursorrules.main")
+    reject("templates/cursorrules.main", "\n- `SKILL.md`")
+    for stale in (
+        "`references/issue-template.md`",
+        "`references/xflow-map.md`",
+    ):
+        reject("templates/cursorrules.main", stale)
+    routes = set(re.findall(r"`(\.xflow/ops/workflow/[^`]+)`", cursor))
+    if not routes:
+        raise AssertionError("templates/cursorrules.main has no project-local workflow routes")
+    for route in routes:
+        source_relative = route.removeprefix(".xflow/ops/workflow/")
+        if not (ROOT / source_relative).is_file():
+            raise AssertionError(f"initialized Cursor route has no workflow source: {route}")
+
+
 def require_capability_entrypoints() -> None:
     forbidden_default_local_claims = (
         ".xflow/issues/ is ignored",
@@ -128,8 +292,47 @@ def require_ai_rule_mappings() -> None:
 def main() -> None:
     require_capability_entrypoints()
     require_ai_rule_mappings()
-    for relative in ("SKILL.md", "references/xflow-map.md"):
-        require_all(relative, CAPABILITY_METHOD_LINKS)
+    require_declared_routes("SKILL.md", SKILL_CAPABILITY_ROUTES)
+    require_declared_routes("references/xflow-map.md", XFLOW_MAP_CAPABILITY_ROUTES)
+    require_initialized_adapter_routes()
+    require_tracked_mode_ignore_rules()
+    reject_production_contradictions()
+    require_in_order(
+        "SKILL.md",
+        (
+            ".xflow/issues/issue-draft/classification.yaml",
+            ".xflow/issues/issue-draft/issue-draft.md",
+            "Approved Action: issue-create",
+            "devctl issue create",
+            "migrate the draft workspace to `.xflow/issues/issue-<id>/`",
+            ".xflow/issues/issue-<id>/task-state.md",
+            "devctl task activate --issue <id>",
+            "devctl approval prepare --issue <id> --action contract-acceptance",
+            "devctl contract accept --issue <id>",
+            "approve entering development",
+            "Follow TDD",
+        ),
+    )
+    require("SKILL.md", "Issue creation approval does not accept the capability contract.")
+    require("SKILL.md", "Contract acceptance does not approve entering development.")
+    for relative in (
+        "SKILL.md",
+        "references/xflow-map.md",
+        "templates/codex-agents.main.md",
+        "templates/cursorrules.main",
+    ):
+        require(relative, "Do not run `devctl check current-task` before the remote Issue ID exists.")
+    reject_tree(
+        ("SKILL.md", "references", "templates"),
+        "approval prepare --issue draft --action contract-acceptance",
+    )
+    reject_tree(
+        ("SKILL.md", "references", "templates"),
+        "contract accept --issue draft",
+    )
+    require("references/capability-contract-method.md", ".xflow/issues/issue-draft/classification.yaml")
+    require("references/scope-routing.md", ".xflow/issues/issue-draft/classification.yaml")
+    require("references/contract-authoring.md", "Contract acceptance starts only after the remote Issue ID exists")
     require_all(
         "SKILL.md",
         (

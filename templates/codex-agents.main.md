@@ -113,15 +113,19 @@ Hard rules:
 Remote-write common checks:
 
 1. Create the body/evidence file.
-2. Run `devctl check current-task --issue <id>`.
+2. For Issue-bound actions, run `devctl task status` and
+   `devctl check current-task --issue <id>`. For new Issue creation, run draft
+   classification and Issue-draft checks instead.
+   Do not run `devctl check current-task` before the remote Issue ID exists.
 3. Run the matching `devctl check ...` command.
 4. Choose one path:
    - Default human path: run `devctl approval prepare`, stop for human review,
      continue only after the human sets `Approved: yes`, then run
      `devctl check local-review`. If AI edits the approval, it is invalid.
    - Valid task-scoped unattended path: verify the bound state and action, then
-     skip approval-file prepare, human wait, and local-review check. The
-     current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
+     skip approval-file prepare, human wait, and local-review check. For
+     Issue-bound actions, the current-task, draft structure, evidence, attachment, provider/platform, and test checks still run. New Issue
+     creation keeps the draft checks but has no canonical task-state yet.
 5. Run the remote-write command through devctl.
 
 On the default human path, push and PR/MR creation are separate human gates:

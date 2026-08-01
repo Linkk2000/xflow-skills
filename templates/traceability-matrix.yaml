@@ -1,7 +1,8 @@
-# Write this file at .xflow/issues/issue-<id>/traceability-matrix.yaml.
+# Draft at .xflow/issues/issue-draft/traceability-matrix.yaml; after confirmed
+# Issue creation, migrate it to .xflow/issues/issue-<id>/traceability-matrix.yaml.
 # Paths below are relative to that Issue directory and must stay in the repository.
 version: 0.1.0
-issue: "101"
+issue: "draft" # Replace with the confirmed remote Issue ID during migration.
 contract:
   id: example.contract.capability-name
   version: 0.1.0

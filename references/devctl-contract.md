@@ -159,6 +159,16 @@ Use these recipes as the normal command surface. Do not probe by retrying
 random flag combinations after an error; read the remote state or run the
 matching check command first.
 
+For a new capability request, `draft` supports classification and Issue-create
+preparation only. Prepare `.xflow/issues/issue-draft/classification.yaml`,
+analysis, Issue body, candidate contract, and candidate trace matrix without
+implementation. After the separately gated `devctl issue create` returns a
+confirmed ID, migrate safe draft artifacts, create
+`.xflow/issues/issue-<id>/task-state.md`, and run
+`devctl task activate --issue <id>`. Contract acceptance has no `draft` form:
+it requires the remote Issue ID, exact contract-root file, exact object list,
+and non-delegable human approval. Development start is a later separate gate.
+
 Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
 command drafts, and review notes.
 AI must never satisfy a human gate itself.

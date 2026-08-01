@@ -1,4 +1,5 @@
-# Write this file at .xflow/issues/issue-<id>/classification.yaml.
+# Start at .xflow/issues/issue-draft/classification.yaml, then migrate it to
+# .xflow/issues/issue-<id>/classification.yaml after confirmed Issue creation.
 # status: found | not-found; classification and nextArtifact must follow scope-routing.md.
 version: 0.1.0
 request:

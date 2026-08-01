@@ -14,6 +14,14 @@ Do not include internal-only visible titles in files passed to `--body-file`.
 Use this shape when converting an oral request into a remote issue. Store the
 file at `.xflow/issues/issue-draft/issue-draft.md` before `devctl issue create`.
 
+The pre-Issue workspace may also contain `classification.yaml`, route analysis,
+`contract-change-proposal.md`, `capability-contract.candidate.yaml`, and
+`traceability-matrix.yaml`. These are candidates only. AI must not implement,
+activate task state, or run contract acceptance before a confirmed remote Issue
+ID exists. After creation, migrate safe draft artifacts into
+`.xflow/issues/issue-<id>/`, excluding the consumed active approval and publish
+outputs, then create canonical task-state and activate the Issue.
+
 ```markdown
 <!-- xflow: issue-draft -->
 

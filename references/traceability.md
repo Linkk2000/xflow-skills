@@ -5,9 +5,11 @@ Every link is an auditable artifact, not an AI assertion.
 
 ## Matrix Location And Shape
 
-The matrix is exactly
-`.xflow/issues/issue-<id>/traceability-matrix.yaml`; a matrix elsewhere is
-invalid. It has `version: 0.1.0`, the exact `issue`, contract `id`, `version`,
+Before remote Issue creation, a candidate matrix may be prepared at
+`.xflow/issues/issue-draft/traceability-matrix.yaml`; it is not closure evidence
+and cannot pass Issue-bound trace validation. After Issue creation, the matrix
+is exactly `.xflow/issues/issue-<id>/traceability-matrix.yaml`; a final matrix
+elsewhere is invalid. It has `version: 0.1.0`, the exact `issue`, contract `id`, `version`,
 and `file`, plus non-empty `entries`. Each entry has `id`, `contractObjects`,
 `verification`, `acceptanceCriterion`, non-empty `tests`, `evidence.before`,
 and `conclusion`; `evidence.after`, `ui`, and `blocker` are conditional.

@@ -41,7 +41,11 @@
 - GitHub numeric IDs and Gitee alphanumeric IDs are both valid, for example
   `[#123]` and `[#IK17AW]`.
 - Portable means plain Git text that travels across GitHub/Gitee: no AI-client trailers, no local absolute paths, no machine-specific usernames, and no provider-only metadata.
-- If no issue number is known, stop before committing and recover the active issue from the branch, `.xflow/current-task.md`, or the human reviewer.
+- If no Issue number is known, stop before committing. Run `devctl task status`,
+  verify the worktree-local pointer, and open the matching
+  `.xflow/issues/issue-<id>/task-state.md`; never infer authority from a branch
+  name or repository singleton. For an explicitly requested legacy migration,
+  use `devctl task migrate-current` once and then rely on v2 Issue state.
 - Do not include unrelated formatting, drive-by refactors, or generated noise in the same commit.
 
 ## Cleanup Approval Boundary

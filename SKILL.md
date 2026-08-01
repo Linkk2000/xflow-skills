@@ -168,23 +168,30 @@ This is a phase-selected reference index. If unsure which file applies, read
 
 ## Capability-Contract Gate
 
-Run this route before Issue drafting:
+Start this route before Issue drafting, but do not require an Issue-bound
+semantic exit before the Issue identity exists:
 
 ```text
 read project rules
 → locate contract
-→ write/check classification
+→ write/check classification in issue-draft
 → choose capability-change | implementation-gap | ui-defect | infrastructure | governance | future
+→ draft analysis, Issue body, candidate contract, and verification matrix
+→ pass the separate Issue-create gate and obtain the remote Issue ID
+→ migrate draft artifacts and activate Issue task state
 → satisfy semantic exit condition
 → enter existing Issue/TDD/Git flow
 ```
 
-Locate an existing capability contract before classifying the request. For a
-`capability-change`, AI must not edit implementation code before
-`accepted-design`; YAML status alone is not approval and Human Approval Is
-Non-Delegable. The verification matrix must exist before engineering
-projection. For an `implementation-gap`, obtain human recognition of the gap
-analysis instead of reopening a correct contract. Use
+Locate an existing capability contract before classifying the request. Before
+the remote Issue exists, keep all request-specific work under
+`.xflow/issues/issue-draft/` and do not edit implementation code. For a
+`capability-change`, the candidate verification matrix must exist before any
+engineering projection. After Issue creation and draft migration, AI must not
+edit implementation code before `accepted-design`; YAML status alone is not
+approval and Human Approval Is Non-Delegable. For an `implementation-gap`,
+obtain human recognition of the gap analysis instead of reopening a correct
+contract. Use
 `references/capability-contract-method.md`, `references/contract-authoring.md`,
 `references/contract-evolution.md`, `references/scope-routing.md`, and
 `references/traceability.md` for the selected phase rather than copying the
@@ -192,43 +199,75 @@ method here.
 
 ## Required Flow
 
-1. Complete the Capability-Contract Gate and its semantic exit condition.
-2. Draft `.xflow/issues/issue-draft/issue-draft.md` from
-   `references/issue-template.md`.
-3. After the remote Issue exists, create or update
-   `.xflow/issues/issue-<id>/task-state.md`, then activate it for this worktree.
-4. Run `devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md`
-   and `devctl check current-task`.
-5. Choose exactly one remote-write path:
+1. Write `.xflow/issues/issue-draft/classification.yaml`, preserving the oral
+   request and contract-search evidence, then run
+   `devctl check classification --issue draft`.
+2. In `.xflow/issues/issue-draft/`, prepare the route analysis and
+   `.xflow/issues/issue-draft/issue-draft.md`. For a capability change, also
+   prepare `contract-change-proposal.md`,
+   `capability-contract.candidate.yaml`, and `traceability-matrix.yaml`.
+   The candidate contract contains its verification matrix before engineering
+   projections. These are review candidates, not accepted design. AI must not
+   edit implementation code.
+3. Run `devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md`
+   and all applicable evidence/attachment checks.
+4. Choose exactly one Issue-create remote-write path:
    - Default human path: run
      `devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md`,
-     stop for the human to set `Approved: yes`, then run
+     stop for the human to explicitly approve `Approved Action: issue-create`
+     and set `Approved: yes`, then run
      `devctl check local-review --issue draft --file .xflow/issues/issue-draft/issue-draft.md --action issue-create`.
      AI must not make the approval edit or treat its own review as approval.
    - Valid task-scoped unattended path: verify the repository/worktree/task
-     state, then skip `devctl approval prepare`, human wait, and `devctl check local-review`.
-     The Issue task-state/current-task compatibility, draft structure, evidence,
-     attachment, provider/platform, and test checks still run.
-6. Create the remote issue through devctl:
+     draft binding and covered action, then skip `devctl approval prepare`,
+     human wait, and `devctl check local-review`. Draft classification,
+     structure, evidence, attachment, provider/platform, and test checks still
+     run. Do not run `devctl check current-task` before the remote Issue ID exists.
+5. Create the remote issue through devctl only after that gate:
    `devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md`.
-7. Start the task branch from the repository's base branch.
-8. Follow TDD: write or identify a failing test/check first, then implement the
-   smallest change to pass it.
-9. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
+   Issue creation approval does not accept the capability contract.
+6. After the provider returns a confirmed ID, migrate the draft workspace to
+   `.xflow/issues/issue-<id>/`. Move classification, analysis, Issue draft,
+   proposal, candidate, trace matrix, and local evidence without moving the
+   consumed active approval or `.xflow/publish/` outputs. Replace draft Issue
+   placeholders with the confirmed ID. Do not infer an ID after an uncertain
+   remote result.
+7. Create `.xflow/issues/issue-<id>/task-state.md` from
+   `templates/task-state.md`, bind the confirmed Issue and intended branch, and
+   run `devctl task activate --issue <id>`. Then run
+   `devctl task status` and `devctl check classification --issue <id>`.
+8. For a capability change, materialize the exact candidate bytes at the
+   configured `<contract-root>/<capability>/contract.yaml`, update task-state
+   to bind that path, and run `devctl contract lint --file <contract.yaml>`.
+   Prepare the exact object list with
+   `devctl approval prepare --issue <id> --action contract-acceptance --file <contract.yaml> --objects <approved-id-list>`, stop for the human decision,
+   then run
+   `devctl contract accept --issue <id> --file <contract.yaml> --objects <approved-id-list>`.
+   Contract acceptance does not approve entering development. It never uses
+   unattended mode and cannot be satisfied by Issue-create approval.
+9. Bind the resulting immutable history record in task-state as
+   `Human Approval Ref`, set `Semantic Phase: accepted-design`, and verify the
+   migrated traceability matrix. Only then ask the human to approve entering development at `G2_APPROVE_DEVELOPMENT_START`.
+10. After that exact approval, start the task branch from the repository's base
+    branch. For non-capability routes, satisfy the route-specific semantic exit
+    before this development-start gate.
+11. Follow TDD: write or identify a failing test/check first, then implement the
+    smallest change to pass it.
+12. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
     If the issue is too large, create `.xflow/issues/issue-<id>/subtask-001/`
     style local subtasks and record their plans, evidence, review checkpoints,
     and conclusions in each subtask README.
-10. Before commit, push, PR/MR creation, or cleanup, run
+13. Before commit, push, PR/MR creation, or cleanup, run
     `devctl check current-task --issue <id>`.
-11. Before requesting MR/PR approval, fetch the target branch, merge
+14. Before requesting MR/PR approval, fetch the target branch, merge
     `origin/<base>` into the task branch by default, resolve approved
     conflicts, rerun relevant checks, and record the target branch SHA plus
     sync result.
-12. For push, run applicable mechanical checks, then use the same chosen path:
+15. For push, run applicable mechanical checks, then use the same chosen path:
     the default human path prepares and validates `Approved Action: git-push`;
     the valid task-scoped unattended path skips only those approval-file steps.
     Run `devctl git push --issue <id> --file .xflow/issues/issue-<id>/walkthrough.md`.
-13. Draft `.xflow/issues/issue-<id>/mr-draft.md` and run
+16. Draft `.xflow/issues/issue-<id>/mr-draft.md` and run
     `devctl check mr-draft --issue <id>`, then use the same default human or
     valid task-scoped unattended path before
     `devctl git mr --body-file ... --issue <id>`.
@@ -331,7 +370,9 @@ Choose one gate path after the common checks:
   pass. If AI made the approval edit, the approval is invalid.
 - Valid task-scoped unattended path: verify the bound state and covered action,
   then skip `devctl approval prepare`, human wait, and `devctl check local-review`.
-  The current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
+  For Issue-bound actions, the current-task, draft structure, evidence, attachment, provider/platform, and test checks still run. For a new Issue,
+  use draft classification and structure checks instead. Do not run
+  `devctl check current-task` before the remote Issue ID exists.
 
 ## Task-Scoped Unattended Mode
 

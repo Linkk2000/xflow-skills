@@ -57,6 +57,9 @@
 
 - Symptom: the AI ignores project language rules, stale state files, or the
   latest human gate.
-- Rule: re-read project rules, `.xflow/current-task.md`, and matching devctl
-  checks before lifecycle actions.
+- Rule: re-read project rules, run `devctl task status`, verify the
+  worktree-local pointer, and open the matching
+  `.xflow/issues/issue-<id>/task-state.md` before lifecycle actions. Mention
+  legacy `.xflow/current-task.md` only when explicitly running
+  `devctl task migrate-current`; it is not active authority.
 - Treat push approval and MR/PR approval as separate gates.

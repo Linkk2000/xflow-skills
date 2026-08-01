@@ -2,11 +2,18 @@
 
 ## Classification Consistency
 
-Create `.xflow/issues/issue-<id>/classification.yaml` and run:
+Before a remote Issue exists, create
+`.xflow/issues/issue-draft/classification.yaml` and run:
 
 ```text
-devctl check classification --issue <id>
+devctl check classification --issue draft
 ```
+
+Draft the route's next artifact under `.xflow/issues/issue-draft/`. After the
+separately approved Issue-create action returns a confirmed ID, migrate the
+draft artifacts to `.xflow/issues/issue-<id>/`, replace draft placeholders,
+create canonical task state, run `devctl task activate --issue <id>`, and check
+the migrated classification again. Do not run contract acceptance for `draft`.
 
 The document is version `0.1.0` and includes `request.originalStatement`,
 `contractSearch.status`, `contractSearch.refs`, `classification`,
@@ -27,6 +34,8 @@ Changing implementation because it violates an existing contract is an
 `implementation-gap`: write and obtain human recognition of `gap-analysis.md`
 before implementation. Changing the participant-visible promise is a
 `capability-change`: author and obtain human acceptance of a contract first.
+Issue creation approval and contract acceptance are separate gates; neither
+approves entering development.
 
 ## Dependency Issue Boundary
 

@@ -68,10 +68,18 @@ implementation-gap: gap-analysis -> gap-recognized
 ```
 
 Locate an existing contract and check classification before Issue drafting.
+Before the remote Issue exists, draft classification, analysis, Issue body,
+candidate contract, and candidate verification matrix under
+`.xflow/issues/issue-draft/`; AI must not edit implementation code. The
+Issue-create gate creates only the remote identity. After the confirmed ID,
+migrate draft artifacts, create Issue task-state, and activate the Issue.
 AI must not edit implementation code for a capability change before the exact
-contract objects reach `accepted-design` through human acceptance. A
+contract objects then reach `accepted-design` through human acceptance. A
 verification matrix must exist before engineering projection. Lint and YAML
 status do not satisfy the human gate.
+
+Issue-create approval, contract acceptance, and
+`G2_APPROVE_DEVELOPMENT_START` are separate gates. None can satisfy another.
 
 ## Issue Task State And Worktrees
 

@@ -15,11 +15,18 @@ plan, an API sketch, or a substitute for review.
 | Policy/process concern | `governance` | `issue-draft.md` |
 | Deliberately deferred capability | `future` | `futureCapabilitiesOutOfScope` or `future-task-proposal.md` |
 
-Lightweight route: capture the original request, search contracts, write
-`.xflow/issues/issue-<id>/classification.yaml`, run
-`devctl check classification --issue <id>`, then create only the route's next
-artifact. Do not turn a known implementation gap into a new capability merely
-because the fix is difficult.
+Lightweight pre-Issue route: capture the original request, search contracts,
+write `.xflow/issues/issue-draft/classification.yaml`, run
+`devctl check classification --issue draft`, then create only the route's next
+draft artifact under `.xflow/issues/issue-draft/`. For a capability change,
+prepare the candidate contract and verification matrix there, but do not run
+contract acceptance and do not edit implementation code. Do not turn a known
+implementation gap into a new capability merely because the fix is difficult.
+
+After the separately approved remote Issue is created, migrate the safe draft
+artifacts to `.xflow/issues/issue-<id>/`, create canonical task state, and run
+`devctl task activate --issue <id>`. Only then may an exact contract under the
+configured contract root enter the contract-acceptance workflow.
 
 ## Discovery Questions
 
@@ -47,8 +54,11 @@ out-of-scope work. Record uncertainty as a precondition with its exact
 
 ## Method Exit
 
-Linting proves only structure. A design enters `accepted-design` only after the
-human accepts exact contract objects through the contract-acceptance workflow
-and the matching tracked acceptance record is retained in the Issue workspace.
+Linting proves only structure. Issue-create approval creates identity only; it
+does not accept a contract. A design enters `accepted-design` only after the
+remote Issue exists and the human accepts exact contract objects through the
+contract-acceptance workflow, with the matching tracked acceptance record
+retained in the Issue workspace. Contract acceptance does not approve entering
+development; that remains a later exact human gate.
 See `contract-authoring.md`, `scope-routing.md`, and `traceability.md` before
 entering development.

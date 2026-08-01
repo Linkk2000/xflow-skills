@@ -7,13 +7,13 @@ do not hard-code a user's local project path or an academic paper layout here.
 
 - `workflow-state-machine.md`: phase order, states, human gates, and the
   pre-MR target-branch synchronization checkpoint.
-- `references/capability-contract-method.md`: capability discovery questions and semantic
+- `capability-contract-method.md`: capability discovery questions and semantic
   exit conditions before Issue/TDD/Git work.
-- `references/contract-authoring.md`: contract field semantics, stable IDs, and exact
+- `contract-authoring.md`: contract field semantics, stable IDs, and exact
   human acceptance records.
-- `references/contract-evolution.md`: PATCH/MINOR/MAJOR changes and accepted-design reopen.
-- `references/scope-routing.md`: `capability-change|implementation-gap|ui-defect|infrastructure|governance|future` classification.
-- `references/traceability.md`: contract-to-test-to-evidence closure.
+- `contract-evolution.md`: PATCH/MINOR/MAJOR changes and accepted-design reopen.
+- `scope-routing.md`: `capability-change|implementation-gap|ui-defect|infrastructure|governance|future` classification.
+- `traceability.md`: contract-to-test-to-evidence closure.
 - `bootstrap-policy.md`: how an empty repository obtains XFlow files and local
   devctl entrypoints.
 - `restore-policy.md`: how an existing XFlow repository is rehydrated on a new
@@ -36,10 +36,10 @@ do not hard-code a user's local project path or an academic paper layout here.
 - `dependency-issue-workflow.md`: advisory dependency classification,
   ownership, lifecycle, integration, and parent closure assessment.
 - `../templates/dependencies.yaml`: reusable issue-local dependency graph.
-- `templates/capability-contract.yaml`: capability contract starter.
-- `templates/classification.yaml`: request classification starter.
-- `templates/task-state.md`: Issue-scoped task state starter.
-- `templates/traceability-matrix.yaml`: verification trace starter.
+- `../templates/capability-contract.yaml`: capability contract starter.
+- `../templates/classification.yaml`: request classification starter.
+- `../templates/task-state.md`: Issue-scoped task state starter.
+- `../templates/traceability-matrix.yaml`: verification trace starter.
 - `scoring-rubric.md`: 100-point effectiveness rubric and hard-fail conditions.
 - `ops-lessons.md`: concise operational lessons for remote writes, shell
   boundaries, and context drift.
@@ -154,10 +154,12 @@ compatibility scripts.
 
 ## Issue And Attachment Command Choice
 
-For issue/comment creation, first run common Issue task-state/current-task
-compatibility, draft structure,
-evidence, attachment, sensitive-data, provider/platform, and applicable test
-checks:
+For new Issue creation, run draft classification, Issue draft, evidence,
+attachment, sensitive-data, provider/platform, and applicable test checks.
+Do not run `devctl check current-task` before the remote Issue ID exists.
+For an Issue-bound comment, run `devctl task status`, the current-task
+compatibility check, and the same content checks against the matching Issue
+task-state.
 
 - Issue/comment images or screenshots without an approved object storage
   backend: do not upload and do not use GitHub release assets. Keep local
@@ -239,15 +241,21 @@ claiming `integrated`.
 
 ## Capability-Contract Gate
 
-Before Issue drafting: read project rules, locate an existing capability
-contract, write and check classification, choose
+Before remote Issue creation: read project rules, locate an existing capability
+contract, write and check `.xflow/issues/issue-draft/classification.yaml`, choose
 `capability-change|implementation-gap|ui-defect|infrastructure|governance|future`,
-satisfy that route's semantic exit condition, then enter the existing
-Issue/TDD/Git flow. AI must not edit implementation code before
-`accepted-design` for a capability change. A verification matrix must exist
-before engineering projection. Follow `capability-contract-method.md`, then
-load only the selected `contract-authoring.md`, `contract-evolution.md`,
-`scope-routing.md`, or `traceability.md` phase reference.
+and prepare the route analysis plus Issue draft under `issue-draft/`. A
+capability change also gets a candidate contract and verification matrix before
+engineering projection. AI must not implement.
+
+Pass the separate Issue-create gate, create the remote Issue, migrate safe
+draft artifacts to `.xflow/issues/issue-<id>/`, create canonical task-state,
+and run `devctl task activate --issue <id>`. Only then run the exact,
+non-delegable contract-acceptance recipe. After accepted-design is bound, obtain
+the separate development-start approval before branch creation or
+implementation. Follow `capability-contract-method.md`, then load only the
+selected `contract-authoring.md`, `contract-evolution.md`, `scope-routing.md`,
+or `traceability.md` phase reference.
 
 ## Current Task State
 

@@ -15,9 +15,9 @@ Read `.xflow/ops/workflow/SKILL.md` and only its phase-specific references.
 
 Read these files before acting:
 
-- `SKILL.md`
-- `references/issue-template.md`
-- `references/xflow-map.md`
+- `.xflow/ops/workflow/SKILL.md`
+- `.xflow/ops/workflow/references/issue-template.md`
+- `.xflow/ops/workflow/references/xflow-map.md`
 - `AGENTS.md` and `README.md` when present
 
 Runtime rules:
@@ -75,15 +75,18 @@ Runtime rules:
   requires the separate exact action `git-cleanup-force`.
   On mismatch, task switch, completion, or invalid state, fail closed and
   restore ordinary human review. `--no-local-review` alone is invalid.
-- Remote-write common checks: prepare the body/evidence file, run
-  `devctl check current-task --issue <id>`, and run the matching draft,
-  structure, evidence, attachment, provider/platform, and test checks.
+- Remote-write common checks: prepare the body/evidence file. For Issue-bound
+  actions, run `devctl task status`, `devctl check current-task --issue <id>`,
+  and the matching content checks. For new Issue creation, run draft
+  classification, Issue-draft, evidence, attachment, provider/platform, and
+  test checks. Do not run `devctl check current-task` before the remote Issue ID exists.
 - Default human path: run `devctl approval prepare`, stop for human review,
   continue only after the human sets `Approved: yes`, then run
   `devctl check local-review`. AI must not edit the approval.
 - Valid task-scoped unattended path: verify the bound state and action, then
-  skip approval-file prepare, human wait, and local-review check. The
-  current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
+  skip approval-file prepare, human wait, and local-review check. For
+  Issue-bound actions, the current-task, draft structure, evidence, attachment, provider/platform, and test checks still run. New Issue creation keeps the
+  draft checks but has no canonical task-state yet.
 - On the default human path, push and PR/MR creation are separate human gates:
   use `Approved Action: git-push` for push and a separate
   `Approved Action: git-mr` for PR/MR creation. Under valid task-scoped unattended mode, each push or PR/MR action must be covered by the bound state and pass its mechanical checks; approval-file steps are skipped.
