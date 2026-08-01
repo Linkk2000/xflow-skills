@@ -28,13 +28,19 @@ Never publish:
 - issue/comment images or screenshots via GitHub release assets
 - AccessKey IDs, AccessKey Secrets, tokens, or other object storage credentials
 
-## Local Storage
+## Tracked Workspace And Publication Boundary
 
-`.xflow/issues/` is a local evidence workspace. It stores drafts, local
-artifacts, approval records, and unpublished attachment manifests. It must not
-store COS/OSS URLs, object-storage URLs, or non-null `publishedUrl` values.
-Rendered remote bodies and published attachment manifests belong under
-`.xflow/publish/issues/issue-<id>/`.
+.xflow/issues/ is tracked by default. It stores drafts, task state, local
+artifacts, immutable approval history, and unpublished attachment manifests.
+Only an explicit `issueWorkspace.mode: local` project rule may opt out. Active
+`approvals/local-review.md` remains ignored. Issue-local `evidence/` and
+subtask evidence must never be uploaded to COS/OSS/object storage or exposed
+through HTTP URLs.
+
+Object storage is only a publication mechanism for a reviewed attachment copy
+that must appear in a remote GitHub/Gitee Issue, comment, or PR/MR body. Its
+published manifest and rendered body belong under
+`.xflow/publish/issues/issue-<id>/`; they never replace repository evidence.
 
 Use these default locations:
 

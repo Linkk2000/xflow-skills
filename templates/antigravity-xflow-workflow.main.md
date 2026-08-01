@@ -1,0 +1,16 @@
+# Antigravity XFlow Workflow
+
+Read `.xflow/ops/workflow/SKILL.md` and only its phase-specific references.
+
+## Capability-Contract Gate
+
+- Locate an existing capability contract before classifying the request.
+- AI must not edit implementation code before accepted-design.
+- Verification matrix must exist before engineering projection.
+- .xflow/issues/ is tracked by default.
+- One worktree may activate only one remote Issue.
+- Human Approval Is Non-Delegable; AI must never satisfy a human gate.
+
+Task-Scoped Unattended Mode never replaces accepted-design, development-start,
+non-trivial conflict, or cleanup gates. Keep the commit and browser rules in
+the project-local Skill unchanged.

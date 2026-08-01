@@ -19,8 +19,7 @@ the gap-analysis file or problem/gap-analysis file in a user's request.
 3. Store issue-level artifacts under
    `.xflow/issues/issue-<id>/evidence/` (or `issue-draft/evidence/`). Store
    subtask artifacts only under that subtask's `evidence/` directory. Use
-   relative Markdown links; do not use COS/OSS/object-storage URLs as local
-   evidence.
+   relative Markdown links. Do not move Issue-local evidence to COS/OSS/object storage or HTTP URLs.
 4. For UI evidence, when a browser is available, include both a live screenshot
    under `evidence/screenshots/` and a DOM observation under `evidence/dom/`.
    Record the target URL and visible state. A prototype or source file may
@@ -30,6 +29,21 @@ the gap-analysis file or problem/gap-analysis file in a user's request.
    State how the reviewer can interpret it.
 6. After implementation, collect fresh post-change evidence. Do not reuse a
    pre-change artifact or claim closure from changed code alone.
+
+## UI Environment Identity
+
+Every UI finding and completion bundle must bind all of these values:
+
+- product URL and page identity
+- model identity or exact data/fixture identity
+- repository commit, branch, and worktree
+- browser, viewport, and capture time
+- screenshot path and DOM or runtime-state path
+
+The screenshot and DOM/runtime-state artifact must describe the same page and
+model identity. A localhost page from another worktree, a design prototype, or
+an unbound screenshot is not product evidence. Store the identity record next
+to the Issue-local evidence and use repository-relative links.
 
 ## Gap-Analysis Finding Bundle
 
@@ -107,6 +121,8 @@ do not claim `resolved`, and use `reduced` or `blocked` as appropriate.
 - Evidence identifies the before/after state and the claimed result.
 - UI artifacts show a real navigated page, not `about:blank` or a prototype
   presented as live behavior.
+- UI artifacts bind the same product URL, page identity, model identity,
+  commit, branch, worktree, browser, viewport, and capture time.
 - The report distinguishes verified facts from hypotheses and remaining risks.
 - A human-review checkbox asks for a concrete judgment, rather than merely
   declaring that the AI tested the work.

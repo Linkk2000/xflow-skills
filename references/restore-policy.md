@@ -38,8 +38,15 @@ The agent should execute the required local commands:
 5. Restore `.xflow/devctl` from the project-bound devctl source.
 6. Restore root `devctl.ps1` and `devctl` wrappers if missing.
 7. Run local checks such as `devctl doctor` and `devctl check encoding` when available.
-8. Write or summarize a restore report.
-9. Stop for human review.
+8. Read the project-local workflow's `templates/ai-rules.json` and restore or
+   merge every mapped adapter. Preserve project-owned text; report conflicts
+   instead of overwriting it.
+9. Preserve the recorded `issueWorkspace.mode`. Missing mode means `tracked`;
+   do not add `.xflow/issues/` to `.gitignore`. If legacy
+   `.xflow/current-task.md` exists, report `devctl task migrate-current` as an
+   explicit migration; do not rewrite or delete the legacy file.
+10. Write or summarize a restore report.
+11. Stop for human review.
 
 ## Boundaries
 
@@ -48,3 +55,8 @@ repositories under `.xflow/ops/`, initialize explicitly configured submodules,
 and write local workflow files. It must not create issues, create feature
 branches, commit, push, create MR/PRs, merge, close issues, delete branches, or
 resolve conflicts without the later human gate for that exact action.
+
+Restored ignore rules cover project-local ops, `.xflow/local/`,
+`.xflow/runtime/`, and `.xflow/issues/**/approvals/local-review.md`. The tracked
+Issue workspace and immutable approval history remain versioned unless the
+project explicitly declares `issueWorkspace.mode: local`.

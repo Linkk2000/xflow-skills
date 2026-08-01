@@ -28,10 +28,15 @@
   `.xflow/issues/issue-<id>/subtask-001/` and run
   `devctl check subtask --issue <id>`. Subtask evidence must stay in the
   repository and must not be uploaded to COS/OSS.
-- `.xflow/issues/issue-<id>/` and `.xflow/issues/issue-draft/` are local
-  evidence workspaces. Do not store COS/OSS URLs, object-storage URLs, or
-  non-null `publishedUrl` values there. Put rendered remote bodies and
-  published manifests under `.xflow/publish/issues/issue-<id>/`.
+- `.xflow/issues/` is tracked by default. Only an explicit project
+  `issueWorkspace.mode: local` may opt out. Track Issue task state,
+  classification, plans, evidence, reports, subtasks, and immutable approval
+  history; ignore active `approvals/local-review.md`.
+- Do not move Issue-local evidence to COS/OSS/object storage or HTTP URLs, and
+  do not store non-null `publishedUrl` values in it. Put rendered remote bodies
+  and published manifests under `.xflow/publish/issues/issue-<id>/`.
+- One worktree may activate only one remote Issue. Use a separate branch and
+  worktree for each independently active remote Issue.
 - Do not publish local file paths, chat-client temp paths, `.xflow/` paths, or
   unresolved `xflow-attachment://` placeholders in remote bodies.
 - Before creating, check for an open issue with the same exact title.

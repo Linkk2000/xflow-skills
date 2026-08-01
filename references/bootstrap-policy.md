@@ -81,6 +81,9 @@ After bootstrap, the project should contain:
 - `.agents/skills/xflow-workflow.md`
 - `.agents/workflows/xflow-start.md`
 - `.xflow/xflow.json`
+- `.xflow/issues/`
+- `.xflow/local/`
+- `.xflow/runtime/`
 - `.xflow/config.env.example`
 - local `devctl.ps1` and `devctl` entrypoints
 
@@ -88,8 +91,15 @@ The project should also contain:
 
 - `.xflow/ops/devctl`
 - `.xflow/ops/workflow`
-- `.gitignore` entries for `.xflow/ops/devctl/`, `.xflow/ops/workflow/`, and
-  `.xflow/local/`
+- `.gitignore` entries for exactly `.xflow/ops/devctl/`,
+  `.xflow/ops/workflow/`, `.xflow/local/`, `.xflow/runtime/`, and
+  `.xflow/issues/**/approvals/local-review.md`
+
+`.xflow/xflow.json` uses `issueWorkspace.mode: tracked` by default, so
+`.xflow/issues/` must not be ignored. An explicit project `mode: local` is the
+only exception. Install or merge every target-template mapping from
+`templates/ai-rules.json`. Existing project-owned text wins: report a conflict
+and leave it unchanged rather than overwriting it.
 
 The agent is responsible for cloning or refreshing those project-local tool
 directories during bootstrap. Do not ask the user to run the Git commands

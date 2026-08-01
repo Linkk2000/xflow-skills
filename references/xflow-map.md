@@ -7,6 +7,13 @@ do not hard-code a user's local project path or an academic paper layout here.
 
 - `workflow-state-machine.md`: phase order, states, human gates, and the
   pre-MR target-branch synchronization checkpoint.
+- `references/capability-contract-method.md`: capability discovery questions and semantic
+  exit conditions before Issue/TDD/Git work.
+- `references/contract-authoring.md`: contract field semantics, stable IDs, and exact
+  human acceptance records.
+- `references/contract-evolution.md`: PATCH/MINOR/MAJOR changes and accepted-design reopen.
+- `references/scope-routing.md`: `capability-change|implementation-gap|ui-defect|infrastructure|governance|future` classification.
+- `references/traceability.md`: contract-to-test-to-evidence closure.
 - `bootstrap-policy.md`: how an empty repository obtains XFlow files and local
   devctl entrypoints.
 - `restore-policy.md`: how an existing XFlow repository is rehydrated on a new
@@ -29,6 +36,10 @@ do not hard-code a user's local project path or an academic paper layout here.
 - `dependency-issue-workflow.md`: advisory dependency classification,
   ownership, lifecycle, integration, and parent closure assessment.
 - `../templates/dependencies.yaml`: reusable issue-local dependency graph.
+- `templates/capability-contract.yaml`: capability contract starter.
+- `templates/classification.yaml`: request classification starter.
+- `templates/task-state.md`: Issue-scoped task state starter.
+- `templates/traceability-matrix.yaml`: verification trace starter.
 - `scoring-rubric.md`: 100-point effectiveness rubric and hard-fail conditions.
 - `ops-lessons.md`: concise operational lessons for remote writes, shell
   boundaries, and context drift.
@@ -80,7 +91,14 @@ project-local version.
 ./devctl unattended enable --issue <number|draft> --confirm XFLOW_HUMAN_UNATTENDED_ALL
 ./devctl unattended status
 ./devctl unattended disable
+./devctl task activate --issue <number>
+./devctl task status
+./devctl task list
+./devctl task migrate-current
 ./devctl check current-task --issue <number>
+./devctl check classification --issue <number|draft>
+./devctl contract lint --file <contract.yaml>
+./devctl trace check --issue <number> --contract <contract.yaml> --matrix .xflow/issues/issue-<number>/traceability-matrix.yaml
 ./devctl check subtask --issue <number> --path .xflow/issues/issue-<number>/subtask-001
 ./devctl check dependencies --issue <number>
 ./devctl check issue-evidence --issue <number>
@@ -136,7 +154,8 @@ compatibility scripts.
 
 ## Issue And Attachment Command Choice
 
-For issue/comment creation, first run common current-task, draft structure,
+For issue/comment creation, first run common Issue task-state/current-task
+compatibility, draft structure,
 evidence, attachment, sensitive-data, provider/platform, and applicable test
 checks:
 
@@ -178,10 +197,13 @@ Task-scoped unattended mode never authorizes local branch deletion.
 `devctl git done` requires exact human approval for `git-cleanup`, while
 `--force` requires exact `git-cleanup-force`; failed cleanup preserves state.
 
-`.xflow/issues/issue-<id>/` is local evidence and approval state only. It must
-not contain COS/OSS URLs, object-storage URLs, or non-null `publishedUrl`
-values. Rendered remote bodies and published manifests belong under
-`.xflow/publish/issues/issue-<id>/`.
+`.xflow/issues/` is tracked by default. Issue task state, classification,
+evidence, subtasks, and immutable approval history stay in Git. Active
+`approvals/local-review.md`, `.xflow/local/`, and `.xflow/runtime/` stay
+ignored. An explicit project `issueWorkspace.mode: local` is the only default
+tracking exception. Issue-local evidence must not be uploaded to COS/OSS,
+object storage, or HTTP URLs. Rendered remote bodies and published manifests
+belong under `.xflow/publish/issues/issue-<id>/`.
 
 ## Local Subtasks
 
@@ -215,10 +237,28 @@ evidence collection. Run `devctl check dependencies --issue <id>` for
 structure and consistency, then collect fresh parent-side evidence before
 claiming `integrated`.
 
+## Capability-Contract Gate
+
+Before Issue drafting: read project rules, locate an existing capability
+contract, write and check classification, choose
+`capability-change|implementation-gap|ui-defect|infrastructure|governance|future`,
+satisfy that route's semantic exit condition, then enter the existing
+Issue/TDD/Git flow. AI must not edit implementation code before
+`accepted-design` for a capability change. A verification matrix must exist
+before engineering projection. Follow `capability-contract-method.md`, then
+load only the selected `contract-authoring.md`, `contract-evolution.md`,
+`scope-routing.md`, or `traceability.md` phase reference.
+
 ## Current Task State
 
-Active tasks should keep `.xflow/current-task.md` in sync with
-`references/workflow-state-machine.md`.
+The canonical persistent state is
+`.xflow/issues/issue-<id>/task-state.md`. The active worktree pointer is
+`.xflow/local/worktrees/<worktree-fingerprint>/active-task.json`. Parallel
+remote Issues require separate branches and worktrees.
+`.xflow/current-task.md` is migration compatibility only and must not
+participate in approval decisions after migration.
+
+One worktree may activate only one remote Issue.
 
 Run `devctl check current-task --issue <number>` before:
 
@@ -342,8 +382,8 @@ direct verification evidence; a code diff or an AI test claim is not proof. If
 self-review shows the conclusion is not true, AI must rework and rewrite the
 report before handoff.
 
-Gap and resolution evidence stays under `.xflow/issues/`; do not use COS/OSS or
-object storage as local evidence for these reports. Publishing either document
+Gap and resolution evidence stays under `.xflow/issues/`; do not use COS/OSS,
+object storage, or HTTP URLs as local evidence for these reports. Publishing either document
 to GitHub/Gitee is a separate remote-write gate.
 
 ## TDD Targets By Change Type

@@ -56,11 +56,43 @@ Valid approval must explicitly name the exact next action. Vague replies such
 as "继续", "都可以", "你看着办", "go ahead", "looks good", or "测试过了就发" are
 not approval.
 
-## Current Task File
+## Semantic Capability Gate
 
-Each active task should have `.xflow/current-task.md`. It records the current
-issue, state, allowed actions, and forbidden actions. It is an execution guard,
-not a replacement for human review.
+The execution states remain compatible, but each Issue also records one
+orthogonal semantic phase:
+
+```text
+unclassified -> classified
+capability-change: declaring -> accepted-design -> verification-designed -> projected
+implementation-gap: gap-analysis -> gap-recognized
+```
+
+Locate an existing contract and check classification before Issue drafting.
+AI must not edit implementation code for a capability change before the exact
+contract objects reach `accepted-design` through human acceptance. A
+verification matrix must exist before engineering projection. Lint and YAML
+status do not satisfy the human gate.
+
+## Issue Task State And Worktrees
+
+Each remote Issue owns the canonical persistent state at
+`.xflow/issues/issue-<id>/task-state.md`. It records execution state, semantic
+phase, classification, contract binding, branch, allowed/forbidden actions,
+and the exact human approval reference. It is an execution guard, not a
+replacement for human review.
+
+`devctl task activate --issue <id>` writes the machine-local pointer at
+`.xflow/local/worktrees/<worktree-fingerprint>/active-task.json`. Multiple
+remote Issues require separate branches and worktrees; changing the branch
+invalidates the old pointer. Local `subtask-*` directories share the parent
+Issue state and do not get an active pointer or remote approval.
+
+One worktree may activate only one remote Issue.
+
+`.xflow/current-task.md` is read-only migration compatibility. Use
+`devctl task migrate-current` to create Issue-scoped state and the local
+pointer; never delete or rewrite the legacy file during migration, and never
+use it for approval binding after migration.
 
 Run this before local approval, commit, push, MR/PR creation, and cleanup:
 
@@ -148,8 +180,9 @@ and name the human decision or external condition needed.
   this gate.
   If a large issue was split into subtasks, each subtask README and
   repository-local evidence directory must be ready for review.
-  Local issue evidence under `.xflow/issues/issue-<id>/` must remain free of
-  COS/OSS published URLs and non-null `publishedUrl` values. Remote-rendered
+  Issue artifacts under `.xflow/issues/issue-<id>/` are tracked by default.
+  Issue-local evidence must remain free of COS/OSS/object-storage/HTTP URLs and
+  non-null `publishedUrl` values. Remote-rendered
   bodies belong under `.xflow/publish/issues/issue-<id>/`.
 - `G4_APPROVE_REMOTE_WRITE`: human approves the exact evidence file before
   `devctl git push`. If the body contains attachment-derived links, the
@@ -191,7 +224,8 @@ the strategy first.
   Never use `--force`; unattended mode does not authorize high-risk actions.
 - Do not skip a `G*` state because tests pass.
 - Do not skip target branch synchronization before MR/PR creation.
-- Do not rely on memory. Read `.xflow/current-task.md` and run
-  `devctl check current-task --issue <id>`.
+- Do not rely on memory. Read `.xflow/issues/issue-<id>/task-state.md`, verify
+  the active worktree pointer, and run `devctl check current-task --issue <id>`
+  as the compatibility check surface.
 - If the state file is stale, prepare a proposed update and ask the human to
   confirm before continuing remote-write work.

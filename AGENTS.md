@@ -6,6 +6,17 @@ This is the canonical rulebook for XFlow agents. Tool-specific files must import
 
 User instructions and repository-local files take precedence. When XFlow behavior is needed, read this file first, then consult `references/workflow-state-machine.md` and `references/devctl-contract.md`.
 
+## Capability-Contract Gate
+
+Read the project-local `SKILL.md` and its phase-specific references.
+
+- Locate an existing capability contract before classifying the request.
+- AI must not edit implementation code before accepted-design.
+- Verification matrix must exist before engineering projection.
+- .xflow/issues/ is tracked by default.
+- One worktree may activate only one remote Issue.
+- Human Approval Is Non-Delegable; AI must never satisfy a human gate.
+
 ## Required Workflow
 
 Follow the XFlow state machine for issue, branch, commit, push, PR/MR, conflict handling, close, and cleanup work. Do not skip states or infer approval from earlier steps.

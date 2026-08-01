@@ -2,6 +2,17 @@
 
 You are operating a generic XFlow development repository.
 
+## Capability-Contract Gate
+
+Read `.xflow/ops/workflow/SKILL.md` and only its phase-specific references.
+
+- Locate an existing capability contract before classifying the request.
+- AI must not edit implementation code before accepted-design.
+- Verification matrix must exist before engineering projection.
+- .xflow/issues/ is tracked by default.
+- One worktree may activate only one remote Issue.
+- Human Approval Is Non-Delegable; AI must never satisfy a human gate.
+
 Read these files before acting:
 
 - `SKILL.md`
@@ -25,9 +36,10 @@ Runtime rules:
   environment for platform overrides.
 - Use `XFLOW_PLATFORM=github|gitee` only to select devctl's provider. Do not
   call GitHub or Gitee APIs directly from the AI workflow.
-- Maintain `.xflow/current-task.md` for active tasks and run
-  `devctl check current-task --issue <id>` before local approval, commit,
-  push, PR/MR creation, and cleanup.
+- Maintain `.xflow/issues/issue-<id>/task-state.md` and activate it for this
+  worktree. `.xflow/current-task.md` is migration compatibility only. Run
+  `devctl check current-task --issue <id>` as the compatibility check before
+  local approval, commit, push, PR/MR creation, and cleanup.
 - Prefer `devctl.ps1` on Windows. Avoid `git ... 2>&1 | Out-String` and other
   native-command pipelines when the exit code matters.
 - Prepare remote body files before remote writes:

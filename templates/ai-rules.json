@@ -11,6 +11,42 @@
       "target": ".cursorrules",
       "template": "cursorrules.main",
       "description": "Cursor project-level XFlow guardrails"
+    },
+    {
+      "id": "cursor-mdc",
+      "target": ".cursor/rules/xflow-workflow.mdc",
+      "template": "cursor-workflow.main.mdc",
+      "description": "Cursor always-on XFlow workflow rule"
+    },
+    {
+      "id": "claude",
+      "target": "CLAUDE.md",
+      "template": "claude.main.md",
+      "description": "Claude project-level XFlow adapter"
+    },
+    {
+      "id": "gemini",
+      "target": "GEMINI.md",
+      "template": "gemini.main.md",
+      "description": "Gemini project-level XFlow adapter"
+    },
+    {
+      "id": "antigravity-agent",
+      "target": ".agents/agents.md",
+      "template": "antigravity-agents.main.md",
+      "description": "Antigravity project-level XFlow agent rules"
+    },
+    {
+      "id": "antigravity-skill",
+      "target": ".agents/skills/xflow-workflow.md",
+      "template": "antigravity-xflow-workflow.main.md",
+      "description": "Antigravity XFlow workflow skill adapter"
+    },
+    {
+      "id": "antigravity-start",
+      "target": ".agents/workflows/xflow-start.md",
+      "template": "antigravity-xflow-start.main.md",
+      "description": "Antigravity XFlow start workflow"
     }
   ]
 }

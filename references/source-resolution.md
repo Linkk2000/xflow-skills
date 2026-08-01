@@ -41,6 +41,12 @@ Recommended `.xflow/xflow.json` shape:
 ```json
 {
   "version": 1,
+  "issueWorkspace": {
+    "mode": "tracked"
+  },
+  "contracts": {
+    "root": "docs/requirements"
+  },
   "skill": {
     "source": "git@github.com:Linkk2000/xflow-skills.git",
     "ref": "main",
@@ -64,3 +70,6 @@ Recommended `.xflow/xflow.json` shape:
 - Initializing XFlow authorizes local bootstrap work only. It does not authorize issue creation, branch creation, commit, push, MR/PR, merge, issue close, or branch cleanup.
 - If `.xflow/xflow.json` and `.xflow/ops/` disagree, stop and ask the user which binding is authoritative.
 - For an existing repository with `.xflow/xflow.json`, restore the recorded project binding. Do not fall back to globally installed Skill/devctl.
+- `issueWorkspace.mode` defaults to `tracked` when absent. An explicit
+  `issueWorkspace.mode: local` is allowed only when project rules explain the
+  exception; tools must not silently change tracked mode to local.

@@ -90,17 +90,27 @@ Use this shape for remote issue comments. Store the file at
 - <requested reviewer action or follow-up>
 ```
 
-## .xflow/current-task.md
+## .xflow/issues/issue-<id>/task-state.md
 
-Use this file as the live state guard for the active task. It should exist
-before local approvals, implementation commits, pushes, PR/MR creation, and
-cleanup. The state values are defined in `references/workflow-state-machine.md`.
+Use `templates/task-state.md` to create the canonical persistent state for one
+remote Issue. It must exist before implementation, local approvals, commits,
+pushes, PR/MR creation, and cleanup. The active pointer lives at
+`.xflow/local/worktrees/<worktree-fingerprint>/active-task.json`. The state
+values and semantic exits are defined in
+`references/workflow-state-machine.md`.
+
+One worktree may activate only one remote Issue.
 
 ```markdown
-# XFlow Current Task
+# XFlow Task State
 
-Issue: <draft|id>
-State: <S0_REQUEST|S1_LOCAL_ISSUE_DRAFT|...|S10_DONE>
+Issue: <id>
+Execution State: <S2_REMOTE_ISSUE_CREATED|...|S10_DONE>
+Semantic Phase: <classified|declaring|accepted-design|verification-designed|projected|gap-analysis|gap-recognized>
+Classification: <capability-change|implementation-gap|ui-defect|infrastructure|governance|future>
+Contract: <none|contract-id@version>
+Contract File: <none|repository-relative-contract.yaml>
+Contract Change Required: <yes|no>
 Branch: <branch name or pending>
 Base: <main|master|other>
 
@@ -111,13 +121,17 @@ Base: <main|master|other>
 - <what the AI must not do until the next human gate is approved>
 
 ## Human Gate
-- Reviewer:
 - Required Approval:
-- Evidence File:
+- Human Approval Ref: <none|approvals/history/...yaml>
 
 ## Notes
 <brief local state notes>
 ```
+
+`.xflow/current-task.md` is migration compatibility only. It may be parsed
+read-only when no Issue state exists. `devctl task migrate-current` creates the
+Issue state and machine-local pointer without deleting or rewriting the legacy
+file; after migration the legacy file cannot satisfy approval checks.
 
 Run this check before sensitive transitions:
 
@@ -135,10 +149,21 @@ merged.
 ## Issue Workspace Evidence
 
 Files under `.xflow/issues/issue-<id>/` and `.xflow/issues/issue-draft/` are
-local evidence and approval state. They may reference repository-local evidence
-files, but must not contain COS/OSS URLs, object-storage URLs, or non-null
+tracked by default, including classification, task state, plans, evidence,
+subtasks, reports, and immutable approval history. Only an explicit project
+`issueWorkspace.mode: local` may opt out. Active
+`approvals/local-review.md` remains ignored. Issue-local evidence must not be
+moved to COS/OSS/object storage or HTTP URLs and must not contain non-null
 `publishedUrl` values. Store rendered remote bodies and published attachment
 manifests under `.xflow/publish/issues/issue-<id>/`.
+
+### UI Environment Identity
+
+Every UI evidence bundle records the product URL, page identity, model or data
+identity, repository commit, branch, worktree, browser and viewport, and
+capture time. The screenshot and DOM/runtime-state artifact must name the same
+identity so a reviewer can distinguish the tested product from a prototype,
+stale server, or different worktree.
 
 ## gap-analysis.md
 
@@ -361,6 +386,7 @@ mechanical fields such as `Approved At`, `Approved File`, `Approved SHA256`,
 artifact and then change `Approved: no` to `Approved: yes`.
 AI may prepare this file but must never make that approval edit. If AI changes
 `Approved: no` to `Approved: yes`, the approval is invalid.
+This active file is machine-local and ignored by Git.
 
 ```markdown
 # Local Review Approval
@@ -385,6 +411,12 @@ If this file was approved by the AI, the approval is invalid.
 ## Notes
 <review notes and constraints>
 ```
+
+After the approved action completes, write the tracked record to
+`.xflow/issues/issue-<id>/approvals/history/<timestamp>-<action>.yaml`. The
+history record is immutable, includes repository/worktree/branch/Issue/action,
+approved file and SHA256, reviewer identity summary, result, and
+`reusable: false`. Never edit a history record to satisfy another gate.
 
 ## Label Hints
 

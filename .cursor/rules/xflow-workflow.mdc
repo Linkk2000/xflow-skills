@@ -6,6 +6,15 @@ alwaysApply: true
 
 Read `AGENTS.md` first and treat it as canonical. Follow XFlow's default human-gated workflow or its valid Task-Scoped Unattended Mode for issue, branch, commit, push, and PR/MR work.
 
+## Capability-Contract Gate
+
+Read project-local `SKILL.md` and its phase-specific references.
+Locate an existing capability contract before classifying the request.
+AI must not edit implementation code before accepted-design.
+Verification matrix must exist before engineering projection.
+.xflow/issues/ is tracked by default.
+One worktree may activate only one remote Issue.
+
 Human Approval Is Non-Delegable by default. Task-Scoped Unattended Mode is valid only when the exact `XFLOW_HUMAN_UNATTENDED_ALL` safety word came from the user's current message and devctl confirms the state is bound to the current repository, worktree, and task. It replaces only ordinary remote-write approval gates for Issue create/comment/close, Git push, PR/MR create/merge, and state backfill. It never replaces human gates for entering development, gap-analysis acceptance, non-trivial conflict resolution, or local cleanup; mechanical checks and evidence requirements remain mandatory.
 
 Unattended mode never authorizes local branch deletion, force push, history rewrite, destructive deletion, secret or permission changes, or non-trivial conflict resolution. `devctl git done` always needs exact human approval for `git-cleanup`; forced deletion needs `git-cleanup-force`.

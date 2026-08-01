@@ -1,12 +1,58 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 CAPABILITY_CONTRACT_SCHEMA_SHA256 = "15cd0caf488c2ffbf5488ff8bf2b362dc9db77204089945f7788ecebe44e2a6f"
 CAPABILITY_CONTRACT_TEMPLATE_SHA256 = "8dd258230cc6605ec03614305bb54247d847443751ac3d8dfc888e8077c65cbf"
+
+CAPABILITY_ENTRYPOINTS = (
+    "AGENTS.md",
+    "CLAUDE.md",
+    "GEMINI.md",
+    "templates/codex-agents.main.md",
+    "templates/cursorrules.main",
+    "templates/claude.main.md",
+    "templates/gemini.main.md",
+    "templates/cursor-workflow.main.mdc",
+    "templates/antigravity-xflow-workflow.main.md",
+    ".cursor/rules/xflow-workflow.mdc",
+)
+
+CAPABILITY_ENTRYPOINT_ANCHORS = (
+    "Capability-Contract Gate",
+    "Locate an existing capability contract before classifying the request",
+    "AI must not edit implementation code before accepted-design",
+    "Verification matrix must exist before engineering projection",
+    ".xflow/issues/ is tracked by default",
+    "One worktree may activate only one remote Issue",
+)
+
+CAPABILITY_METHOD_LINKS = (
+    "references/capability-contract-method.md",
+    "references/contract-authoring.md",
+    "references/contract-evolution.md",
+    "references/scope-routing.md",
+    "references/traceability.md",
+    "templates/capability-contract.yaml",
+    "templates/classification.yaml",
+    "templates/task-state.md",
+    "templates/traceability-matrix.yaml",
+)
+
+AI_RULE_MAPPINGS = (
+    ("codex", "AGENTS.md", "codex-agents.main.md"),
+    ("cursor", ".cursorrules", "cursorrules.main"),
+    ("cursor-mdc", ".cursor/rules/xflow-workflow.mdc", "cursor-workflow.main.mdc"),
+    ("claude", "CLAUDE.md", "claude.main.md"),
+    ("gemini", "GEMINI.md", "gemini.main.md"),
+    ("antigravity-agent", ".agents/agents.md", "antigravity-agents.main.md"),
+    ("antigravity-skill", ".agents/skills/xflow-workflow.md", "antigravity-xflow-workflow.main.md"),
+    ("antigravity-start", ".agents/workflows/xflow-start.md", "antigravity-xflow-start.main.md"),
+)
 
 
 def read(relative: str) -> str:
@@ -47,7 +93,98 @@ def require_sha256(relative: str, expected: str) -> None:
         raise AssertionError(f"SHA-256 drift in {relative}: expected {expected}, found {actual}")
 
 
+def require_capability_entrypoints() -> None:
+    forbidden_default_local_claims = (
+        ".xflow/issues/ is ignored",
+        ".xflow/issues/ remains ignored",
+        ".xflow/issues/ is local-only",
+        ".xflow/issues/ is a local evidence workspace",
+        ".xflow/issues/ is local evidence and approval state only",
+        "ignore `.xflow/issues/`",
+    )
+    for relative in CAPABILITY_ENTRYPOINTS:
+        require_all(relative, CAPABILITY_ENTRYPOINT_ANCHORS)
+        for claim in forbidden_default_local_claims:
+            reject(relative, claim)
+
+
+def require_ai_rule_mappings() -> None:
+    payload = json.loads(read("templates/ai-rules.json"))
+    actual = [
+        (rule.get("id"), rule.get("target"), rule.get("template"))
+        for rule in payload.get("rules", [])
+    ]
+    if len(actual) != len(AI_RULE_MAPPINGS):
+        raise AssertionError(
+            f"templates/ai-rules.json must contain exactly {len(AI_RULE_MAPPINGS)} rules, found {len(actual)}"
+        )
+    for expected in AI_RULE_MAPPINGS:
+        if actual.count(expected) != 1:
+            raise AssertionError(
+                f"templates/ai-rules.json must contain exactly one mapping {expected!r}, found {actual.count(expected)}"
+            )
+
+
 def main() -> None:
+    require_capability_entrypoints()
+    require_ai_rule_mappings()
+    for relative in ("SKILL.md", "references/xflow-map.md"):
+        require_all(relative, CAPABILITY_METHOD_LINKS)
+    require_all(
+        "SKILL.md",
+        (
+            "read project rules",
+            "locate contract",
+            "write/check classification",
+            "capability-change | implementation-gap | ui-defect | infrastructure | governance | future",
+            "satisfy semantic exit condition",
+            "enter existing Issue/TDD/Git flow",
+            ".xflow/issues/issue-<id>/task-state.md",
+            ".xflow/local/worktrees/<worktree-fingerprint>/active-task.json",
+            "`.xflow/current-task.md` is migration compatibility only",
+            "issueWorkspace.mode: local",
+        ),
+    )
+    for relative in (
+        "references/workflow-state-machine.md",
+        "references/issue-template.md",
+        "references/devctl-contract.md",
+        "references/xflow-map.md",
+    ):
+        require(relative, ".xflow/issues/issue-<id>/task-state.md")
+        require(relative, "One worktree may activate only one remote Issue")
+    require_all(
+        "references/issue-template.md",
+        (
+            ".xflow/issues/issue-<id>/approvals/history/<timestamp>-<action>.yaml",
+            "immutable",
+            "reusable: false",
+            "UI Environment Identity",
+        ),
+    )
+    require_all(
+        "references/evidence-analysis.md",
+        (
+            "UI Environment Identity",
+            "product URL",
+            "page identity",
+            "model identity",
+            "worktree",
+            "Do not move Issue-local evidence to COS/OSS/object storage or HTTP URLs.",
+        ),
+    )
+    require_all(
+        "templates/xflow-local-ignored-vendor-init-prompt.md",
+        (
+            ".xflow/runtime/",
+            ".xflow/issues/**/approvals/local-review.md",
+            '"mode": "tracked"',
+            "templates/ai-rules.json",
+            "报告冲突",
+            "不得覆盖项目自有文本",
+            "不得将 `.xflow/issues/` 加入 `.gitignore`",
+        ),
+    )
     require("references/contract-authoring.md", "先回答能力问题，再填写 YAML")
     require("references/contract-authoring.md", "purpose → constraints → context")
     require("references/contract-evolution.md", "PATCH")
@@ -168,7 +305,7 @@ def main() -> None:
     require("SKILL.md", "`--no-local-review` alone is invalid")
     require("SKILL.md", "subtask-001")
     require("SKILL.md", "Subtask evidence must stay under that subtask's `evidence/` directory")
-    require("SKILL.md", ".xflow/issues/` is local evidence")
+    require("SKILL.md", ".xflow/issues/ is tracked by default")
     require("SKILL.md", ".xflow/publish/issues/")
     require("SKILL.md", "~/.xflow/env.local")
     require("SKILL.md", "Do not put `XFLOW_PLATFORM` in user-level")
@@ -338,7 +475,7 @@ def main() -> None:
     require("references/attachment-policy.md", "ALIYUN_OSS_ACCESS_KEY_SECRET")
     require("references/attachment-policy.md", "must not be written to attachment manifests")
     require("references/attachment-policy.md", "Subtask evidence must stay in the repository")
-    require("references/attachment-policy.md", ".xflow/issues/` is a local evidence workspace")
+    require("references/attachment-policy.md", ".xflow/issues/ is tracked by default")
     require("references/attachment-policy.md", ".xflow/publish/issues/")
     require("references/attachment-policy.md", "not in COS/OSS")
     require("references/attachment-policy.md", "Required Checks")

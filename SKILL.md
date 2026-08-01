@@ -14,8 +14,9 @@ as `academic`, not here.
 
 1. Read the current user request.
 2. Read repository-local rules first: `AGENTS.md`, `.cursorrules`,
-   `CLAUDE.md`, `GEMINI.md`, `README.md`, and `.xflow/current-task.md` when
-   present.
+   `CLAUDE.md`, `GEMINI.md`, and `README.md`. For an active Issue, read
+   `.xflow/issues/issue-<id>/task-state.md`; `.xflow/current-task.md` is
+   migration compatibility only.
 3. Apply precedence: current user instruction > nearest project rule >
    project-bound XFlow config/local tools > agent defaults.
 4. Stop and ask the user before irreversible action if rules conflict.
@@ -33,6 +34,14 @@ This is a phase-selected reference index. If unsure which file applies, read
 - XFlow source, ref, local ops tools, and project binding precedence:
   `references/source-resolution.md`
 - Phase order and human gates: `references/workflow-state-machine.md`
+- Capability discovery, questions, and semantic exit:
+  `references/capability-contract-method.md`
+- Contract field order, stable IDs, and exact acceptance:
+  `references/contract-authoring.md`
+- PATCH/MINOR/MAJOR and reopening accepted design:
+  `references/contract-evolution.md`
+- Request classification and dependency boundaries: `references/scope-routing.md`
+- Contract-to-evidence closure: `references/traceability.md`
 - Rule precedence and project overrides: `references/priority-and-overrides.md`
 - Issue creation and comments: `references/issue-policy.md`
 - Pasted files, screenshots, images, and comment attachments:
@@ -46,6 +55,10 @@ This is a phase-selected reference index. If unsure which file applies, read
 - Windows, PowerShell, WSL, UTF-8, LF/CRLF: `references/platform-adapters.md`
 - Operational incidents and recovery patterns: `references/ops-lessons.md`
 - Final self-evaluation: `references/scoring-rubric.md`
+- Capability contract starter: `templates/capability-contract.yaml`
+- Classification starter: `templates/classification.yaml`
+- Issue task-state starter: `templates/task-state.md`
+- Traceability starter: `templates/traceability-matrix.yaml`
 
 ## Hard Rules
 
@@ -75,9 +88,13 @@ This is a phase-selected reference index. If unsure which file applies, read
    safe `git branch -d`, or `git-cleanup-force` for explicitly reviewed forced
    deletion. Failed cleanup keeps the unattended state active; only successful
    approved cleanup disables it.
-5. Maintain `.xflow/current-task.md` for active tasks and run
-   `devctl check current-task --issue <id>` before local approval, commit,
-   push, MR/PR creation, and cleanup.
+5. The canonical task state is
+   `.xflow/issues/issue-<id>/task-state.md`. Activate it through
+   `devctl task activate --issue <id>`; the machine-local pointer is
+   `.xflow/local/worktrees/<worktree-fingerprint>/active-task.json`.
+   One worktree may activate only one remote Issue. Independent remote Issues
+   use independent branches and worktrees. `devctl check current-task --issue
+   <id>` remains a compatibility alias. `.xflow/current-task.md` is migration compatibility only and cannot satisfy approval binding.
 6. Never create MR/PR before synchronizing the task branch with the target
    branch and recording the sync evidence.
 7. The active approval file is always
@@ -96,10 +113,14 @@ This is a phase-selected reference index. If unsure which file applies, read
    image attachments are currently disabled unless an approved object storage
    backend published reviewed URLs; never use GitHub release assets as an
    issue/comment image store.
-11. `.xflow/issues/` is local evidence and approval workspace. Do not store
-    COS/OSS URLs, object-storage URLs, or non-null `publishedUrl` values there.
-    Rendered remote bodies and published attachment manifests belong under
-    `.xflow/publish/issues/`.
+11. .xflow/issues/ is tracked by default. Track Issue process artifacts,
+     task state, evidence, and immutable `approvals/history/` records. Ignore
+     only machine-local/runtime material and active
+     `approvals/local-review.md`. A project may use `issueWorkspace.mode: local`
+     only when its own rules explicitly declare the exception. Issue-local
+     evidence must not be moved to COS/OSS/object storage or HTTP URLs.
+     Rendered remote bodies and published attachment manifests belong under
+     `.xflow/publish/issues/`.
 12. Large issues may be split into local subtask directories named
     `.xflow/issues/issue-<id>/subtask-001`, `subtask-002`, and so on. Each
     subtask needs `README.md` and must pass `devctl check subtask --issue <id>`.
@@ -145,13 +166,37 @@ This is a phase-selected reference index. If unsure which file applies, read
     conclusion. If AI self-review finds the gap is not actually closed or
     reduced, AI must rework and rewrite the report before human handoff.
 
+## Capability-Contract Gate
+
+Run this route before Issue drafting:
+
+```text
+read project rules
+→ locate contract
+→ write/check classification
+→ choose capability-change | implementation-gap | ui-defect | infrastructure | governance | future
+→ satisfy semantic exit condition
+→ enter existing Issue/TDD/Git flow
+```
+
+Locate an existing capability contract before classifying the request. For a
+`capability-change`, AI must not edit implementation code before
+`accepted-design`; YAML status alone is not approval and Human Approval Is
+Non-Delegable. The verification matrix must exist before engineering
+projection. For an `implementation-gap`, obtain human recognition of the gap
+analysis instead of reopening a correct contract. Use
+`references/capability-contract-method.md`, `references/contract-authoring.md`,
+`references/contract-evolution.md`, `references/scope-routing.md`, and
+`references/traceability.md` for the selected phase rather than copying the
+method here.
+
 ## Required Flow
 
-1. Clarify the request only when required for safety or scope.
+1. Complete the Capability-Contract Gate and its semantic exit condition.
 2. Draft `.xflow/issues/issue-draft/issue-draft.md` from
    `references/issue-template.md`.
-3. Create or update `.xflow/current-task.md` using the state machine in
-   `references/workflow-state-machine.md`.
+3. After the remote Issue exists, create or update
+   `.xflow/issues/issue-<id>/task-state.md`, then activate it for this worktree.
 4. Run `devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md`
    and `devctl check current-task`.
 5. Choose exactly one remote-write path:
@@ -162,7 +207,8 @@ This is a phase-selected reference index. If unsure which file applies, read
      AI must not make the approval edit or treat its own review as approval.
    - Valid task-scoped unattended path: verify the repository/worktree/task
      state, then skip `devctl approval prepare`, human wait, and `devctl check local-review`.
-     The current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
+     The Issue task-state/current-task compatibility, draft structure, evidence,
+     attachment, provider/platform, and test checks still run.
 6. Create the remote issue through devctl:
    `devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md`.
 7. Start the task branch from the repository's base branch.
@@ -233,8 +279,8 @@ quality gap, workflow gap, or "差距":
 remaining work is documented. `blocked` means AI cannot continue without human
 decision or an external condition.
 
-Gap analysis and resolution evidence under `.xflow/issues/` is local
-repository evidence. Keep issue-level artifacts under
+Gap analysis and resolution evidence under `.xflow/issues/` is tracked
+repository evidence by default. Keep issue-level artifacts under
 `.xflow/issues/issue-<id>/evidence/` and subtask artifacts under the subtask's
 `evidence/` directory. Do not store or cite COS/OSS/object-storage URLs as the
 evidence source for these reports. For UI findings, when browser access is
@@ -344,7 +390,14 @@ mechanical checks, tests, evidence, or business conclusions.
 - MR/PR draft: `.xflow/issues/issue-<id>/mr-draft.md`
 - Walkthrough/evidence: `.xflow/issues/issue-<id>/walkthrough.md`
 - Active local approval: `.xflow/issues/issue-<id>/approvals/local-review.md`
-- Current task state: `.xflow/current-task.md`
+- Canonical Issue task state: `.xflow/issues/issue-<id>/task-state.md`
+- Machine-local active pointer:
+  `.xflow/local/worktrees/<worktree-fingerprint>/active-task.json`
+- Legacy migration input only: `.xflow/current-task.md`
+- Capability contract starter: `templates/capability-contract.yaml`
+- Classification starter: `templates/classification.yaml`
+- Task-state starter: `templates/task-state.md`
+- Traceability starter: `templates/traceability-matrix.yaml`
 - PR/MR state suggestion: `.xflow/issues/issue-<id>/state-update-suggestion.md`
 - Local ignored vendor init prompt:
   `templates/xflow-local-ignored-vendor-init-prompt.md`

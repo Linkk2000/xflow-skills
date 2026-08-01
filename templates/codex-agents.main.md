@@ -3,10 +3,22 @@
 Use this repository's local XFlow workflow. Do not rely on a global temporary
 development checkout as the workflow source.
 
+## Capability-Contract Gate
+
+Read `.xflow/ops/workflow/SKILL.md` and only the phase-specific references it
+routes to.
+
+- Locate an existing capability contract before classifying the request.
+- AI must not edit implementation code before accepted-design.
+- Verification matrix must exist before engineering projection.
+- .xflow/issues/ is tracked by default.
+- One worktree may activate only one remote Issue.
+- Human Approval Is Non-Delegable; AI must never satisfy a human gate.
+
 Hard rules:
 
-- Read this file, `README.md`, `.cursorrules`, and `.xflow/current-task.md`
-  when present before acting.
+- Read this file, project rules, and the active
+  `.xflow/issues/issue-<id>/task-state.md` before acting.
 - Use repository-local `devctl` or `devctl.ps1` from the project root.
 - Treat `devctl` / `devctl.ps1` as the only supported workflow entrypoints.
   Do not import or call `xflow.providers` directly, and do not call GitHub or
@@ -21,9 +33,10 @@ Hard rules:
   environment for platform overrides.
 - Use `XFLOW_PLATFORM=github|gitee` only to select devctl's provider. Do not
   call GitHub or Gitee APIs directly from the AI workflow.
-- Maintain `.xflow/current-task.md` for active tasks and run
-  `devctl check current-task --issue <id>` before local approval, commit,
-  push, PR/MR creation, and cleanup.
+- Maintain `.xflow/issues/issue-<id>/task-state.md` and activate it for this
+  worktree. `.xflow/current-task.md` is migration compatibility only. Run
+  `devctl check current-task --issue <id>` as the compatibility check before
+  local approval, commit, push, PR/MR creation, and cleanup.
 - Outside valid Task-Scoped Unattended Mode, do not perform remote writes before local human review approves the exact
   file being published or used as evidence.
 - Human Approval Is Non-Delegable. AI may prepare approval files, evidence,

@@ -86,9 +86,21 @@ current repository.
   exposing credentials or the safety word.
 - `devctl unattended disable`: idempotently remove the local state and restore
   ordinary human gates.
+- `devctl task activate --issue <id>`: bind this worktree to the Issue-scoped
+  task state.
+  One worktree may activate only one remote Issue.
+- `devctl task status`: report repository, worktree, branch, Issue, execution
+  state, and semantic phase from the active binding.
+- `devctl task list`: list persistent Issue task states without activating them.
+- `devctl task migrate-current`: parse legacy `.xflow/current-task.md`, then
+  create `.xflow/issues/issue-<id>/task-state.md` and the machine-local pointer
+  without deleting or rewriting the legacy file.
+- `devctl check current-task --issue <id>`: compatibility alias for active task
+  validation; after migration, approval checks use the Issue-scoped state and
+  worktree pointer rather than the legacy singleton.
 - `devctl check issue-evidence --issue <id> [--publish-root .xflow/publish/issues/issue-<id>]`:
-  validate that `.xflow/issues/issue-<id>/` remains a local evidence workspace
-  without COS/OSS published URLs or non-null `publishedUrl` values.
+  validate tracked Issue evidence paths without COS/OSS/object-storage/HTTP
+  URLs or non-null `publishedUrl` values.
 - `devctl check subtask --issue <id> [--path .xflow/issues/issue-<id>/subtask-001]`:
   validate local subtask directory naming, README sections, source file, local
   evidence links, and conclusion status.
@@ -245,9 +257,12 @@ Issue workspace evidence check:
 devctl check issue-evidence --issue <number>
 ```
 
-`.xflow/issues/issue-<number>/` is local evidence and approval state only.
+`.xflow/issues/` is tracked by default; only explicit
+`issueWorkspace.mode: local` opts out. Track task state, evidence, and immutable
+approval history, while active `approvals/local-review.md` stays ignored.
+Issue-local evidence must not be sent to COS/OSS/object storage or HTTP URLs.
 Published attachment manifests and rendered remote bodies belong under
-`.xflow/publish/issues/issue-<number>/`.
+`.xflow/publish/issues/issue-<number>/` and do not replace repository evidence.
 
 Problem/Gap Closure Loop:
 
@@ -262,7 +277,13 @@ implementation, `resolution-report.md` records actual changes, local evidence,
 and a `resolved|reduced|blocked` conclusion. If AI self-review finds the report
 is not true, AI must rework and rewrite the report before human handoff.
 Gap/resolution evidence must remain under `.xflow/issues/issue-<number>/`, not
-in COS/OSS or object storage.
+in COS/OSS, object storage, or HTTP URLs.
+
+Completed approvals produce immutable tracked records under
+`.xflow/issues/issue-<id>/approvals/history/<timestamp>-<action>.yaml` with
+repository/worktree/branch/Issue/action binding, file SHA256, reviewer identity
+summary, result, and `reusable: false`. The active
+`approvals/local-review.md` is ignored and must never be committed.
 
 Approved MR/PR creation:
 
