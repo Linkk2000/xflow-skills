@@ -296,7 +296,7 @@ def require_policy_anchor_mutation_cases(
     nested_fenced_example_fixture = (
         "````markdown\n```\n## Approval Binding Check\n\n"
         + "\n".join(approval_anchors)
-        + "\n````\n"
+        + "\n```\n````\n"
     )
     require_mutation_rejected(
         "approval bundle hidden by an outer four-backtick fence",
