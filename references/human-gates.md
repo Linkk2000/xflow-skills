@@ -30,6 +30,37 @@ Invalid approval is vague, delegated, or outcome-based. Invalid examples:
 - "looks good"
 - "do what you think is best"
 
+## Durable Remote-Action Claim
+
+For every ordinary `local-review` issue create/comment/close, Git push, PR/MR
+create, or PR/MR merge, devctl atomically reserves the approval ID before the
+provider mutation. It seals the exact approved bytes and review bytes in the
+Issue approval workspace. A provider body is decoded only from that approved
+snapshot; changing the source file after reservation cannot change provider
+bytes. Bodyless actions still require the same one-use reservation.
+
+The durable states are `reserved`, `outcome-unknown`, `retryable`,
+`remote-confirmed`, and `completed`. A provider exception is
+`outcome-unknown`: do not rerun the remote command, prepare another approval,
+or guess whether the provider committed the action. If the provider succeeded
+but local history was not written, recovery completes history from the sealed
+receipt and must not call the provider again.
+
+After checking authoritative remote state, a human may direct one exact
+reconciliation:
+
+```text
+devctl approval reconcile --issue <id|draft> --approval-id <id> --outcome no-effect --confirm XFLOW_HUMAN_REMOTE_RECONCILED
+devctl approval reconcile --issue <id|draft> --approval-id <id> --outcome success --target-issue <created-id-if-needed> --provider-receipt '<JSON object>' --confirm XFLOW_HUMAN_REMOTE_RECONCILED
+```
+
+`no-effect` permits a later attempt under the same sealed approval and advances
+its attempt counter. `success` records the observed remote outcome and consumes
+the approval without another provider mutation. The exact confirmation and
+outcome must come from the human's current instruction; AI-generated, copied,
+quoted, inferred, or stale confirmation is invalid. This recovery protocol does
+not expand task-scoped unattended mode or alter its existing action boundary.
+
 ## Task-Scoped Unattended Mode
 
 Human Approval Is Non-Delegable remains the default. The sole exception is a

@@ -10,8 +10,10 @@ S0_REQUEST
 S1_LOCAL_ISSUE_DRAFT
 G1_APPROVE_ISSUE_CREATE
 S2_REMOTE_ISSUE_CREATED
-G2_APPROVE_DEVELOPMENT_START
+B1_APPROVE_TASK_BRANCH_IDENTITY
 S3_TASK_BRANCH_STARTED
+G1_CONTRACT_ACCEPTANCE_OR_GAP_RECOGNITION
+G2_APPROVE_DEVELOPMENT_START
 S4_TDD_AND_IMPLEMENTATION
 S5_LOCAL_VERIFICATION
 G3_APPROVE_RESULT
@@ -87,7 +89,8 @@ A request that is explicitly a visual, styling, or contrast defect and does
 not change existing behavior or capability semantics is classified as
 `ui-defect`; retain that route. The only required core artifact is
 `classification.yaml`: record contract-search evidence and
-`contractChangeRequired: false`. If no applicable contract is found, fail
+`contractChangeRequired: false`. Set `nextArtifact: lightweight-route-complete`
+for both `found` and `not-found`; this is a terminal sentinel, not a file. If no applicable contract is found, fail
 closed by requesting additional contract-search evidence while retaining
 `ui-defect`; must not require capability-contract creation or establish a
 capability baseline. This route must not require `issue-draft.md`,
@@ -122,8 +125,13 @@ contract objects then reach `accepted-design` through human acceptance. A
 verification matrix must exist before engineering projection. Lint and YAML
 status do not satisfy the human gate.
 
-Issue-create approval, contract acceptance, and
+Issue-create approval, `B1_APPROVE_TASK_BRANCH_IDENTITY`, capability closure's
+`G1_CONTRACT_ACCEPTANCE_OR_GAP_RECOGNITION`, and
 `G2_APPROVE_DEVELOPMENT_START` are separate gates. None can satisfy another.
+The branch identity gate only creates and activates the final task branch; it
+does not authorize implementation or any remote write. Contract acceptance is
+performed on that final branch so repository/worktree/branch/Issue binding
+remains exact.
 
 ## Issue Task State And Worktrees
 
@@ -140,6 +148,8 @@ invalidates the old pointer. Local `subtask-*` directories share the parent
 Issue state and do not get an active pointer or remote approval.
 
 One worktree may activate only one remote Issue.
+After modern pointer/authority creation, `.xflow/current-task.md` remains
+migration provenance only and is not read for unattended authorization.
 
 `.xflow/current-task.md` is read-only migration compatibility. Use
 `devctl task migrate-current` to create Issue-scoped state and the local
@@ -212,6 +222,11 @@ evidence, define scope, propose the modification plan, and list acceptance
 criteria. Every finding must have its own reviewer-readable evidence bundle:
 observation, direct local artifact, analysis, acceptance condition, and human
 review checkbox. AI must stop for human recognition before implementation.
+The editable `Recognized: yes` field is not authorization. The human must
+approve exact action `gap-recognition`; `devctl gap recognize` seals the exact
+analysis bytes in an immutable, non-reusable record, and task state must bind
+that record before entering `gap-recognized`. Contract acceptance and
+task-scoped unattended mode cannot satisfy this route.
 
 After implementation, AI writes
 `.xflow/issues/issue-<id>/resolution-report.md`. The report must cite local
@@ -232,8 +247,15 @@ and name the human decision or external condition needed.
   approves the attachment manifest and rendered public URLs. Issue/comment
   images require an approved object storage backend such as `aliyun-oss`;
   otherwise they remain local evidence.
-- `G2_APPROVE_DEVELOPMENT_START`: human accepts the created issue and intended
-  task branch before implementation starts.
+- `B1_APPROVE_TASK_BRANCH_IDENTITY`: human approves exact action
+  `task-branch-start` for the canonical task-state bytes while the base branch
+  is active. Devctl creates and activates the final task branch only.
+- `G1_CONTRACT_ACCEPTANCE_OR_GAP_RECOGNITION`: on the final task branch, the
+  human either accepts exact capability-contract bytes and objects or records
+  the route's independent exact gap recognition. These actions are not
+  interchangeable.
+- `G2_APPROVE_DEVELOPMENT_START`: only after the route-specific semantic gate
+  is bound does the human authorize implementation to start.
 - `G3_APPROVE_RESULT`: human reviews local evidence, test results, scope, and
   generated artifacts before commit or remote publication.
   For problem/gap work, the resolution report and evidence must be ready before

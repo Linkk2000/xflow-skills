@@ -257,6 +257,8 @@ state must not be reused to authorize dependency Issue creation.
 Before remote Issue creation: read project rules, locate an existing capability
 contract, write and check `.xflow/issues/issue-draft/classification.yaml`, choose
 `capability-change|implementation-gap|ui-defect|infrastructure|governance|future`.
+An `implementation-gap` exits through exact human `gap-recognition`; its
+immutable record is distinct from contract acceptance and unattended mode.
 For `ui-defect`, record lightweight acceptance evidence and stop without
 requiring `issue-draft.md`. For every other route, prepare the route analysis
 plus Issue draft under `issue-draft/`. A

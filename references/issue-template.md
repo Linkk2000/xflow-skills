@@ -113,33 +113,33 @@ One worktree may activate only one remote Issue.
 # XFlow Task State
 
 Issue: <id>
-Execution State: <S2_REMOTE_ISSUE_CREATED|...|S10_DONE>
-Semantic Phase: <classified|declaring|accepted-design|verification-designed|projected|gap-analysis|gap-recognized>
-Classification: <capability-change|implementation-gap|ui-defect|infrastructure|governance|future>
-Contract: <none|contract-id@version>
-Contract File: <none|repository-relative-contract.yaml>
-Contract Change Required: <yes|no>
-Branch: <branch name or pending>
-Base: <main|master|other>
+Execution State: S2_REMOTE_ISSUE_CREATED
+Semantic Phase: classified
+Classification: capability-change
+Contract: <contract-id>@<version>
+Contract File: <repository-relative-contract.yaml>
+Contract Change Required: yes
+Branch: <task-branch>
+Base: main
+Human Gate: capability design acceptance required
+Human Approval Ref: none
 
 ## Allowed Actions
-- <what the AI may do in the current state>
+- clarify-contract
+- prepare-verification
 
 ## Forbidden Actions
-- <what the AI must not do until the next human gate is approved>
-
-## Human Gate
-- Required Approval:
-- Human Approval Ref: <none|approvals/history/...yaml>
-
-## Notes
-<brief local state notes>
+- edit-implementation
+- push
+- create-mr
 ```
 
 `.xflow/current-task.md` is migration compatibility only. It may be parsed
 read-only when no Issue state exists. `devctl task migrate-current` creates the
 Issue state and machine-local pointer without deleting or rewriting the legacy
 file; after migration the legacy file cannot satisfy approval checks.
+When modern pointer/authority exists, unattended validation uses only the
+modern active task; the preserved legacy file cannot invalidate or authorize it.
 
 Run this check before sensitive transitions:
 
@@ -274,7 +274,12 @@ Notes:
 
 AI may prepare this file, collect evidence, and ask clarifying questions. AI
 must not treat the analysis as approved until the human explicitly recognizes
-the gap and intended direction. Read `evidence-analysis.md`: every finding
+the gap and intended direction. `Recognized: yes` remains reviewed content,
+not authority. Prepare exact action `gap-recognition`, stop for the human, then
+run `devctl gap recognize --issue <id> --file
+.xflow/issues/issue-<id>/gap-analysis.md` and bind its immutable history record
+in task state. Contract acceptance and unattended mode cannot satisfy it.
+Read `evidence-analysis.md`: every finding
 needs a direct evidence bundle. For `ui`, include both a live screenshot under
 `evidence/screenshots/` and a DOM observation under `evidence/dom/` when a
 browser is available.

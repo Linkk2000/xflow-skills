@@ -2,14 +2,17 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
+import sys
 from collections.abc import Callable
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CAPABILITY_CONTRACT_SCHEMA_SHA256 = "15cd0caf488c2ffbf5488ff8bf2b362dc9db77204089945f7788ecebe44e2a6f"
+CAPABILITY_CONTRACT_SCHEMA_SHA256 = "ae341b2ccd43dac30d0b01f85cc3e49fd21ca02c263bab236801cb7872b1720f"
 CAPABILITY_CONTRACT_TEMPLATE_SHA256 = "8dd258230cc6605ec03614305bb54247d847443751ac3d8dfc888e8077c65cbf"
+STABLE_ID_PATTERN = r"^(?!(?:na|none|placeholder|tbd|todo|unknown)(?![\s\S]))[a-z0-9]+(?:[.-][a-z0-9]+)*(?![\s\S])"
 
 CAPABILITY_ENTRYPOINTS = (
     "AGENTS.md",
@@ -31,6 +34,7 @@ CAPABILITY_ENTRYPOINT_ANCHORS = (
     "Verification matrix must exist before engineering projection",
     ".xflow/issues/ is tracked by default",
     "One worktree may activate only one remote Issue",
+    "implementation-gap requires an immutable human gap-recognition record; contract acceptance cannot satisfy it",
 )
 
 SKILL_CAPABILITY_ROUTES = (
@@ -125,6 +129,41 @@ def require_sha256(relative: str, expected: str) -> None:
     actual = hashlib.sha256((ROOT / relative).read_bytes()).hexdigest()
     if actual != expected:
         raise AssertionError(f"SHA-256 drift in {relative}: expected {expected}, found {actual}")
+
+
+def require_task_state_reference_parser_parity() -> None:
+    marker = "## .xflow/issues/issue-<id>/task-state.md"
+    section = read("references/issue-template.md").split(marker, 1)[1]
+    sample = section.split("```markdown\n", 1)[1].split("\n```", 1)[0] + "\n"
+    canonical = read("templates/task-state.md")
+    if sample != canonical:
+        raise AssertionError("issue-template task-state sample must exactly match templates/task-state.md")
+
+    configured = os.environ.get("XFLOW_DEVCTL_ROOT")
+    devctl_root = Path(configured).resolve() if configured else ROOT.parent / "xflow-devctl"
+    if not (devctl_root / "xflow" / "task_state.py").is_file():
+        return
+    sys.path.insert(0, str(devctl_root))
+    try:
+        from xflow.task_state import parse_task_state_text
+
+        rendered = (
+            canonical.replace("<id>", "PARITY7")
+            .replace("<contract-id>", "example.contract.parity")
+            .replace("<version>", "1.0.0")
+            .replace("<repository-relative-contract.yaml>", "docs/requirements/parity/contract.yaml")
+            .replace("<task-branch>", "feat/PARITY7-template-parity")
+        )
+        parsed = parse_task_state_text(
+            ROOT / ".xflow" / "issues" / "issue-PARITY7" / "task-state.md",
+            rendered,
+            binding_mode="recorded",
+            validate_acceptance=False,
+        )
+        if parsed.issue != "PARITY7" or parsed.semantic_phase != "classified":
+            raise AssertionError("formal task-state parser returned unexpected sample values")
+    finally:
+        sys.path.remove(str(devctl_root))
 
 
 def require_in_order(relative: str, needles: tuple[str, ...]) -> None:
@@ -1079,6 +1118,7 @@ def require_ai_rule_mappings() -> None:
 
 
 def main() -> None:
+    require_task_state_reference_parser_parity()
     require_capability_entrypoints()
     require_ai_rule_mappings()
     require_declared_routes("SKILL.md", SKILL_CAPABILITY_ROUTES)
@@ -1096,7 +1136,9 @@ def main() -> None:
             "devctl issue create",
             "migrate the draft workspace to `.xflow/issues/issue-<id>/`",
             ".xflow/issues/issue-<id>/task-state.md",
-            "devctl task activate --issue <id>",
+            "Approved Action: task-branch-start",
+            "devctl git start <slug> --issue <id> --file .xflow/issues/issue-<id>/task-state.md",
+            "devctl task status",
             "devctl approval prepare --issue <id> --action contract-acceptance",
             "devctl contract accept --issue <id>",
             "approve entering development",
@@ -1105,6 +1147,9 @@ def main() -> None:
     )
     require("SKILL.md", "Issue creation approval does not accept the capability contract.")
     require("SKILL.md", "Contract acceptance does not approve entering development.")
+    require("SKILL.md", "Branch identity approval does not authorize implementation or any remote write.")
+    require("SKILL.md", "Contract acceptance is performed on the final task branch.")
+    require("references/git-policy.md", "task-branch-start")
     for relative in (
         "SKILL.md",
         "references/xflow-map.md",
@@ -1231,6 +1276,7 @@ def main() -> None:
         "only required core artifact is `classification.yaml`",
         "contract-search evidence",
         "`contractChangeRequired: false`",
+        "`nextArtifact: lightweight-route-complete`",
         "fail closed",
         "must not require capability-contract creation",
         "must not require `issue-draft.md`, `gap-analysis.md`, `task-state.md`, `resolution-report.md`, or G1/G2",
@@ -1334,7 +1380,7 @@ def main() -> None:
         (
             "| `capability-change` | `contractChangeRequired: true`; found or not-found | `contract-change-proposal.md` |",
             "| `implementation-gap` | `false`; found contract | `gap-analysis.md` |",
-            "| `ui-defect` | `false`; contract-search evidence | lightweight classification stop |",
+            "| `ui-defect` | `false`; found or not-found contract-search evidence | `lightweight-route-complete` terminal sentinel |",
             "| `infrastructure` | `false`; found or not-found | `dependency-issue-proposal.md` |",
             "| `governance` | `false`; found or not-found | `issue-draft.md` |",
             "| `future` | `false`; found or not-found | `futureCapabilitiesOutOfScope` or `future-task-proposal.md` |",
@@ -1367,11 +1413,23 @@ def main() -> None:
         ),
     )
     require_sha256("schemas/capability-contract.schema.json", CAPABILITY_CONTRACT_SCHEMA_SHA256)
+    contract_schema = json.loads(read("schemas/capability-contract.schema.json"))
+    if contract_schema["$defs"]["id"]["pattern"] != STABLE_ID_PATTERN:
+        raise AssertionError("capability contract schema stable-ID regex drifted")
+    require("references/contract-authoring.md", STABLE_ID_PATTERN)
+    reject("docs/superpowers/specs/2026-07-30-capability-contract-closure-design.md", "lane_not_empty")
     require_sha256("templates/capability-contract.yaml", CAPABILITY_CONTRACT_TEMPLATE_SHA256)
     require("SKILL.md", "This is the generic `main` product line")
     require("SKILL.md", "default local human approval or valid task-scoped unattended authorization before remote writes")
     require("SKILL.md", "Core Remote Write Review Gate")
     require("SKILL.md", "Human Approval Is Non-Delegable")
+    require("SKILL.md", "persistent approval-ID reservation")
+    require("SKILL.md", "exact approved byte snapshot")
+    require("SKILL.md", "outcome-unknown")
+    require("SKILL.md", "must not silently retry")
+    require("references/human-gates.md", "devctl approval reconcile")
+    require("references/human-gates.md", "XFLOW_HUMAN_REMOTE_RECONCILED")
+    require("references/devctl-contract.md", "provider consumes only that snapshot")
     require("SKILL.md", "AI must never satisfy a human gate itself")
     require("SKILL.md", "AI must never edit `Approved: no` to `Approved: yes`")
     require("SKILL.md", "Outside valid Task-Scoped Unattended Mode, AI must not use `--force`")

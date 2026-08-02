@@ -24,7 +24,7 @@ The document is version `0.1.0` and includes `request.originalStatement`,
 | --- | --- | --- |
 | `capability-change` | `contractChangeRequired: true`; found or not-found | `contract-change-proposal.md` |
 | `implementation-gap` | `false`; found contract | `gap-analysis.md` |
-| `ui-defect` | `false`; contract-search evidence | lightweight classification stop |
+| `ui-defect` | `false`; found or not-found contract-search evidence | `lightweight-route-complete` terminal sentinel |
 | `infrastructure` | `false`; found or not-found | `dependency-issue-proposal.md` |
 | `governance` | `false`; found or not-found | `issue-draft.md` |
 | `future` | `false`; found or not-found | `futureCapabilitiesOutOfScope` or `future-task-proposal.md` |
@@ -32,7 +32,12 @@ The document is version `0.1.0` and includes `request.originalStatement`,
 For `found`, refs must be non-empty; for `not-found`, refs must be empty.
 Changing implementation because it violates an existing contract is an
 `implementation-gap`: write and obtain human recognition of `gap-analysis.md`
-before implementation. Changing the participant-visible promise is a
+before implementation. `Recognized: yes` is reviewed content, not authority;
+the route exits only through an immutable, non-reusable `gap-recognition`
+history record bound to the exact repository, worktree, branch, Issue,
+canonical gap file, and SHA-256. It is human-only, is never eligible for
+unattended mode, and cannot be satisfied by `contract-acceptance`. Changing
+the participant-visible promise is a
 `capability-change`: author and obtain human acceptance of a contract first.
 Issue creation approval and contract acceptance are separate gates; neither
 approves entering development.
@@ -43,7 +48,8 @@ A request that is explicitly a visual, styling, or contrast defect and does
 not change existing behavior or capability semantics is classified as
 `ui-defect`; retain that route. The only required core artifact is
 `classification.yaml`: record contract-search evidence and
-`contractChangeRequired: false`. If no applicable contract is found, fail
+`contractChangeRequired: false`. Set `nextArtifact: lightweight-route-complete`
+for both `found` and `not-found`; this is a terminal sentinel, not a file. If no applicable contract is found, fail
 closed by requesting additional contract-search evidence while retaining
 `ui-defect`; must not require capability-contract creation or establish a
 capability baseline. This route must not require `issue-draft.md`,

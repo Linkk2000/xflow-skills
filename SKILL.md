@@ -98,6 +98,11 @@ This is a phase-selected reference index. If unsure which file applies, read
    Exact Action, Reviewed File Relative Path, SHA256, Candidate Approval
    Provenance, Binding Verdict, and Required Next Human Gate. The check must
    not reuse an old approval or push; stop for the required next human gate.
+   For `implementation-gap`, `Recognized: yes` in an editable task artifact is
+   never authority. Prepare exact action `gap-recognition`, stop for the human,
+   run `devctl gap recognize`, and bind its immutable, non-reusable history
+   record to the exact `gap-analysis.md` bytes. Contract acceptance and
+   unattended mode can never satisfy or replace this decision.
 5. The canonical task state is
    `.xflow/issues/issue-<id>/task-state.md`. Activate it through
    `devctl task activate --issue <id>`; the machine-local pointer is
@@ -105,6 +110,8 @@ This is a phase-selected reference index. If unsure which file applies, read
    One worktree may activate only one remote Issue. Independent remote Issues
    use independent branches and worktrees. `devctl check current-task --issue
    <id>` remains a compatibility alias. `.xflow/current-task.md` is migration compatibility only and cannot satisfy approval binding.
+   Once modern pointer/authority exists, the preserved legacy file is never
+   consulted for unattended authorization or completion state.
 6. Never create MR/PR before synchronizing the task branch with the target
    branch and recording the sync evidence.
 7. The active approval file is always
@@ -225,7 +232,8 @@ A request that is explicitly a visual, styling, or contrast defect and does
 not change existing behavior or capability semantics is classified as
 `ui-defect`; retain that route. The only required core artifact is
 `classification.yaml`: record contract-search evidence and
-`contractChangeRequired: false`. If no applicable contract is found, fail
+`contractChangeRequired: false`. Set `nextArtifact: lightweight-route-complete`
+for both `found` and `not-found`; this is a terminal sentinel, not a file. If no applicable contract is found, fail
 closed by requesting additional contract-search evidence while retaining
 `ui-defect`; must not require capability-contract creation or establish a
 capability baseline. This route must not require `issue-draft.md`,
@@ -288,24 +296,40 @@ fresh parent-side integration evidence.
    placeholders with the confirmed ID. Do not infer an ID after an uncertain
    remote result.
 8. Create `.xflow/issues/issue-<id>/task-state.md` from
-   `templates/task-state.md`, bind the confirmed Issue and intended branch, and
-   run `devctl task activate --issue <id>`. Then run
-   `devctl task status` and `devctl check classification --issue <id>`.
-9. For a capability change, materialize the exact candidate bytes at the
+   `templates/task-state.md`, bind the confirmed Issue and final task branch,
+   and keep it at `S2_REMOTE_ISSUE_CREATED`. From the base branch, run
+   `devctl approval prepare --issue <id> --action task-branch-start --file
+   .xflow/issues/issue-<id>/task-state.md`, stop for the human to explicitly
+   approve `Approved Action: task-branch-start`, then run `devctl git start
+   <slug> --issue <id> --file .xflow/issues/issue-<id>/task-state.md`. This
+   command creates and activates only the exact final task branch.
+   Branch identity approval does not authorize implementation or any remote write.
+9. On that final branch, run `devctl task status` and
+   `devctl check classification --issue <id>`. For a capability change,
+   materialize the exact candidate bytes at the
    configured `<contract-root>/<capability>/contract.yaml`, update task-state
    to bind that path, and run `devctl contract lint --file <contract.yaml>`.
    Prepare the exact object list with
    `devctl approval prepare --issue <id> --action contract-acceptance --file <contract.yaml> --objects <approved-id-list>`, stop for the human decision,
    then run
    `devctl contract accept --issue <id> --file <contract.yaml> --objects <approved-id-list>`.
+   Contract acceptance is performed on the final task branch.
    Contract acceptance does not approve entering development. It never uses
    unattended mode and cannot be satisfied by Issue-create approval.
 10. Bind the resulting immutable history record in task-state as
    `Human Approval Ref`, set `Semantic Phase: accepted-design`, and verify the
    migrated traceability matrix. Only then ask the human to approve entering development at `G2_APPROVE_DEVELOPMENT_START`.
-11. After that exact approval, start the task branch from the repository's base
-    branch. For non-capability routes, satisfy the route-specific semantic exit
-    before this development-start gate.
+   For `implementation-gap`, instead run `devctl check gap-analysis --issue
+   <id>`, prepare exact action `gap-recognition` for the canonical
+   `gap-analysis.md`, stop for the human decision, run `devctl gap recognize
+   --issue <id> --file .xflow/issues/issue-<id>/gap-analysis.md`, then bind that
+   distinct history record and set `Semantic Phase: gap-recognized`. Never use
+   contract acceptance for this route.
+11. Only after the separate `G2_APPROVE_DEVELOPMENT_START` human gate may task
+    state enter `S4_TDD_AND_IMPLEMENTATION`. The branch identity gate,
+    contract-acceptance gate, and development-start gate are distinct and none
+    authorizes another. For non-capability routes, satisfy the route-specific
+    semantic exit before entering implementation.
 12. Follow TDD: write or identify a failing test/check first, then implement the
     smallest change to pass it.
 13. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
@@ -422,12 +446,26 @@ Choose one gate path after the common checks:
 - Default human path: `devctl approval prepare` prefills action, path,
   timestamp, and SHA256; the human reviewer sets `Approved: yes`; then
   `devctl check local-review --issue <id> --file <file> --action <action>` must
-  pass. If AI made the approval edit, the approval is invalid.
+  pass. If AI made the approval edit, the approval is invalid. Before every
+  provider mutation, devctl must atomically create a persistent approval-ID reservation
+  and an exact approved byte snapshot. Issue/comment/MR bodies
+  sent to the provider come only from that snapshot; push, merge, close, and
+  other bodyless writes still consume one reservation. A provider exception
+  moves the claim to `outcome-unknown` and the action must not silently retry.
+  Reconciliation either proves `no-effect` before another attempt or records
+  `success` without issuing the provider mutation again.
 - Valid task-scoped unattended path: verify the bound state and covered action,
   then skip `devctl approval prepare`, human wait, and `devctl check local-review`.
   For Issue-bound actions, the current-task, draft structure, evidence, attachment, provider/platform, and test checks still run. For a new Issue,
   use draft classification and structure checks instead. Do not run
   `devctl check current-task` before the remote Issue ID exists.
+
+The reservation/snapshot protocol above protects ordinary `local-review`
+actions and does not widen, replace, or otherwise change task-scoped unattended
+authorization. An AI must not infer a reconciliation outcome or copy its
+confirmation from documentation; it may run `devctl approval reconcile` only
+when the human's current instruction supplies the exact outcome and
+confirmation.
 
 ## Task-Scoped Unattended Mode
 

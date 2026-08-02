@@ -5,6 +5,11 @@ effect and obtaining fresh acceptance for the changed objects.
 
 ## Version Decision
 
+Each accepted task retains the exact accepted contract bytes in immutable
+Issue approval history. Status promotion and same-path version replacement do
+not rewrite that snapshot, and historical audit must never substitute the
+current canonical file for it.
+
 - `PATCH`: correct a non-semantic typo, explanatory `note`, or equivalent
   wording that changes no participant-visible meaning, constraint, context,
   interaction, verification outcome, failure preservation, or trace target.
@@ -40,3 +45,5 @@ If implementation evidence reveals that the design is wrong, return to
 record, then progress again. Do not relabel an implementation gap as a contract
 change merely to avoid gap analysis; if the contract remains correct, retain
 it and route to `implementation-gap`.
+That route requires its own immutable human `gap-recognition` record for the
+exact analysis bytes. Never reuse a prior `contract-acceptance` record.

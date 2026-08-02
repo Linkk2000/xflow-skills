@@ -64,8 +64,12 @@ current repository.
   completed. It must not push task code implicitly. After the provider returns
   a PR/MR number and URL, it may create and push one metadata-only state
   backfill commit containing XFlow PR number/URL state.
-- `devctl git start/status/commit-msg/done`: Git lifecycle commands implemented
-  by Python core for normal Windows/POSIX use.
+- `devctl git start <slug> --issue <id> --file
+  .xflow/issues/issue-<id>/task-state.md`: for a first capability task, consume
+  exact local `task-branch-start` approval while on the base branch, create and
+  activate the task-state's final branch, and perform no implementation or
+  remote write. `status/commit-msg/done` are the remaining commands. These are
+  Git lifecycle commands implemented by Python core for normal Windows/POSIX use.
 - `devctl app start-frontend/status/stop-frontend`: App helper commands
   implemented by Python core for normal Windows/POSIX use.
 - `devctl doctor`: check environment health.
@@ -92,12 +96,22 @@ current repository.
 - `devctl task status`: report repository, worktree, branch, Issue, execution
   state, and semantic phase from the active binding.
 - `devctl task list`: list persistent Issue task states without activating them.
+- `devctl contract accept --issue <id> --file <contract.yaml> --objects <ids>`:
+  consume exact human acceptance and seal both the decision and exact contract
+  bytes. Historical task audit uses the sealed snapshot, so later status
+  promotion or a newer version at the same canonical path does not invalidate
+  the old task. Its finalizer lock exists only under Git common-dir
+  `xflow/runtime/contract-acceptance/<worktree>/` and is removed on every
+  success, failure, concurrency, and recovery exit; no lock belongs in tracked
+  approval history.
 - `devctl task migrate-current`: parse legacy `.xflow/current-task.md`, then
   create `.xflow/issues/issue-<id>/task-state.md` and the machine-local pointer
   without deleting or rewriting the legacy file.
 - `devctl check current-task --issue <id>`: compatibility alias for active task
   validation; after migration, approval checks use the Issue-scoped state and
   worktree pointer rather than the legacy singleton.
+  A modern pointer/authority also suppresses legacy `current-task.md` input to
+  unattended validation, even when migration intentionally preserved that file.
 - `devctl check issue-evidence --issue <id> [--publish-root .xflow/publish/issues/issue-<id>]`:
   validate tracked Issue evidence paths without COS/OSS/object-storage/HTTP
   URLs or non-null `publishedUrl` values.
@@ -108,6 +122,12 @@ current repository.
   validate the Problem/Gap Closure Loop analysis before implementation. It
   requires sections for user statement, clarified gap, analysis, local
   evidence, scope, proposed plan, acceptance criteria, and `Recognized: yes`.
+- `devctl gap recognize --issue <id> --file .xflow/issues/issue-<id>/gap-analysis.md`:
+  consume exact local human action `gap-recognition`, archive the approved
+  review and analysis bytes, and write one immutable, non-reusable history
+  record. It never accepts unattended mode or `contract-acceptance` as a
+  substitute. Task state may enter `gap-recognized` only by referencing this
+  exact record.
 - `devctl check resolution-report --issue <id> [--file .xflow/issues/issue-<id>/resolution-report.md]`:
   validate the completion report after implementation. It requires local
   evidence, actual changes, `resolved|reduced|blocked` conclusion, self-review,
@@ -176,6 +196,28 @@ AI must never edit `Approved: no` to `Approved: yes`.
 Outside valid Task-Scoped Unattended Mode, AI must not use `--force`,
 `--no-local-review`, direct provider APIs, or manual approval-file edits to
 bypass review.
+
+For every ordinary `local-review` remote mutation, devctl persists a one-use
+approval-ID claim and exact approved byte snapshot before invoking the provider.
+For issue/comment/MR bodies, the provider consumes only that snapshot;
+bodyless push/close/merge actions still reserve the approval ID. Concurrent
+claims serialize. A provider error leaves `outcome-unknown`, which blocks
+silent retry. A confirmed provider receipt is sealed before history publication,
+so recovery after remote success completes local history without repeating the
+remote mutation.
+
+Only after a human verifies authoritative remote state may the AI run:
+
+```text
+devctl approval reconcile --issue <id|draft> --approval-id <approval-id> --outcome no-effect --confirm XFLOW_HUMAN_REMOTE_RECONCILED
+devctl approval reconcile --issue <id|draft> --approval-id <approval-id> --outcome success --target-issue <created-id-if-needed> --provider-receipt '<JSON object>' --confirm XFLOW_HUMAN_REMOTE_RECONCILED
+```
+
+The exact confirmation and outcome must come from the human's current message.
+`no-effect` makes the sealed claim retryable; `success` records the observed
+receipt and never calls the provider. This local-review recovery protocol does
+not change the task-scoped unattended action set, binding, or per-execution
+audit behavior.
 
 Task-scoped unattended commands:
 
@@ -295,7 +337,9 @@ Gap/resolution evidence must remain under `.xflow/issues/issue-<number>/`, not
 in COS/OSS, object storage, or HTTP URLs.
 
 Completed approvals produce immutable tracked records under
-`.xflow/issues/issue-<id>/approvals/history/<timestamp>-<action>.yaml` with
+`.xflow/issues/issue-<id>/approvals/history/`. Ordinary local-review remote
+actions use `<timestamp>-<action>-<approval-id>.yaml`; other gate-specific
+records retain their defined names. Records contain
 repository/worktree/branch/Issue/action binding, file SHA256, reviewer identity
 summary, result, and `reusable: false`. The active
 `approvals/local-review.md` is ignored and must never be committed.

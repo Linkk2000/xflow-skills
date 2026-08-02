@@ -33,6 +33,14 @@ futureCapabilitiesOutOfScope → references`.
 ## Stable IDs And Versions
 
 Use meaningful, stable dotted IDs such as `billing.interaction.submit-payment`.
+The canonical syntax is
+`^(?!(?:na|none|placeholder|tbd|todo|unknown)(?![\s\S]))[a-z0-9]+(?:[.-][a-z0-9]+)*(?![\s\S])`:
+lowercase ASCII letters and digits form segments, with one dot or hyphen
+between segments. Uppercase, underscores, slashes, colons, Unicode letters,
+leading/trailing separators, and empty segments are invalid. The rule applies
+to root and object IDs, internal references, `supersedes`, dependency contract
+IDs, and contract-acceptance `acceptedObjects`. `references[].target` remains an
+external source locator rather than a stable contract ID.
 Never reuse an ID for a different meaning. Every root and contract object uses
 `MAJOR.MINOR.PATCH` versioning. Preserve a replaced object's identity in its
 `supersedes` list. Raise the object version with its semantic change and the
@@ -57,13 +65,28 @@ devctl approval prepare --issue <id> --action contract-acceptance --file <contra
 devctl contract accept --issue <id> --file <contract.yaml> --objects <approved-id-list>
 ```
 
-Issue-create approval does not satisfy this recipe. A successful acceptance
-binds `accepted-design`; it does not approve entering development. Obtain the
-separate development-start approval before branch creation or implementation.
+Issue-create approval does not satisfy this recipe. First obtain exact local
+`task-branch-start` approval and create/activate the final task branch without
+implementation or remote write. Perform contract acceptance on that final
+branch. A successful acceptance binds `accepted-design`; it does not approve
+entering development. Obtain the separate development-start approval after
+acceptance and before implementation.
 
 Human Approval Is Non-Delegable. AI may prepare the file, object list,
 evidence, and command draft, but it must never satisfy the gate or edit
 `Approved: no` to `Approved: yes`.
+
+Acceptance archives and seals the exact contract bytes under the Issue's
+approval history. Historical task audit reads that immutable snapshot, not the
+current bytes at `Contract File`. The canonical path may advance from
+`accepted-design` to `active` or later hold a newer version without invalidating
+the older task's exact acceptance; changing the sealed snapshot fails closed.
+
+The finalizer lock is runtime coordination only. It lives under the Git
+common-dir at `xflow/runtime/contract-acceptance/<worktree>/<approval-id>.lock`,
+never under tracked approval history, and is removed after success, failure,
+concurrent rejection, or recovery. Claim, archived review, contract snapshot,
+and acceptance history remain the durable audit artifacts.
 
 YAML `status: accepted-design` alone is not approval. The gate closes only
 when task state references an exact tracked acceptance record under

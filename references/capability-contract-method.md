@@ -10,10 +10,15 @@ plan, an API sketch, or a substitute for review.
 | --- | --- | --- |
 | New participant-visible outcome, boundary, value, or failure meaning | `capability-change` | `contract-change-proposal.md` then contract YAML |
 | Existing contract is found and implementation fails to honor it | `implementation-gap` | `gap-analysis.md` |
-| Existing contract is found and only presentation is wrong | `ui-defect` | `issue-draft.md` |
+| Only presentation is wrong, with found or not-found contract evidence | `ui-defect` | `lightweight-route-complete` terminal sentinel |
 | Shared runtime, platform, or independently owned prerequisite | `infrastructure` | `dependency-issue-proposal.md` |
 | Policy/process concern | `governance` | `issue-draft.md` |
 | Deliberately deferred capability | `future` | `futureCapabilitiesOutOfScope` or `future-task-proposal.md` |
+
+For `implementation-gap`, AI may prepare analysis and an approval draft but
+cannot recognize its own gap. Only exact human action `gap-recognition`,
+consumed into an immutable non-reusable record bound to the analysis bytes,
+authorizes `gap-recognized`; contract acceptance and unattended mode do not.
 
 Lightweight pre-Issue route: capture the original request, search contracts,
 write `.xflow/issues/issue-draft/classification.yaml`, run

@@ -11,8 +11,8 @@ scenarios:
     prompt: 现有流程审批契约已经规定驳回后必须保留原任务状态，但线上实现会清空待办，请直接修复。
     expectedRoute: implementation-gap
     requiredArtifacts: [classification.yaml, gap-analysis.md, resolution-report.md]
-    forbiddenActions: [change-existing-contract, claim-gap-resolved-without-new-evidence]
-    stopCondition: explicit-human-acceptance-of-gap-analysis-and-verification
+    forbiddenActions: [change-existing-contract, claim-gap-resolved-without-new-evidence, reuse-contract-acceptance-as-gap-recognition]
+    stopCondition: immutable-human-gap-recognition-record-bound-to-exact-analysis-bytes
 
   - id: pure-ui-defect
     prompt: 流程设计器的保存按钮在深色主题下文字看不清，只调整样式和对比度，不要改变保存行为。

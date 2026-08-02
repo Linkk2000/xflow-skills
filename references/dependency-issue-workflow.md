@@ -36,7 +36,8 @@ A request that is explicitly a visual, styling, or contrast defect and does
 not change existing behavior or capability semantics is classified as
 `ui-defect`; retain that route. The only required core artifact is
 `classification.yaml`: record contract-search evidence and
-`contractChangeRequired: false`. If no applicable contract is found, fail
+`contractChangeRequired: false`. Set `nextArtifact: lightweight-route-complete`
+for both `found` and `not-found`; this is a terminal sentinel, not a file. If no applicable contract is found, fail
 closed by requesting additional contract-search evidence while retaining
 `ui-defect`; must not require capability-contract creation or establish a
 capability baseline. This route must not require `issue-draft.md`,

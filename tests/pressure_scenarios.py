@@ -23,4 +23,7 @@ for scenario in scenarios.values():
     assert scenario["requiredArtifacts"]
     assert scenario["forbiddenActions"]
     assert scenario["stopCondition"]
+gap = scenarios["existing-contract-gap"]
+assert gap["stopCondition"] == "immutable-human-gap-recognition-record-bound-to-exact-analysis-bytes"
+assert "reuse-contract-acceptance-as-gap-recognition" in gap["forbiddenActions"]
 print("capability contract pressure scenarios ok")

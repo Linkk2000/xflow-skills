@@ -5,7 +5,8 @@
 | Action | Required state | Human gate | Required preflight | Allowed command |
 |---|---|---|---|---|
 | Inspect status | Any | No | None | `git status`, `devctl git status` |
-| Create branch | Issue created | Yes: approve development | Clean worktree, issue number known | `devctl git start <slug> --issue <number>` |
+| Create and activate final task branch | Issue created, no implementation | Yes: exact `task-branch-start` identity approval | Base branch active; canonical task-state binds the final branch; changes limited to the matching Issue workspace | `devctl git start <slug> --issue <number> --file .xflow/issues/issue-<number>/task-state.md` |
+| Enter development | Final task branch active; required contract acceptance or gap recognition is bound | Yes: separate development-start approval | Route semantic exit verified | Set `S4_TDD_AND_IMPLEMENTATION`, then begin TDD |
 | Stage files | Development | No | Scope matches issue | `git add <scoped files>` |
 | Commit | Development | No, unless project requires | Read project rules, run tests/checks, run `devctl check commit-msg` | `devctl git commit-msg` or native `git commit` if message passes checks |
 | Pull/rebase base | Before branch or conflict work | Ask if conflicts likely | Clean worktree or stash plan | `git pull --ff-only`, explicit rebase only after strategy preview |
@@ -70,7 +71,11 @@ type(scope): 中文核心摘要[#Issue编号]
 
 - Issue must have title, background, scope, acceptance criteria, and verification commands.
 - Branch slug must derive from the approved issue title and issue number.
-- Development may not begin merely because an issue exists; the user must approve development.
+- `task-branch-start` creates and activates only the exact final branch. It
+  authorizes neither implementation nor remote write.
+- Development may not begin merely because an issue or task branch exists. For
+  capability work, contract acceptance occurs on the final branch, and the
+  user must separately approve development afterward.
 
 ## MR/PR Requirements
 

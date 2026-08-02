@@ -164,13 +164,15 @@ xflow.contract.process-ui-responsibility-partition
 xflow.capability.process-responsibility-partition
 xflow.interaction.reassign-flow-node
 xflow.constraint.node-membership
-xflow.failure-reason.lane_not_empty
+xflow.failure-reason.lane-not-empty
 xflow.verify.case.cross-lane-reassignment
 ```
 
 规则：
 
-- 使用小写英文、数字、点和连字符。
+- 使用小写英文、数字、点和连字符；规范 regex 为
+  `^(?!(?:na|none|placeholder|tbd|todo|unknown)(?![\s\S]))[a-z0-9]+(?:[.-][a-z0-9]+)*(?![\s\S])`。
+  点和连字符只能作为单个分隔符，ID 必须以小写英文字母或数字开始和结束。
 - ID 表达稳定语义，不包含日期、Issue、分支、组件、数据库或框架名称。
 - 标题和文案可以修改，外部引用后的 ID 不因措辞优化而变化。
 - 语义上替换原对象时保留 `supersedes` 或迁移说明，不静默复用或删除旧 ID。
@@ -210,7 +212,7 @@ interactionContracts:
     constraints:
       - 含有流程节点的泳道不得删除
     failureExpectations:
-      - 引用 example.failure-reason.lane_not_empty
+      - 引用 example.failure-reason.lane-not-empty
       - 拒绝后泳道、节点、边和责任归属全部保持不变
 
 verificationMatrix:
