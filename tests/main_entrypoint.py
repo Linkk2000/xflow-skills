@@ -348,6 +348,49 @@ def require_policy_anchor_mutation_cases(
         raise AssertionError("; ".join(failures))
 
 
+def require_route_policy_anchor_mutation_cases(
+    marker: str, anchors: tuple[str, ...]
+) -> None:
+    failures: list[str] = []
+    joined = "\n".join(anchors)
+    scattered = "\n\n".join(anchors)
+    fixtures = (
+        (
+            "hidden in an HTML comment",
+            f"## {marker}\n\n<!--\n{joined}\n-->\n",
+        ),
+        (
+            "hidden in a Markdown comment",
+            f"## {marker}\n\n[//]: # ({' '.join(anchors)})\n",
+        ),
+        (
+            "hidden in a fenced Markdown example",
+            f"```markdown\n## {marker}\n\n{joined}\n```\n",
+        ),
+        (
+            "hidden by an outer four-backtick fence",
+            f"````markdown\n```\n## {marker}\n\n{joined}\n```\n````\n",
+        ),
+        (
+            "scattered into unrelated sections",
+            f"## {marker}\n\nThis section has no required route policy.\n\n"
+            f"## Unrelated Notes\n\n{scattered}",
+        ),
+    )
+    for label, fixture in fixtures:
+        require_mutation_rejected(
+            f"{marker} policy {label}",
+            lambda fixture=fixture: run_anchor_mutation(
+                "SKILL.md",
+                fixture,
+                lambda: require_operational_policy_block("SKILL.md", marker, anchors),
+            ),
+            failures,
+        )
+    if failures:
+        raise AssertionError("; ".join(failures))
+
+
 def require_declared_routes(relative: str, routes: tuple[str, ...]) -> None:
     declaring_file = ROOT / relative
     text = read(relative)
@@ -1015,6 +1058,63 @@ def main() -> None:
     require_policy_anchor_mutation_cases(
         approval_binding_anchors, product_evidence_anchors
     )
+    ui_defect_policy_blocks = (
+        ("SKILL.md", "### Lightweight UI Defect Route"),
+        ("references/scope-routing.md", "## Lightweight UI Defect Route"),
+        ("references/dependency-issue-workflow.md", "## Lightweight UI Defect Route"),
+        ("references/workflow-state-machine.md", "### Lightweight UI Defect Route"),
+        ("templates/codex-agents.main.md", "### Lightweight UI Defect Route"),
+        ("templates/cursorrules.main", "### Lightweight UI Defect Route"),
+    )
+    ui_defect_policy_anchors = (
+        "explicitly a visual, styling, or contrast defect",
+        "does not change existing behavior or capability semantics",
+        "`ui-defect`",
+        "only required core artifact is `classification.yaml`",
+        "contract-search evidence",
+        "`contractChangeRequired: false`",
+        "fail closed",
+        "must not require capability-contract creation",
+        "must not require `issue-draft.md`, `gap-analysis.md`, `task-state.md`, `resolution-report.md`, or G1/G2",
+        "lightweight classification and acceptance evidence recorded",
+        "ordinary Issue/Git workflow",
+        "does not rewrite this routing stop condition",
+        "must not make capability semantic changes",
+    )
+    for relative, marker in ui_defect_policy_blocks:
+        require_operational_policy_block(relative, marker, ui_defect_policy_anchors)
+    require_route_policy_anchor_mutation_cases(
+        "Lightweight UI Defect Route", ui_defect_policy_anchors
+    )
+
+    shared_infrastructure_policy_blocks = (
+        ("SKILL.md", "### Shared Infrastructure Approval Isolation"),
+        ("references/scope-routing.md", "## Shared Infrastructure Approval Isolation"),
+        ("references/dependency-issue-workflow.md", "## Shared Infrastructure Approval Isolation"),
+        ("references/workflow-state-machine.md", "### Shared Infrastructure Approval Isolation"),
+        ("templates/codex-agents.main.md", "### Shared Infrastructure Approval Isolation"),
+        ("templates/cursorrules.main", "### Shared Infrastructure Approval Isolation"),
+    )
+    shared_infrastructure_policy_anchors = (
+        "`shared-infrastructure` is a separate dependency Issue",
+        "must not reuse the parent Issue, branch, or worktree's",
+        "approval, task-scoped unattended state, or development authorization",
+        "Before dependency Issue creation or shared-infrastructure implementation",
+        "human must separately accept",
+        "dependency scope",
+        "named parent integration target",
+        "semantic decision is separate from issue-create approval",
+        "Issue-create approval cannot substitute",
+        "Dependency state remains advisory",
+        "fresh parent-side integration evidence",
+    )
+    for relative, marker in shared_infrastructure_policy_blocks:
+        require_operational_policy_block(
+            relative, marker, shared_infrastructure_policy_anchors
+        )
+    require_route_policy_anchor_mutation_cases(
+        "Shared Infrastructure Approval Isolation", shared_infrastructure_policy_anchors
+    )
     require_all(
         "templates/xflow-local-ignored-vendor-init-prompt.md",
         (
@@ -1072,7 +1172,7 @@ def main() -> None:
         (
             "| `capability-change` | `contractChangeRequired: true`; found or not-found | `contract-change-proposal.md` |",
             "| `implementation-gap` | `false`; found contract | `gap-analysis.md` |",
-            "| `ui-defect` | `false`; found contract | `issue-draft.md` |",
+            "| `ui-defect` | `false`; contract-search evidence | lightweight classification stop |",
             "| `infrastructure` | `false`; found or not-found | `dependency-issue-proposal.md` |",
             "| `governance` | `false`; found or not-found | `issue-draft.md` |",
             "| `future` | `false`; found or not-found | `futureCapabilitiesOutOfScope` or `future-task-proposal.md` |",

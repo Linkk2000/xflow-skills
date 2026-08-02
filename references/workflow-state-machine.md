@@ -78,6 +78,33 @@ capability-change: declaring -> accepted-design -> verification-designed -> proj
 implementation-gap: gap-analysis -> gap-recognized
 ```
 
+### Lightweight UI Defect Route
+
+A request that is explicitly a visual, styling, or contrast defect and does
+not change existing behavior or capability semantics is classified as
+`ui-defect`; retain that route. The only required core artifact is
+`classification.yaml`: record contract-search evidence and
+`contractChangeRequired: false`. If no applicable contract is found, fail
+closed by requesting additional contract-search evidence while retaining
+`ui-defect`; must not require capability-contract creation or establish a
+capability baseline. This route must not require `issue-draft.md`,
+`gap-analysis.md`, `task-state.md`, `resolution-report.md`, or G1/G2 as a
+precondition. Stop when lightweight classification and acceptance evidence
+recorded. Later delivery follows the ordinary Issue/Git workflow, but this
+does not rewrite this routing stop condition. `ui-defect` must not make
+capability semantic changes.
+
+### Shared Infrastructure Approval Isolation
+
+`shared-infrastructure` is a separate dependency Issue and must not reuse the
+parent Issue, branch, or worktree's approval, task-scoped unattended state, or
+development authorization. Before dependency Issue creation or
+shared-infrastructure implementation, a human must separately accept the
+dependency scope and named parent integration target. This semantic decision
+is separate from issue-create approval; Issue-create approval cannot substitute
+for it. Dependency state remains advisory, and `integrated` still requires
+fresh parent-side integration evidence.
+
 Locate an existing contract and check classification before Issue drafting.
 Before the remote Issue exists, draft classification, analysis, Issue body,
 candidate contract, and candidate verification matrix under
