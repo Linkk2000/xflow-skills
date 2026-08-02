@@ -57,6 +57,12 @@ dependency, evidence, test, attachment, sensitive-data, provider, and platform
 checks remain mandatory. Force push, history rewrite, destructive deletion,
 and secret or permission changes remain excluded.
 
+Although the mode may replace an ordinary human gate for covered Issue
+creation, for `shared-infrastructure` it does not replace or
+satisfy the separate human semantic decision, and the parent Issue's approval
+or unattended state must never be reused to authorize the dependency. A human
+must first accept the dependency scope and named parent integration target.
+
 `--no-local-review` alone is invalid. It is only a compatibility flag accepted
 when an already-valid task-scoped state covers the current Issue and action.
 `--no-local-review` must not be used for push, MR/PR creation, merge, issue

@@ -7,6 +7,15 @@ This scenario replays the approved D01-D22 decisions in
 The generated contract is the design candidate; this record does not constitute
 contract acceptance or authorization to enter development.
 
+## Snapshot Timing
+
+This document is a pre-acceptance replay snapshot. Statements below about the
+candidate not yet being accepted and having only negative `Approved: no`
+evidence describe the state before the later human review and one-time
+acceptance. The accepted contract bytes remain unchanged; the current
+acceptance state is recorded by immutable history, claim, and consumed-review
+artifacts.
+
 ## Replay Outcome
 
 The capability is limited to project-local XFlow initialization and recovery.
@@ -39,7 +48,7 @@ D01-D22 decision-to-object map below is part of this replay evidence.
 | D19 | History remains evidence but active approval, unattended state, and old authorization never carry forward; AI cannot edit approval. | `xflow.constraint.approval-noninheritance-and-remote-gate`, `xflow.verify.bootstrap-handoff-and-independent-gates` |
 | D20 | Ready requires each tool source, expectedRef, resolvedCommit, vendor/submodule mode, aggregate-mixed submodule proof when applicable, compatibility, wrapper, adapter, effective ignore, and no blocker. | `xflow.constraint.ready-result-audit`, `xflow.verify.ready-result-audit` |
 | D21 | Results are ready, needs-review, or blocked and future evidence retains bindings, byte/hash comparisons, Git audits, effective-ignore output, planned, applied, skipped, conflicts, commits, and verification. | `xflow.value.implementation-evidence-record`, `xflow.value.recovery-audit-record`, `xflow.verify.ready-result-audit` |
-| D22 | Bootstrap stops for human review; Issue, task, acceptance, development, commit, push, and PR/MR have separate later gates. Current replay has only negative `Approved: no` gate evidence. | `xflow.constraint.enablement-authorization-boundary`, `xflow.verify.bootstrap-handoff-and-independent-gates` |
+| D22 | Bootstrap stops for human review; Issue, task, acceptance, development, commit, push, and PR/MR have separate later gates. At this pre-acceptance replay snapshot, only negative `Approved: no` gate evidence existed; immutable records now hold the later completed acceptance. | `xflow.constraint.enablement-authorization-boundary`, `xflow.verify.bootstrap-handoff-and-independent-gates` |
 
 The candidate is deliberately not an implementation plan. These directly stated
 semantic requirements are projected only after their verification obligations

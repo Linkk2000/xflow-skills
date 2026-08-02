@@ -14,4 +14,5 @@ Read `.xflow/ops/workflow/SKILL.md` and only its phase-specific references.
 - Human Approval Is Non-Delegable; AI must never satisfy a human gate.
 
 Keep Task-Scoped Unattended Mode exclusions, commit format, and browser rules
-from `AGENTS.md`; this adapter does not redefine them.
+from `AGENTS.md`, including the separate human semantic decision required for
+`shared-infrastructure`; this adapter does not redefine them.

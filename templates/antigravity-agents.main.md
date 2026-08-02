@@ -5,4 +5,6 @@ Read `.xflow/ops/workflow/SKILL.md` and
 are authoritative; there is no user-level or global XFlow fallback.
 
 Human Approval Is Non-Delegable. Preserve the Task-Scoped Unattended Mode
-exclusions, commit format, and browser rules from the project-local Skill.
+exclusions, including the separate human semantic decision required for
+`shared-infrastructure`, plus the commit format and browser rules from the
+project-local Skill.

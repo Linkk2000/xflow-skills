@@ -76,6 +76,18 @@ AI_RULE_MAPPINGS = (
     ("antigravity-start", ".agents/workflows/xflow-start.md", "antigravity-xflow-start.main.md"),
 )
 
+SHARED_INFRASTRUCTURE_UNATTENDED_POLICY_FILES = (
+    "AGENTS.md",
+    "SKILL.md",
+    "templates/codex-agents.main.md",
+    "templates/cursorrules.main",
+    "references/dependency-issue-workflow.md",
+    "references/devctl-contract.md",
+    "references/human-gates.md",
+    "references/scope-routing.md",
+    "references/xflow-map.md",
+)
+
 
 def read(relative: str) -> str:
     return (ROOT / relative).read_text(encoding="utf-8")
@@ -202,6 +214,152 @@ def operative_policy_block(text: str, marker: str) -> str:
             end = index
             break
     return "\n".join(lines[start:end])
+
+
+def numbered_flow_items(text: str, marker: str) -> tuple[str, ...]:
+    block = operative_policy_block(text, marker)
+    items: list[list[str]] = []
+    for raw_line in block.splitlines()[1:]:
+        line = raw_line.strip()
+        match = re.match(r"^(\d+)\.\s+(.*)$", line)
+        if match:
+            items.append([match.group(2)])
+        elif items and line:
+            items[-1].append(line)
+    return tuple(re.sub(r"\s+", " ", " ".join(item)) for item in items)
+
+
+def require_lightweight_ui_required_flow(relative: str) -> None:
+    items = numbered_flow_items(read(relative), "## Required Flow")
+    ui_stops = [
+        index
+        for index, item in enumerate(items)
+        if "`ui-defect`" in item
+        and re.search(r"\bstop\b", item, re.IGNORECASE)
+        and re.search(r"must not continue|do not continue", item, re.IGNORECASE)
+    ]
+    if len(ui_stops) != 1:
+        raise AssertionError(
+            f"{relative} Required Flow needs one explicit ui-defect stop branch"
+        )
+
+    issue_draft_steps = [
+        index for index, item in enumerate(items) if "issue-draft.md" in item
+    ]
+    if not issue_draft_steps or min(issue_draft_steps) <= ui_stops[0]:
+        raise AssertionError(
+            f"{relative} requires issue-draft.md before the ui-defect stop branch"
+        )
+    first_issue_step = items[min(issue_draft_steps)]
+    if not re.search(r"non-`?ui-defect`?|other routes", first_issue_step, re.IGNORECASE):
+        raise AssertionError(
+            f"{relative} issue-draft.md flow is not limited to non-ui-defect routes"
+        )
+
+
+def markdown_rule_blocks(text: str) -> tuple[str, ...]:
+    blocks: list[str] = []
+    current: list[str] = []
+    for raw_line in strip_markdown_comments(text).splitlines():
+        line = raw_line.strip()
+        if not line:
+            if current:
+                blocks.append(" ".join(current))
+                current = []
+            continue
+        if re.match(r"^(?:[-*+]\s+|\d+\.\s+|#{1,6}\s+)", line):
+            if current:
+                blocks.append(" ".join(current))
+            current = [line]
+        else:
+            current.append(line)
+    if current:
+        blocks.append(" ".join(current))
+    return tuple(re.sub(r"\s+", " ", block) for block in blocks)
+
+
+def require_shared_infrastructure_unattended_isolation(relative: str) -> None:
+    candidate_blocks = [
+        block
+        for block in markdown_rule_blocks(read(relative))
+        if "unattended" in block.lower()
+        and re.search(r"Issue (?:create|creation)|dependency Issue", block, re.IGNORECASE)
+        and re.search(
+            r"exception|unless|skip (?:the )?(?:ordinary )?human|skip approval-file|"
+            r"bypass(?:es)? (?:the )?ordinary human|replace(?:s)? (?:an? )?ordinary human|"
+            r"or a valid|covers? (?:that )?(?:remote )?action|"
+            r"may.{0,80}(?:reuse|satisfy|authorize)",
+            block,
+            re.IGNORECASE,
+        )
+    ]
+    if not candidate_blocks:
+        raise AssertionError(f"missing unattended Issue policy in {relative}")
+    for block in candidate_blocks:
+        if "shared-infrastructure" not in block:
+            raise AssertionError(
+                f"unattended Issue rule does not branch around shared-infrastructure in {relative}: {block!r}"
+            )
+        if not re.search(
+            r"(?:does not|cannot|must not|never).{0,100}(?:replace|satisfy|reuse|authorize)"
+            r".{0,120}(?:semantic decision|semantic acceptance|parent)",
+            block,
+            re.IGNORECASE,
+        ):
+            raise AssertionError(
+                f"shared-infrastructure human semantic gate is not isolated in {relative}: {block!r}"
+            )
+
+
+def require_special_route_contradiction_mutations() -> None:
+    failures: list[str] = []
+    old_ui_flow = """## Required Flow
+
+1. Write `.xflow/issues/issue-draft/classification.yaml`.
+2. Prepare `.xflow/issues/issue-draft/issue-draft.md` for every route.
+3. Run `devctl check issue-draft` and create the remote Issue.
+"""
+    require_mutation_rejected(
+        "unconditional issue-draft flow overrides lightweight ui-defect stop",
+        lambda: run_anchor_mutation(
+            "SKILL.md", old_ui_flow, lambda: require_lightweight_ui_required_flow("SKILL.md")
+        ),
+        failures,
+    )
+
+    old_shared_rule = """# Rules
+
+- Task-Scoped Unattended Mode is the sole exception to ordinary remote-write
+  approval gates for Issue creation.
+- Advisory Dependency Issue Workflow protects dependency Issue creation with
+  the default human gate or a valid task-scoped unattended state.
+"""
+    require_mutation_rejected(
+        "generic unattended dependency route bypasses shared-infrastructure semantics",
+        lambda: run_anchor_mutation(
+            "AGENTS.md",
+            old_shared_rule,
+            lambda: require_shared_infrastructure_unattended_isolation("AGENTS.md"),
+        ),
+        failures,
+    )
+    parent_reuse_rule = """# Rules
+
+- For `shared-infrastructure` dependency Issue creation, a valid parent
+  approval or task-scoped unattended state may be reused to satisfy and
+  authorize the dependency semantic decision.
+"""
+    require_mutation_rejected(
+        "shared-infrastructure reuses parent approval or unattended state",
+        lambda: run_anchor_mutation(
+            "AGENTS.md",
+            parent_reuse_rule,
+            lambda: require_shared_infrastructure_unattended_isolation("AGENTS.md"),
+        ),
+        failures,
+    )
+    if failures:
+        raise AssertionError("; ".join(failures))
 
 
 def require_operational_policy_block(
@@ -1115,6 +1273,10 @@ def main() -> None:
     require_route_policy_anchor_mutation_cases(
         "Shared Infrastructure Approval Isolation", shared_infrastructure_policy_anchors
     )
+    require_lightweight_ui_required_flow("SKILL.md")
+    for relative in SHARED_INFRASTRUCTURE_UNATTENDED_POLICY_FILES:
+        require_shared_infrastructure_unattended_isolation(relative)
+    require_special_route_contradiction_mutations()
     require_all(
         "templates/xflow-local-ignored-vendor-init-prompt.md",
         (

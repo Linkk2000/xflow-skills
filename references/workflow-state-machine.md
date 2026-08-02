@@ -41,7 +41,10 @@ UNATTENDED_ACTIVE -> DONE                   # completion invalidates state
 `UNATTENDED_ACTIVE` applies only after the current user's exact safety word has
 enabled a repository/worktree/task-bound state. It bypasses the ordinary human
 approval step for covered actions while all mechanical checks and evidence
-requirements remain in force. Any mismatch fails closed.
+requirements remain in force. It does not replace or satisfy the separate
+human semantic decision for `shared-infrastructure`; a parent approval or
+unattended state must never be reused for dependency Issue creation or
+implementation. Any mismatch fails closed.
 
 ## Human Approval Is Non-Delegable
 
@@ -109,6 +112,9 @@ Locate an existing contract and check classification before Issue drafting.
 Before the remote Issue exists, draft classification, analysis, Issue body,
 candidate contract, and candidate verification matrix under
 `.xflow/issues/issue-draft/`; AI must not edit implementation code. The
+`ui-defect` branch stops after lightweight classification and acceptance
+evidence and does not continue into this Issue-draft sequence. Every other
+route continues through the Issue-draft sequence. The
 Issue-create gate creates only the remote identity. After the confirmed ID,
 migrate draft artifacts, create Issue task-state, and activate the Issue.
 AI must not edit implementation code for a capability change before the exact

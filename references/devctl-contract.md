@@ -198,6 +198,11 @@ checks pass. Evidence, tests, attachment and sensitive-data checks, provider
 limitations, branch protection, and platform policy remain mandatory. Force
 push, history rewrite, destructive deletion, and secret or permission changes
 remain excluded.
+For `shared-infrastructure` Issue creation, task-scoped unattended mode does
+not replace or satisfy the separate human semantic decision, and the parent
+Issue's approval or unattended state must never be reused to authorize the
+dependency. That human decision precedes any dependency-owned issue-create
+gate.
 Task-scoped unattended mode never authorizes local branch deletion. Run
 `devctl git done --issue <id> --file <resolution-report.md>` only after exact
 human approval for `git-cleanup`; `--force` requires exact

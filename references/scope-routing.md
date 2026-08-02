@@ -60,6 +60,9 @@ Issue only for independently owned work, classifying it as
 `child-feature|shared-infrastructure|external`. A dependency proposal is not a
 remote Issue. Human approval remains required before remote dependency Issue
 creation unless a valid task-scoped unattended state covers that remote action.
+For `shared-infrastructure`, the generic exception does not replace or satisfy
+the separate human semantic decision, and the parent Issue's approval or
+unattended state must not be reused to authorize the dependency.
 
 Record dependency work in the tracked Issue workspace:
 `.xflow/issues/issue-<id>/dependencies.yaml`. `discovered` belongs in analysis
@@ -87,3 +90,7 @@ dependency scope and named parent integration target. This semantic decision
 is separate from issue-create approval; Issue-create approval cannot substitute
 for it. Dependency state remains advisory, and `integrated` still requires
 fresh parent-side integration evidence.
+
+Only after that human semantic decision may the dependency use its own
+issue-create gate. Any generic Issue flow or unattended path is subordinate to
+this branch and cannot be used to skip it.

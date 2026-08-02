@@ -154,8 +154,10 @@ compatibility scripts.
 
 ## Issue And Attachment Command Choice
 
-For new Issue creation, run draft classification, Issue draft, evidence,
+After route classification, for non-`ui-defect` new Issue creation, run draft classification, Issue draft, evidence,
 attachment, sensitive-data, provider/platform, and applicable test checks.
+The lightweight `ui-defect` route stops before this sequence and does not use
+`issue-draft.md` as a routing precondition.
 Do not run `devctl check current-task` before the remote Issue ID exists.
 For an Issue-bound comment, run `devctl task status`, the current-task
 compatibility check, and the same content checks against the matching Issue
@@ -177,7 +179,10 @@ After common checks and attachment preparation, choose one gate path:
   run `check local-review` before the final issue/comment command.
 - Valid task-scoped unattended path: verify the bound state and action, then
   skip approval-file preparation, human wait, and local-review validation.
-  All common checks and attachment preparation remain mandatory. The compatibility flag alone never authorizes it.
+  For `shared-infrastructure`, this path does not replace or satisfy the
+  separate human semantic decision, and the parent Issue's approval or
+  unattended state must not be reused to authorize dependency Issue creation
+  or implementation. All common checks and attachment preparation remain mandatory. The compatibility flag alone never authorizes it.
 
 Issue/comment image attachments are disabled unless the manifest shows an
 approved object storage backend such as `aliyun-oss`. Other files may render as
@@ -195,6 +200,9 @@ It replaces ordinary human gates for covered actions only. Mechanical checks,
 tests, evidence, attachment policy, provider limitations, and high-risk
 exclusions remain effective. State mismatch, task switch, disable, cleanup, or
 completion invalidates the state and restores normal review.
+For `shared-infrastructure` Issue creation, unattended mode cannot replace or
+satisfy the separate human semantic decision, and parent approval or
+unattended state must never be reused to authorize the dependency.
 Task-scoped unattended mode never authorizes local branch deletion.
 `devctl git done` requires exact human approval for `git-cleanup`, while
 `--force` requires exact `git-cleanup-force`; failed cleanup preserves state.
@@ -239,12 +247,19 @@ evidence collection. Run `devctl check dependencies --issue <id>` for
 structure and consistency, then collect fresh parent-side evidence before
 claiming `integrated`.
 
+For `shared-infrastructure`, a human must first accept the dependency scope and
+named parent integration target. The generic unattended Issue path does not
+replace or satisfy this semantic decision, and parent approval or unattended
+state must not be reused to authorize dependency Issue creation.
+
 ## Capability-Contract Gate
 
 Before remote Issue creation: read project rules, locate an existing capability
 contract, write and check `.xflow/issues/issue-draft/classification.yaml`, choose
-`capability-change|implementation-gap|ui-defect|infrastructure|governance|future`,
-and prepare the route analysis plus Issue draft under `issue-draft/`. A
+`capability-change|implementation-gap|ui-defect|infrastructure|governance|future`.
+For `ui-defect`, record lightweight acceptance evidence and stop without
+requiring `issue-draft.md`. For every other route, prepare the route analysis
+plus Issue draft under `issue-draft/`. A
 capability change also gets a candidate contract and verification matrix before
 engineering projection. AI must not implement.
 

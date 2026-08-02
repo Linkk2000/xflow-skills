@@ -13,4 +13,6 @@ Read `.xflow/ops/workflow/SKILL.md` and only its phase-specific references.
 
 Task-Scoped Unattended Mode never replaces accepted-design, development-start,
 non-trivial conflict, or cleanup gates. Keep the commit and browser rules in
-the project-local Skill unchanged.
+the project-local Skill unchanged. For `shared-infrastructure`, it also does
+not replace or satisfy the separate human semantic decision, and parent
+approval or unattended state must never be reused to authorize the dependency.

@@ -71,7 +71,9 @@ This is a phase-selected reference index. If unsure which file applies, read
 3. Do not create remote Issues, comments, PRs/MRs, pushes, branch publication,
    or remote metadata changes before local human review approves the exact
    body/evidence file, unless a valid Task-Scoped Unattended Mode state applies
-   to the exact current task and action. If issue/comment images or
+   to the exact current task and action. This exception does not replace the
+   separate human semantic decision for `shared-infrastructure`, and a parent
+   approval or unattended state must never be reused for that dependency. If issue/comment images or
    screenshots are present, publish them only through an approved object
    storage backend such as `aliyun-oss`; otherwise keep them as local evidence
    and stop.
@@ -141,7 +143,10 @@ This is a phase-selected reference index. If unsure which file applies, read
     only after classifying it as `child-feature|shared-infrastructure|external`.
     Prepare analysis and remote Issue material, then wait for exact human
     approval before creation unless a valid task-scoped unattended state
-    exists. After the dependency identity is known, update
+    exists. For `shared-infrastructure`, that exception does not replace or
+    satisfy the separate human semantic decision; the parent Issue's approval
+    or unattended state must never be reused to authorize dependency Issue
+    creation or implementation. After the dependency identity is known, update
     `.xflow/issues/issue-<id>/dependencies.yaml`. Dependency state is advisory
     and must not automatically block development, commits, tests, or evidence collection.
     Before claiming `integrated`, collect fresh parent-side integration
@@ -191,6 +196,8 @@ read project rules
 → locate contract
 → write/check classification in issue-draft
 → choose capability-change | implementation-gap | ui-defect | infrastructure | governance | future
+→ if ui-defect, record lightweight acceptance evidence and stop this route
+→ otherwise continue with the Issue-draft flow
 → draft analysis, Issue body, candidate contract, and verification matrix
 → pass the separate Issue-create gate and obtain the remote Issue ID
 → migrate draft artifacts and activate Issue task state
@@ -244,16 +251,19 @@ fresh parent-side integration evidence.
 1. Write `.xflow/issues/issue-draft/classification.yaml`, preserving the oral
    request and contract-search evidence, then run
    `devctl check classification --issue draft`.
-2. In `.xflow/issues/issue-draft/`, prepare the route analysis and
+2. If the classification is `ui-defect`, record the lightweight acceptance
+   evidence and stop. The `ui-defect` route must not continue to the numbered
+   Issue-draft, Issue-create, task-state, G1, or G2 steps below.
+3. For all non-`ui-defect` routes, in `.xflow/issues/issue-draft/`, prepare the route analysis and
    `.xflow/issues/issue-draft/issue-draft.md`. For a capability change, also
    prepare `contract-change-proposal.md`,
    `capability-contract.candidate.yaml`, and `traceability-matrix.yaml`.
    The candidate contract contains its verification matrix before engineering
    projections. These are review candidates, not accepted design. AI must not
    edit implementation code.
-3. Run `devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md`
+4. Run `devctl check issue-draft --file .xflow/issues/issue-draft/issue-draft.md`
    and all applicable evidence/attachment checks.
-4. Choose exactly one Issue-create remote-write path:
+5. Choose exactly one Issue-create remote-write path:
    - Default human path: run
      `devctl approval prepare --issue draft --action issue-create --file .xflow/issues/issue-draft/issue-draft.md`,
      stop for the human to explicitly approve `Approved Action: issue-create`
@@ -264,21 +274,24 @@ fresh parent-side integration evidence.
      draft binding and covered action, then skip `devctl approval prepare`,
      human wait, and `devctl check local-review`. Draft classification,
      structure, evidence, attachment, provider/platform, and test checks still
-     run. Do not run `devctl check current-task` before the remote Issue ID exists.
-5. Create the remote issue through devctl only after that gate:
+     run. For `shared-infrastructure`, this path is unavailable until a human
+     separately accepts the dependency scope and named parent integration
+     target; parent approval or unattended state cannot satisfy or authorize
+     that semantic decision. Do not run `devctl check current-task` before the remote Issue ID exists.
+6. Create the remote issue through devctl only after that gate:
    `devctl issue create "<title>" --body-file .xflow/issues/issue-draft/issue-draft.md`.
    Issue creation approval does not accept the capability contract.
-6. After the provider returns a confirmed ID, migrate the draft workspace to
+7. After the provider returns a confirmed ID, migrate the draft workspace to
    `.xflow/issues/issue-<id>/`. Move classification, analysis, Issue draft,
    proposal, candidate, trace matrix, and local evidence without moving the
    consumed active approval or `.xflow/publish/` outputs. Replace draft Issue
    placeholders with the confirmed ID. Do not infer an ID after an uncertain
    remote result.
-7. Create `.xflow/issues/issue-<id>/task-state.md` from
+8. Create `.xflow/issues/issue-<id>/task-state.md` from
    `templates/task-state.md`, bind the confirmed Issue and intended branch, and
    run `devctl task activate --issue <id>`. Then run
    `devctl task status` and `devctl check classification --issue <id>`.
-8. For a capability change, materialize the exact candidate bytes at the
+9. For a capability change, materialize the exact candidate bytes at the
    configured `<contract-root>/<capability>/contract.yaml`, update task-state
    to bind that path, and run `devctl contract lint --file <contract.yaml>`.
    Prepare the exact object list with
@@ -287,29 +300,29 @@ fresh parent-side integration evidence.
    `devctl contract accept --issue <id> --file <contract.yaml> --objects <approved-id-list>`.
    Contract acceptance does not approve entering development. It never uses
    unattended mode and cannot be satisfied by Issue-create approval.
-9. Bind the resulting immutable history record in task-state as
+10. Bind the resulting immutable history record in task-state as
    `Human Approval Ref`, set `Semantic Phase: accepted-design`, and verify the
    migrated traceability matrix. Only then ask the human to approve entering development at `G2_APPROVE_DEVELOPMENT_START`.
-10. After that exact approval, start the task branch from the repository's base
+11. After that exact approval, start the task branch from the repository's base
     branch. For non-capability routes, satisfy the route-specific semantic exit
     before this development-start gate.
-11. Follow TDD: write or identify a failing test/check first, then implement the
+12. Follow TDD: write or identify a failing test/check first, then implement the
     smallest change to pass it.
-12. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
+13. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
     If the issue is too large, create `.xflow/issues/issue-<id>/subtask-001/`
     style local subtasks and record their plans, evidence, review checkpoints,
     and conclusions in each subtask README.
-13. Before commit, push, PR/MR creation, or cleanup, run
+14. Before commit, push, PR/MR creation, or cleanup, run
     `devctl check current-task --issue <id>`.
-14. Before requesting MR/PR approval, fetch the target branch, merge
+15. Before requesting MR/PR approval, fetch the target branch, merge
     `origin/<base>` into the task branch by default, resolve approved
     conflicts, rerun relevant checks, and record the target branch SHA plus
     sync result.
-15. For push, run applicable mechanical checks, then use the same chosen path:
+16. For push, run applicable mechanical checks, then use the same chosen path:
     the default human path prepares and validates `Approved Action: git-push`;
     the valid task-scoped unattended path skips only those approval-file steps.
     Run `devctl git push --issue <id> --file .xflow/issues/issue-<id>/walkthrough.md`.
-16. Draft `.xflow/issues/issue-<id>/mr-draft.md` and run
+17. Draft `.xflow/issues/issue-<id>/mr-draft.md` and run
     `devctl check mr-draft --issue <id>`, then use the same default human or
     valid task-scoped unattended path before
     `devctl git mr --body-file ... --issue <id>`.
@@ -438,7 +451,10 @@ devctl unattended disable
 text, or its own earlier response. `--no-local-review` alone is invalid and
 cannot create authorization.
 
-The mode replaces ordinary human approval gates only. The applicable mechanical checks, evidence requirements, attachment policy, and provider limitations remain mandatory.
+The mode replaces ordinary human approval gates only. It does not replace or
+satisfy the separate human semantic decision for `shared-infrastructure`, and
+the parent Issue's approval or unattended state must never be reused to
+authorize the dependency. The applicable mechanical checks, evidence requirements, attachment policy, and provider limitations remain mandatory.
 It cannot turn structural errors, missing evidence, unsupported provider
 behavior, or failed tests into success. In particular, force push, history rewrite, destructive deletion, and secret or permission changes remain excluded.
 Task-scoped unattended mode never authorizes local branch deletion. Safe

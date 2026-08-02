@@ -69,7 +69,12 @@ test checks, choose exactly one path:
   and validate it with `devctl check local-review` before Issue creation.
 - Valid task-scoped unattended path: verify the bound state and covered action,
   then skip approval-file preparation, human wait, and local-review validation.
-  The current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
+  For `shared-infrastructure`, this path does not replace or satisfy the
+  separate human semantic decision, and the parent Issue's approval or
+  unattended state must not be reused to authorize dependency Issue creation
+  or implementation. Only after the human accepts the dependency scope and
+  named parent integration target may the dependency's own issue-create gate
+  be selected. The current-task, draft structure, evidence, attachment, provider/platform, and test checks still run.
 
 ## Advisory Blocking Assessment
 

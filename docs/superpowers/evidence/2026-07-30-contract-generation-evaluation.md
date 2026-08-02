@@ -16,6 +16,13 @@ The associated immutable acceptance history, claim, and consumed review are
 under `.xflow/issues/issue-contractevaluation/approvals/history/`. Reviewer
 identity is intentionally not reproduced here.
 
+The baseline YAML note saying acceptance is not completed is a pre-acceptance
+snapshot embedded before the human gate ran. The accepted contract bytes are
+not rewritten after digest-bound acceptance; current authorization state comes
+from the immutable history, claim, and consumed review rather than that note.
+Likewise, the negative-only wording in the decision replay records its
+pre-acceptance moment, not the current accepted state.
+
 ## Discovery Replay: D01-D22
 
 The replay began with natural-language input only, searched repository rules,
@@ -37,10 +44,25 @@ answers are in the Task 13 discovery record.
 | D19-D22 | Historical approval is never inherited; readiness requires coherent tool bindings, compatibility, wrappers, adapter, ignores, and no blocking conflict; results contain an audit; the next workflow action requires its own human gate. |
 
 The contract captures stable IDs, failure preservation, verification before
-engineering projection, blockers, and future scope. Its semantic rubric passed
-for purpose quality, testable constraints, success/failure completeness,
-authority versus projection, future separation, and stable IDs. Lint is
-supporting structure evidence only, not semantic acceptance or runtime proof.
+engineering projection, blockers, and future scope. Lint is supporting
+structure evidence only, not semantic acceptance or runtime proof.
+
+## Human Semantic Rubric
+
+This rubric is bound to the accepted contract digest
+`deef597c50a40694143dd4b38a03196f3869c8e52fe38ef40bc3e4957eb5c729`
+and its complete ordered set of 51 accepted object IDs. It does not apply to a
+later variant or a partial object set. Any `FAIL` row would invalidate the
+semantic acceptance regardless of lint results.
+
+| Dimension | Outcome | Contract-specific rationale |
+| --- | --- | --- |
+| Purpose quality | PASS | `xflow.capability.project-local-initialization-recovery` names the project owner's dependable outcome: an auditable local initialization or recovery result at a confirmed project root, with project material and authorization boundaries preserved and no implied development or remote write. |
+| Testable constraints | PASS | The constraints define observable root containment, source trust, Git mutation limits, per-tool binding/mode coherence, managed-text preservation, partial recovery, approval isolation, and readiness. Each operational interaction traces to Given/When/Then verification with a planned evidence target. |
+| Success/failure completeness | PASS | The two interactions cover inspection/routing and project-local reconciliation; successful results distinguish `ready`, `needs-review`, and `blocked`, while six stable failure-reason contracts name the refusal and the state each failure preserves. |
+| Authority versus projection | PASS | Bootstrap authority ends after verified project-local handoff, role `doesNotOwn` fields exclude development and remote authorization, and `xflow.constraint.verify-before-projection` prevents the engineering projection from inventing business semantics or executable promises. |
+| Future separation | PASS | Machine prerequisite installation, automatic conflict overwrite, and unreviewed development/remote write are explicit future capabilities out of scope. Bootstrap source access remains an open implementation precondition and provider details remain deferred without weakening the generic local contract. |
+| Stable IDs | PASS | The accepted set contains 51 unique dotted IDs at root/object version `0.1.0`; references and trace edges use those IDs consistently, and future evolution must preserve unchanged IDs or use an explicit `supersedes` relation for replacement. |
 
 ## Human Acceptance Binding
 
