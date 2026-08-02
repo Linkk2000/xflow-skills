@@ -30,9 +30,18 @@ passed is not completion evidence.
 ## Recipe
 
 ```text
+devctl trace check --issue <id> --matrix .xflow/issues/issue-<id>/traceability-matrix.yaml
 devctl trace check --issue <id> --contract <contract.yaml> --matrix .xflow/issues/issue-<id>/traceability-matrix.yaml
 devctl check resolution-report --issue <id>
 ```
+
+For an accepted-design route, immutable sealed contract-acceptance history is the authority.
+Omit `--contract` even when the former current contract file was moved or
+deleted. Supplying `--contract` on that route makes
+the file a non-authoritative, mechanical fail-closed evolution input. It must
+match the sealed contract identity and pass semantic-version, object-version,
+and exact `supersedes` evolution rules; it cannot replace acceptance history or
+grant new acceptance authority. Non-acceptance routes still require `--contract`.
 
 For a contract-bearing task, the trace check also verifies the accepted design:
 the task state must reference the exact acceptance history record, contract

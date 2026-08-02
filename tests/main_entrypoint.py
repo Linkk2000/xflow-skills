@@ -1396,6 +1396,10 @@ def main() -> None:
         (
             "`contract → interaction → verification → issue → test → evidence → conclusion`",
             "`.xflow/issues/issue-<id>/traceability-matrix.yaml`",
+            "devctl trace check --issue <id> --matrix .xflow/issues/issue-<id>/traceability-matrix.yaml",
+            "immutable sealed contract-acceptance history is the authority",
+            "non-authoritative, mechanical fail-closed evolution input",
+            "Non-acceptance routes still require `--contract`",
             "`contractObjects` must exactly match the verification's `traces`",
             "Every active contract verification has",
             "`resolved|reduced` entries require fresh non-empty `evidence.after`",
