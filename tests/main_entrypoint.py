@@ -135,26 +135,36 @@ def strip_markdown_comments(text: str) -> str:
     )
 
 
-def next_fence_char(line: str, current: str | None) -> str | None:
-    match = re.match(r"^\s*(`{3,}|~{3,})", line)
-    if not match:
-        return current
-    candidate = match.group(1)[0]
+def next_fence_state(
+    line: str, current: tuple[str, int] | None
+) -> tuple[str, int] | None:
     if current is None:
-        return candidate
-    return None if candidate == current else current
+        opening = re.match(r"^ {0,3}(`{3,}|~{3,})", line)
+        if not opening:
+            return None
+        delimiter = opening.group(1)
+        return delimiter[0], len(delimiter)
+
+    closing = re.match(r"^ {0,3}(`+|~+)[ \t]*$", line)
+    if not closing:
+        return current
+    delimiter = closing.group(1)
+    opening_char, opening_length = current
+    if delimiter[0] == opening_char and len(delimiter) >= opening_length:
+        return None
+    return current
 
 
 def operative_policy_block(text: str, marker: str) -> str:
     lines = strip_markdown_comments(text).splitlines()
-    fence_char: str | None = None
+    fence: tuple[str, int] | None = None
     start = None
     for index, line in enumerate(lines):
-        next_fence = next_fence_char(line, fence_char)
-        if next_fence != fence_char:
-            fence_char = next_fence
+        next_fence = next_fence_state(line, fence)
+        if next_fence != fence:
+            fence = next_fence
             continue
-        if fence_char is None and marker in line:
+        if fence is None and marker in line:
             start = index
             break
     if start is None:
@@ -165,12 +175,12 @@ def operative_policy_block(text: str, marker: str) -> str:
         level = len(heading.group(1))
         end = len(lines)
         for index in range(start + 1, len(lines)):
-            next_fence = next_fence_char(lines[index], fence_char)
-            if next_fence != fence_char:
-                fence_char = next_fence
+            next_fence = next_fence_state(lines[index], fence)
+            if next_fence != fence:
+                fence = next_fence
                 continue
             next_heading = (
-                None if fence_char is not None else re.match(r"^(#{1,6})\s", lines[index])
+                None if fence is not None else re.match(r"^(#{1,6})\s", lines[index])
             )
             if next_heading and len(next_heading.group(1)) <= level:
                 end = index
@@ -181,11 +191,11 @@ def operative_policy_block(text: str, marker: str) -> str:
     end = len(lines)
     for index in range(start + 1, len(lines)):
         line = lines[index]
-        next_fence = next_fence_char(line, fence_char)
-        if next_fence != fence_char:
-            fence_char = next_fence
+        next_fence = next_fence_state(line, fence)
+        if next_fence != fence:
+            fence = next_fence
             continue
-        if fence_char is None and (
+        if fence is None and (
             not line.strip()
             or re.match(rf"^\s{{0,{indent}}}(?:[-*+]\s+|\d+\.\s+|#{{1,6}}\s)", line)
         ):
@@ -276,6 +286,40 @@ def require_policy_anchor_mutation_cases(
         lambda: run_anchor_mutation(
             "SKILL.md",
             fenced_example_fixture,
+            lambda: require_operational_policy_block(
+                "SKILL.md", "Approval Binding Check", approval_anchors
+            ),
+        ),
+        failures,
+    )
+
+    nested_fenced_example_fixture = (
+        "````markdown\n```\n## Approval Binding Check\n\n"
+        + "\n".join(approval_anchors)
+        + "\n````\n"
+    )
+    require_mutation_rejected(
+        "approval bundle hidden by an outer four-backtick fence",
+        lambda: run_anchor_mutation(
+            "SKILL.md",
+            nested_fenced_example_fixture,
+            lambda: require_operational_policy_block(
+                "SKILL.md", "Approval Binding Check", approval_anchors
+            ),
+        ),
+        failures,
+    )
+
+    mismatched_fence_fixture = (
+        "~~~markdown\n```\n## Approval Binding Check\n\n"
+        + "\n".join(approval_anchors)
+        + "\n~~~\n"
+    )
+    require_mutation_rejected(
+        "backticks do not close a tilde fence",
+        lambda: run_anchor_mutation(
+            "SKILL.md",
+            mismatched_fence_fixture,
             lambda: require_operational_policy_block(
                 "SKILL.md", "Approval Binding Check", approval_anchors
             ),
