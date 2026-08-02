@@ -135,9 +135,28 @@ def strip_markdown_comments(text: str) -> str:
     )
 
 
+def next_fence_char(line: str, current: str | None) -> str | None:
+    match = re.match(r"^\s*(`{3,}|~{3,})", line)
+    if not match:
+        return current
+    candidate = match.group(1)[0]
+    if current is None:
+        return candidate
+    return None if candidate == current else current
+
+
 def operative_policy_block(text: str, marker: str) -> str:
     lines = strip_markdown_comments(text).splitlines()
-    start = next((index for index, line in enumerate(lines) if marker in line), None)
+    fence_char: str | None = None
+    start = None
+    for index, line in enumerate(lines):
+        next_fence = next_fence_char(line, fence_char)
+        if next_fence != fence_char:
+            fence_char = next_fence
+            continue
+        if fence_char is None and marker in line:
+            start = index
+            break
     if start is None:
         raise AssertionError(f"missing operative policy marker {marker!r}")
 
@@ -145,12 +164,14 @@ def operative_policy_block(text: str, marker: str) -> str:
     if heading:
         level = len(heading.group(1))
         end = len(lines)
-        in_fence = False
         for index in range(start + 1, len(lines)):
-            if lines[index].strip().startswith("```"):
-                in_fence = not in_fence
+            next_fence = next_fence_char(lines[index], fence_char)
+            if next_fence != fence_char:
+                fence_char = next_fence
                 continue
-            next_heading = None if in_fence else re.match(r"^(#{1,6})\s", lines[index])
+            next_heading = (
+                None if fence_char is not None else re.match(r"^(#{1,6})\s", lines[index])
+            )
             if next_heading and len(next_heading.group(1)) <= level:
                 end = index
                 break
@@ -160,7 +181,14 @@ def operative_policy_block(text: str, marker: str) -> str:
     end = len(lines)
     for index in range(start + 1, len(lines)):
         line = lines[index]
-        if not line.strip() or re.match(rf"^\s{{0,{indent}}}(?:[-*+]\s+|\d+\.\s+|#{{1,6}}\s)", line):
+        next_fence = next_fence_char(line, fence_char)
+        if next_fence != fence_char:
+            fence_char = next_fence
+            continue
+        if fence_char is None and (
+            not line.strip()
+            or re.match(rf"^\s{{0,{indent}}}(?:[-*+]\s+|\d+\.\s+|#{{1,6}}\s)", line)
+        ):
             end = index
             break
     return "\n".join(lines[start:end])
@@ -233,6 +261,23 @@ def require_policy_anchor_mutation_cases(
             product_comment_fixture,
             lambda: require_operational_policy_block(
                 "SKILL.md", "Product Integration Evidence Bundle", product_anchors
+            ),
+        ),
+        failures,
+    )
+
+    fenced_example_fixture = (
+        "```markdown\n## Approval Binding Check\n\n"
+        + "\n".join(approval_anchors)
+        + "\n```\n"
+    )
+    require_mutation_rejected(
+        "approval bundle hidden in a fenced Markdown example",
+        lambda: run_anchor_mutation(
+            "SKILL.md",
+            fenced_example_fixture,
+            lambda: require_operational_policy_block(
+                "SKILL.md", "Approval Binding Check", approval_anchors
             ),
         ),
         failures,
