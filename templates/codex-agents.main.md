@@ -47,6 +47,13 @@ Hard rules:
   Outside valid Task-Scoped Unattended Mode, AI must not use `--force`,
   `--no-local-review`, direct provider APIs, or manual approval-file edits to
   bypass review.
+- Approval Binding Check. For cross-worktree, cross-Issue, cross-branch, old,
+  or inconsistent approval binding, use governance and create
+  `.xflow/issues/issue-<current>/approval-binding-check.md`. It is evidence,
+  not approval. Include Repository, Worktree, Branch, Current Issue, Exact
+  Action, Reviewed File Relative Path, SHA256, Candidate Approval Provenance,
+  Binding Verdict, and Required Next Human Gate. The check must not reuse an
+  old approval or push; stop at the Required Next Human Gate.
 - Task-Scoped Unattended Mode is the sole exception to ordinary remote-write
   approval gates for Issue create/comment/close, Git push, PR/MR create/merge,
   and state backfill. It never replaces human gates for entering development,
@@ -89,6 +96,12 @@ Hard rules:
   and verify the current URL is not `about:blank`. Opening Chrome alone is not
   verification; if navigation fails, diagnose the service, URL, port, auth
   state, or browser-control connection before claiming UI verification.
+- Product Integration Evidence Bundle. Before claiming real product-page or
+  integration verification, retain `product-url.txt`, `page-identity.txt`,
+  `model-identity.txt`, `screenshot.png`, and `dom-runtime-state.json` as
+  Issue-local evidence bound to the same real product-page capture. Capture
+  only after an explicitly navigated real product URL; `about:blank, prototype,
+  or test harness` evidence must not claim integration passed.
 - Problem/Gap Closure Loop. When the user orally reports a problem or gap,
   create or update `.xflow/issues/issue-draft/gap-analysis.md` or
   `.xflow/issues/issue-<id>/gap-analysis.md`, add evidence, clarify scope and

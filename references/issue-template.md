@@ -173,6 +173,38 @@ capture time. The screenshot and DOM/runtime-state artifact must name the same
 identity so a reviewer can distinguish the tested product from a prototype,
 stale server, or different worktree.
 
+### Product Integration Evidence Bundle
+
+Before a real product-page or integration claim, place these exact files in the
+current Issue's evidence directory: `product-url.txt`, `page-identity.txt`,
+`model-identity.txt`, `screenshot.png`, and `dom-runtime-state.json`. Bind them
+to the same real product-page capture, made only after an explicitly navigated
+real product URL. `about:blank, prototype, or test harness` evidence must not
+claim integration passed.
+
+## approval-binding-check.md
+
+For a cross-worktree, cross-Issue, or cross-branch request, or an old approval
+or inconsistent approval binding, create
+`.xflow/issues/issue-<current>/approval-binding-check.md` before any governed
+action. It is evidence, not approval, and must not reuse an old approval or
+push. The Binding Verdict determines the Required Next Human Gate.
+
+```markdown
+# Approval Binding Check
+
+Repository: <repository identity>
+Worktree: <worktree identity>
+Branch: <branch name>
+Current Issue: <current Issue ID>
+Exact Action: <action that needs review>
+Reviewed File Relative Path: <path relative to repository root>
+SHA256: <reviewed-file SHA256>
+Candidate Approval Provenance: <approval record, source Issue, or none>
+Binding Verdict: <match|mismatch|stale|unknown>
+Required Next Human Gate: <exact human approval or refusal>
+```
+
 ## gap-analysis.md
 
 Use this shape when the user orally reports a problem or gap. Store it at

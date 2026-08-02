@@ -88,6 +88,14 @@ This is a phase-selected reference index. If unsure which file applies, read
    safe `git branch -d`, or `git-cleanup-force` for explicitly reviewed forced
    deletion. Failed cleanup keeps the unattended state active; only successful
    approved cleanup disables it.
+   Approval Binding Check. On a cross-worktree, cross-Issue, or cross-branch
+   request, or when an approval is old or its binding is inconsistent, route to
+   governance and create
+   `.xflow/issues/issue-<current>/approval-binding-check.md`. It is evidence,
+   not approval, and must display: Repository, Worktree, Branch, Current Issue,
+   Exact Action, Reviewed File Relative Path, SHA256, Candidate Approval
+   Provenance, Binding Verdict, and Required Next Human Gate. The check must
+   not reuse an old approval or push; stop for the required next human gate.
 5. The canonical task state is
    `.xflow/issues/issue-<id>/task-state.md`. Activate it through
    `devctl task activate --issue <id>`; the machine-local pointer is
@@ -158,6 +166,13 @@ This is a phase-selected reference index. If unsure which file applies, read
     If the page stays on `about:blank`, treat it as a failed navigation and
     diagnose the missing URL, stopped dev server, bad port, auth redirect, or
     browser-control failure before claiming UI verification.
+   Product Integration Evidence Bundle. Before claiming real product-page or
+   integration verification, Issue-local evidence must include
+   `product-url.txt`, `page-identity.txt`, `model-identity.txt`,
+   `screenshot.png`, and `dom-runtime-state.json`, bound to the same real
+   product-page capture. Capture only after an explicitly navigated real product
+   URL, never `about:blank, prototype, or test harness`; otherwise must not
+   claim integration passed.
 18. Problem/Gap Closure Loop. When the user orally reports a problem or gap,
     AI must first create or update `gap-analysis.md`, add evidence, clarify
     the gap, scope, proposed fix, and acceptance criteria, then stop for human

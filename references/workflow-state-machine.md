@@ -56,6 +56,17 @@ Valid approval must explicitly name the exact next action. Vague replies such
 as "继续", "都可以", "你看着办", "go ahead", "looks good", or "测试过了就发" are
 not approval.
 
+### Approval Binding Mismatch Gate
+
+For a cross-worktree, cross-Issue, or cross-branch request, or an old approval
+or inconsistent approval binding, transition to governance before any action.
+Create `.xflow/issues/issue-<current>/approval-binding-check.md`; it is
+evidence, not approval. Record Repository, Worktree, Branch, Current Issue,
+Exact Action, Reviewed File Relative Path, SHA256, Candidate Approval
+Provenance, Binding Verdict, and Required Next Human Gate. The check must not
+reuse an old approval or push. A failed or unknown Binding Verdict stops at the
+Required Next Human Gate.
+
 ## Semantic Capability Gate
 
 The execution states remain compatible, but each Issue also records one
@@ -126,6 +137,14 @@ result: screenshot, page title, visible text, HTTP status, console state, or
 DOM assertion. If the browser remains on `about:blank`, diagnose the target
 service, URL, port, login/auth state, or browser-control connection before
 continuing the workflow.
+
+### Product Integration Capture Gate
+
+Before a real product-page or integration claim, the current Issue must retain
+`product-url.txt`, `page-identity.txt`, `model-identity.txt`, `screenshot.png`,
+and `dom-runtime-state.json` bound to the same real product-page capture. The
+capture must follow an explicitly navigated real product URL. `about:blank,
+prototype, or test harness` evidence must not claim integration passed.
 
 ## Optional Dependency Discovery Transitions
 

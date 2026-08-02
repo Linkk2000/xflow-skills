@@ -45,6 +45,26 @@ model identity. A localhost page from another worktree, a design prototype, or
 an unbound screenshot is not product evidence. Store the identity record next
 to the Issue-local evidence and use repository-relative links.
 
+## Product Integration Evidence Bundle
+
+Before claiming real product-page or integration verification, store these exact
+files under the current Issue's evidence directory: `product-url.txt`,
+`page-identity.txt`, `model-identity.txt`, `screenshot.png`, and
+`dom-runtime-state.json`. They must be bound to the same real product-page
+capture, made only after an explicitly navigated real product URL. A capture
+from `about:blank, prototype, or test harness` is not product evidence and
+must not claim integration passed.
+
+## Approval Binding Check
+
+On a cross-worktree, cross-Issue, or cross-branch request, or when an approval
+is old or its binding is inconsistent, use the governance route and create
+`.xflow/issues/issue-<current>/approval-binding-check.md`. This is evidence,
+not approval. It records Repository, Worktree, Branch, Current Issue, Exact
+Action, Reviewed File Relative Path, SHA256, Candidate Approval Provenance,
+Binding Verdict, and Required Next Human Gate. The check must not reuse an old
+approval or push; stop until the Required Next Human Gate is satisfied.
+
 ## Gap-Analysis Finding Bundle
 
 Each `gap-analysis.md` must have `## Evidence-Backed Findings` with one or

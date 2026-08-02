@@ -126,6 +126,14 @@ def require_in_order(relative: str, needles: tuple[str, ...]) -> None:
         cursor = position
 
 
+def require_normalized_all(relative: str, needles: tuple[str, ...]) -> None:
+    text = re.sub(r"\s+", " ", read(relative))
+    for needle in needles:
+        normalized = re.sub(r"\s+", " ", needle)
+        if normalized not in text:
+            raise AssertionError(f"missing normalized marker {needle!r} in {relative}")
+
+
 def require_declared_routes(relative: str, routes: tuple[str, ...]) -> None:
     declaring_file = ROOT / relative
     text = read(relative)
@@ -743,6 +751,53 @@ def main() -> None:
             "Do not move Issue-local evidence to COS/OSS/object storage or HTTP URLs.",
         ),
     )
+    approval_binding_documents = (
+        "SKILL.md",
+        "references/evidence-analysis.md",
+        "references/workflow-state-machine.md",
+        "templates/codex-agents.main.md",
+        "templates/cursorrules.main",
+        "references/issue-template.md",
+    )
+    approval_binding_anchors = (
+        ".xflow/issues/issue-<current>/approval-binding-check.md",
+        "not approval",
+        "Repository",
+        "Worktree",
+        "Branch",
+        "Current Issue",
+        "Exact Action",
+        "Reviewed File Relative Path",
+        "SHA256",
+        "Candidate Approval Provenance",
+        "Binding Verdict",
+        "Required Next Human Gate",
+        "must not reuse an old approval or push",
+    )
+    for relative in approval_binding_documents:
+        require_normalized_all(relative, approval_binding_anchors)
+
+    product_evidence_documents = (
+        "SKILL.md",
+        "references/evidence-analysis.md",
+        "references/workflow-state-machine.md",
+        "templates/codex-agents.main.md",
+        "templates/cursorrules.main",
+        "references/issue-template.md",
+    )
+    product_evidence_anchors = (
+        "product-url.txt",
+        "page-identity.txt",
+        "model-identity.txt",
+        "screenshot.png",
+        "dom-runtime-state.json",
+        "same real product-page capture",
+        "explicitly navigated real product URL",
+        "about:blank, prototype, or test harness",
+        "must not claim integration passed",
+    )
+    for relative in product_evidence_documents:
+        require_normalized_all(relative, product_evidence_anchors)
     require_all(
         "templates/xflow-local-ignored-vendor-init-prompt.md",
         (
