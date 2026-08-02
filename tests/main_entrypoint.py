@@ -126,12 +126,137 @@ def require_in_order(relative: str, needles: tuple[str, ...]) -> None:
         cursor = position
 
 
-def require_normalized_all(relative: str, needles: tuple[str, ...]) -> None:
-    text = re.sub(r"\s+", " ", read(relative))
+def strip_markdown_comments(text: str) -> str:
+    text = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
+    return re.sub(
+        r"(?m)^[ \t]*\[(?://|comment)\]:[ \t]*#[ \t]*\([^\n]*\)[ \t]*$",
+        "",
+        text,
+    )
+
+
+def operative_policy_block(text: str, marker: str) -> str:
+    lines = strip_markdown_comments(text).splitlines()
+    start = next((index for index, line in enumerate(lines) if marker in line), None)
+    if start is None:
+        raise AssertionError(f"missing operative policy marker {marker!r}")
+
+    heading = re.match(r"^(#{1,6})\s", lines[start])
+    if heading:
+        level = len(heading.group(1))
+        end = len(lines)
+        in_fence = False
+        for index in range(start + 1, len(lines)):
+            if lines[index].strip().startswith("```"):
+                in_fence = not in_fence
+                continue
+            next_heading = None if in_fence else re.match(r"^(#{1,6})\s", lines[index])
+            if next_heading and len(next_heading.group(1)) <= level:
+                end = index
+                break
+        return "\n".join(lines[start:end])
+
+    indent = len(lines[start]) - len(lines[start].lstrip())
+    end = len(lines)
+    for index in range(start + 1, len(lines)):
+        line = lines[index]
+        if not line.strip() or re.match(rf"^\s{{0,{indent}}}(?:[-*+]\s+|\d+\.\s+|#{{1,6}}\s)", line):
+            end = index
+            break
+    return "\n".join(lines[start:end])
+
+
+def require_operational_policy_block(
+    relative: str, marker: str, needles: tuple[str, ...]
+) -> None:
+    block = re.sub(r"\s+", " ", operative_policy_block(read(relative), marker))
     for needle in needles:
         normalized = re.sub(r"\s+", " ", needle)
-        if normalized not in text:
-            raise AssertionError(f"missing normalized marker {needle!r} in {relative}")
+        if normalized not in block:
+            raise AssertionError(
+                f"missing operative marker {needle!r} in {relative} block {marker!r}"
+            )
+
+
+def run_anchor_mutation(
+    relative: str, text: str, check: Callable[[], None]
+) -> None:
+    original_read = globals()["read"]
+    globals()["read"] = lambda requested: text if requested == relative else original_read(requested)
+    try:
+        check()
+    finally:
+        globals()["read"] = original_read
+
+
+def require_policy_anchor_mutation_cases(
+    approval_anchors: tuple[str, ...], product_anchors: tuple[str, ...]
+) -> None:
+    failures: list[str] = []
+    comment_fixture = "## Approval Binding Check\n\n<!--\n" + "\n".join(approval_anchors) + "\n-->\n"
+    require_mutation_rejected(
+        "approval bundle hidden in an HTML comment",
+        lambda: run_anchor_mutation(
+            "SKILL.md",
+            comment_fixture,
+            lambda: require_operational_policy_block(
+                "SKILL.md", "Approval Binding Check", approval_anchors
+            ),
+        ),
+        failures,
+    )
+
+    markdown_comment_fixture = (
+        "## Approval Binding Check\n\n[//]: # (" + " ".join(approval_anchors) + ")\n"
+    )
+    require_mutation_rejected(
+        "approval bundle hidden in a Markdown comment",
+        lambda: run_anchor_mutation(
+            "SKILL.md",
+            markdown_comment_fixture,
+            lambda: require_operational_policy_block(
+                "SKILL.md", "Approval Binding Check", approval_anchors
+            ),
+        ),
+        failures,
+    )
+
+    product_comment_fixture = (
+        "## Product Integration Evidence Bundle\n\n<!--\n"
+        + "\n".join(product_anchors)
+        + "\n-->\n"
+    )
+    require_mutation_rejected(
+        "product evidence bundle hidden in an HTML comment",
+        lambda: run_anchor_mutation(
+            "SKILL.md",
+            product_comment_fixture,
+            lambda: require_operational_policy_block(
+                "SKILL.md", "Product Integration Evidence Bundle", product_anchors
+            ),
+        ),
+        failures,
+    )
+
+    scattered_fixture = (
+        "## Approval Binding Check\n\nThis section has no required binding data.\n\n"
+        "## Unrelated Notes\n\n"
+        + "\n\n".join(approval_anchors)
+    )
+    require_mutation_rejected(
+        "approval tokens scattered into unrelated sections",
+        lambda: run_anchor_mutation(
+            "SKILL.md",
+            scattered_fixture,
+            lambda: require_operational_policy_block(
+                "SKILL.md", "Approval Binding Check", approval_anchors
+            ),
+        ),
+        failures,
+    )
+
+    if failures:
+        raise AssertionError("; ".join(failures))
 
 
 def require_declared_routes(relative: str, routes: tuple[str, ...]) -> None:
@@ -751,13 +876,13 @@ def main() -> None:
             "Do not move Issue-local evidence to COS/OSS/object storage or HTTP URLs.",
         ),
     )
-    approval_binding_documents = (
-        "SKILL.md",
-        "references/evidence-analysis.md",
-        "references/workflow-state-machine.md",
-        "templates/codex-agents.main.md",
-        "templates/cursorrules.main",
-        "references/issue-template.md",
+    approval_binding_blocks = (
+        ("SKILL.md", "Approval Binding Check."),
+        ("references/evidence-analysis.md", "## Approval Binding Check"),
+        ("references/workflow-state-machine.md", "### Approval Binding Mismatch Gate"),
+        ("templates/codex-agents.main.md", "Approval Binding Check."),
+        ("templates/cursorrules.main", "Approval Binding Check."),
+        ("references/issue-template.md", "## approval-binding-check.md"),
     )
     approval_binding_anchors = (
         ".xflow/issues/issue-<current>/approval-binding-check.md",
@@ -774,16 +899,16 @@ def main() -> None:
         "Required Next Human Gate",
         "must not reuse an old approval or push",
     )
-    for relative in approval_binding_documents:
-        require_normalized_all(relative, approval_binding_anchors)
+    for relative, marker in approval_binding_blocks:
+        require_operational_policy_block(relative, marker, approval_binding_anchors)
 
-    product_evidence_documents = (
-        "SKILL.md",
-        "references/evidence-analysis.md",
-        "references/workflow-state-machine.md",
-        "templates/codex-agents.main.md",
-        "templates/cursorrules.main",
-        "references/issue-template.md",
+    product_evidence_blocks = (
+        ("SKILL.md", "Product Integration Evidence Bundle."),
+        ("references/evidence-analysis.md", "## Product Integration Evidence Bundle"),
+        ("references/workflow-state-machine.md", "### Product Integration Capture Gate"),
+        ("templates/codex-agents.main.md", "Product Integration Evidence Bundle."),
+        ("templates/cursorrules.main", "Product Integration Evidence Bundle."),
+        ("references/issue-template.md", "### Product Integration Evidence Bundle"),
     )
     product_evidence_anchors = (
         "product-url.txt",
@@ -796,8 +921,11 @@ def main() -> None:
         "about:blank, prototype, or test harness",
         "must not claim integration passed",
     )
-    for relative in product_evidence_documents:
-        require_normalized_all(relative, product_evidence_anchors)
+    for relative, marker in product_evidence_blocks:
+        require_operational_policy_block(relative, marker, product_evidence_anchors)
+    require_policy_anchor_mutation_cases(
+        approval_binding_anchors, product_evidence_anchors
+    )
     require_all(
         "templates/xflow-local-ignored-vendor-init-prompt.md",
         (
