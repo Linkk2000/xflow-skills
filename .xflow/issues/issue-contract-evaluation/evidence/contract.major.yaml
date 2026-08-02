@@ -1,0 +1,313 @@
+id: xflow.contract.project-local-initialization-recovery
+version: 1.0.0
+name: XFlow 项目本地检查与恢复
+status: accepted-design
+created: 2026-08-02
+note: "Task 13 MAJOR replay: a confirmed non-Git project is inspected and returned as an authorization block; this capability no longer initializes Git repositories."
+capabilityContract:
+  id: xflow.capability.project-local-initialization-recovery
+  version: 1.0.0
+  purpose: 项目负责人可在确认的项目根目录请求检查或恢复 XFlow，并得到可审计的本地结果；确认的非 Git 项目保持不变并返回授权阻塞，不启动开发或远端写入。
+  participants: [xflow.role.project-owner, xflow.role.bootstrap-agent, xflow.role.project-local-devctl]
+  inputs: [xflow.value.enable-request, xflow.value.project-inspection]
+  outputs: [xflow.value.local-recovery-result, xflow.value.recovery-audit-record, xflow.value.implementation-evidence-record]
+  constraints:
+    - id: xflow.constraint.project-local-authority
+      version: 0.1.0
+      rule: minimal bootstrap 只可取得并验证经允许的项目工具；验证后 initialize/recover 的执行权交接给项目本地 devctl，workflow 和 devctl 成为唯一运行时授权，bootstrap 随即退出授权链。
+    - id: xflow.constraint.enablement-authorization-boundary
+      version: 0.1.0
+      rule: 自然语言“启用 XFlow”只授权本地检查和安全初始化或恢复，不授权开发、Issue 创建、任务激活、契约验收、commit、push 或 PR/MR；bootstrap 结束必须停止等待人工。
+    - id: xflow.constraint.local-git-inspection-boundary
+      version: 1.0.0
+      rule: 确认的非 Git 项目只可检查并报告授权阻塞；不得执行 git init、创建commit、配置或发明remote，或push。审计必须可判定项目仍非 Git 且既有资料字节不变。
+      supersedes: [xflow.constraint.local-git-initialization-boundary]
+    - id: xflow.constraint.confirmed-root-and-trusted-source
+      version: 0.1.0
+      rule: 仅可在经确认且 containment 检查通过的项目或 Git 根目录写入；bare、越界、symlink、junction 或 reparse 根失败关闭。工具来源仅可为项目绑定、用户精确指定或 bootstrap allowlist，禁止公共搜索、全局 PATH 或 checkout、以及临时开发目录回退。
+    - id: xflow.constraint.tool-binding-reproducibility
+      version: 0.1.0
+      rule: workflow 和 devctl 各自必须记录 source、expectedRef、resolvedCommit 和安装模式，且每工具模式只能是 vendor 或 submodule；恢复固定 resolvedCommit，不得隐式升级。仅两工具模式不同时，项目聚合状态才称为 mixed；每个 submodule（包括 mixed 中的 submodule）仅在项目配置、.gitmodules 和 Git index gitlink 三方一致时成立。
+    - id: xflow.constraint.managed-configuration-and-ignore-preservation
+      version: 0.1.0
+      rule: 只可更新已知 XFlow managed block 和 .xflow/xflow.json 的受管字段；规则区块外和未知配置字段逐字保留。未知旧文本、无效或语义冲突的配置保持原样并阻塞。仅可追加精确 ignore 规则并验证 effective ignore；隐藏 .xflow/issues 的宽规则是冲突且不得自动移除。
+    - id: xflow.constraint.recovery-artifact-and-git-preservation
+      version: 0.1.0
+      rule: vendor 仅在缺失时获取，且仅 clean matching checkout 可对齐；dirty 或 non-Git 内容保留并报告冲突，禁止 reset。允许添加缺失的空 XFlow 结构；既有 Issue、task、approval、evidence 不移动、不删除、不改写，保持字节不变。只可创建缺失 wrapper 或更新已知生成版本；未知同名文件保持并冲突。保留 branch、detached、worktree 和本地修改；对远端只读且不得远端写入。若确需 fetch，必须限制到明确临时引用或明确记录 FETCH_HEAD 和 refs 的本地元数据影响，且不得改业务 branch、index、worktree、remotes 或业务 remote-tracking refs；禁止 stash、reset、clean 和 checkout 业务文件。
+    - id: xflow.constraint.partial-safe-recovery
+      version: 0.1.0
+      rule: 冲突目标保持原样并使结果进入 needs-review 或 blocked；与冲突独立、确定安全且无冲突的本地动作可以继续。审计必须分别记录 applied、skipped 和 conflicts；任何未解决冲突都禁止进入开发。
+    - id: xflow.constraint.machine-and-commit-preparation-boundary
+      version: 0.1.0
+      rule: Git、Python 等机器前提只可检查和报告，不得自动安装。准备初始提交只可生成候选文件清单、检查结果和提交信息草案，不得 stage 或 commit。
+    - id: xflow.constraint.approval-noninheritance-and-remote-gate
+      version: 0.1.0
+      rule: "历史可作为证据保留，但 active approval、unattended 状态或旧授权不得继承；AI 不得将 Approved: no 改为 yes。push、远端 Issue、PR/MR 和其他远端写入必须停止等待独立人工审核。"
+    - id: xflow.constraint.ready-result-audit
+      version: 0.1.0
+      rule: ready 仅在 workflow 和 devctl 各自的 source、expectedRef、resolvedCommit、vendor或submodule模式均通过，且 aggregate mixed 时每个 submodule 的项目配置、.gitmodules和Git index gitlink三方证据通过，并且兼容性、wrapper、adapter、effective ignore 均通过且无阻塞冲突时成立；结果只能为 ready、needs-review 或 blocked，并保留 planned、applied、skipped、conflicts、commits 和 verification 审计上下文。
+    - id: xflow.constraint.verify-before-projection
+      version: 0.1.0
+      rule: 工程投影只能在对应交互和约束已有可观察 verification 后表示实现，不得新增业务语义。
+semanticValueContracts:
+  - id: xflow.value.enable-request
+    version: 0.1.0
+    name: 启用 XFlow 请求
+    meanings: [项目负责人以自然语言请求项目本地 XFlow 初始化或恢复，而非开发或远端工作]
+  - id: xflow.value.project-inspection
+    version: 0.1.0
+    name: 项目检查结果
+    meanings: [确认根目录与 Git 路由、机器前提、来源信任、既有资料、冲突和只读状态的检查结果]
+  - id: xflow.value.tool-binding-record
+    version: 0.1.0
+    name: 每工具可复现绑定
+    meanings: [workflow 和 devctl 各自的 source、expectedRef、resolvedCommit、vendor或submodule模式以及适用的三方 submodule 证明]
+  - id: xflow.value.local-recovery-result
+    version: 0.1.0
+    name: 本地初始化或恢复结果
+    meanings: [保留项目资料后的本地工具状态、已完成安全动作、稳定失败原因、阻塞和需人工审核事项]
+  - id: xflow.value.recovery-audit-record
+    version: 0.1.0
+    name: 恢复审计记录
+    meanings: [ready、needs-review或blocked结果，以及 planned、applied、skipped、conflicts、commits和verification]
+  - id: xflow.value.implementation-evidence-record
+    version: 0.1.0
+    name: 未来实现验收证据记录
+    meanings: [每工具 source、expectedRef、resolvedCommit和模式绑定记录，before/after文件哈希或字节比较，Git status/ref/command审计，effective-ignore输出，以及planned、applied、skipped、conflicts、commits和verification]
+failureReasonContracts:
+  - id: xflow.failure-reason.ambiguous-or-unsafe-root
+    version: 0.1.0
+    code: ambiguous_or_unsafe_root
+    meaning: 目标不是确认的工作项目根目录，或是 bare、越界、symlink、junction 或不安全 reparse 路径
+    preserves: [既有项目文件和 Git 状态]
+  - id: xflow.failure-reason.source-unavailable-or-untrusted
+    version: 0.1.0
+    code: source_unavailable_or_untrusted
+    meaning: 不存在项目绑定、精确用户指令或 bootstrap allowlist 所允许的可访问工具来源
+    preserves: [既有项目文件、工具选择和全局环境]
+  - id: xflow.failure-reason.existing-material-conflict
+    version: 0.1.0
+    code: existing_material_conflict
+    meaning: 未知规则文本、无效或冲突配置、宽 ignore、dirty或non-Git工具目录、未知 wrapper 或既有资料与请求动作冲突
+    preserves: [既有代码、项目规则、配置、Issue、task、approval、evidence、工具选择和 Git 状态]
+  - id: xflow.failure-reason.machine-prerequisite-missing
+    version: 0.1.0
+    code: machine_prerequisite_missing
+    meaning: Git 或 Python 等必需机器级前提缺失
+    preserves: [机器级软件状态和既有项目文件]
+  - id: xflow.failure-reason.authorization-or-remote-review-required
+    version: 0.1.0
+    code: authorization_or_remote_review_required
+    meaning: 请求超出本地启用范围，或将进入开发、审批、提交、远端写入或其他独立人工门
+    preserves: [本地和远端历史、未发布状态及现有审批状态]
+  - id: xflow.failure-reason.readiness-not-satisfied
+    version: 0.1.0
+    code: readiness_not_satisfied
+    meaning: 两工具绑定、兼容性、wrapper、adapter、effective ignore 或无阻塞冲突的 ready 联合条件未满足
+    preserves: [项目资料、工具状态和审计记录]
+context:
+  id: xflow.context.project-local-initialization-recovery
+  version: 0.1.0
+  name: 项目本地 XFlow 初始化与恢复上下文
+  entryConditions: [项目负责人确认目标项目根目录并提出自然语言启用请求]
+  completionConditions: [完成安全本地动作并报告审计结果，或保留状态后返回稳定失败原因、blocked或needs-review并停止]
+  responsibilities: [检查项目与 Git 路由、验证来源和工具绑定、保留项目资料、协调项目本地工具并阻止超范围动作]
+contextRoles:
+  - id: xflow.role.project-owner
+    version: 0.1.0
+    context: xflow.context.project-local-initialization-recovery
+    responsibility: 确认目标根目录、表达启用请求并处理冲突、阻塞或后续独立人工门
+    doesNotOwn: [工具来源信任判断、项目内文件覆盖、机器级安装和远端写入自动授权]
+  - id: xflow.role.bootstrap-agent
+    version: 0.1.0
+    context: xflow.context.project-local-initialization-recovery
+    responsibility: 执行只读检查和独立安全本地动作，取得并验证项目工具后交接执行权给项目本地 devctl
+    doesNotOwn: [交接后的初始化或恢复执行、开发、冲突覆盖、机器级安装、stage、commit、远端写入、审批继承和项目本地工具之外的运行时授权]
+  - id: xflow.role.project-local-devctl
+    version: 0.1.0
+    context: xflow.context.project-local-initialization-recovery
+    responsibility: 在 bootstrap 取得并验证项目工具后接管 initialize/recover，执行确定性项目本地协调并产生恢复审计和未来实现验收证据
+    doesNotOwn: [bootstrap来源扩展、开发授权、冲突覆盖、机器级安装、stage、commit、远端写入和人工审批替代]
+interactionContracts:
+  - id: xflow.interaction.inspect-and-route-project
+    version: 1.0.0
+    context: xflow.context.project-local-initialization-recovery
+    participants: [xflow.role.project-owner, xflow.role.bootstrap-agent]
+    accepts: [xflow.value.enable-request]
+    produces: [xflow.value.project-inspection]
+    constraints: [xflow.constraint.enablement-authorization-boundary, xflow.constraint.local-git-inspection-boundary, xflow.constraint.confirmed-root-and-trusted-source, xflow.constraint.machine-and-commit-preparation-boundary]
+    failureExpectations:
+      - reason: xflow.failure-reason.ambiguous-or-unsafe-root
+        preserves: [既有项目文件和 Git 状态]
+      - reason: xflow.failure-reason.source-unavailable-or-untrusted
+        preserves: [既有项目文件、工具选择和全局环境]
+      - reason: xflow.failure-reason.machine-prerequisite-missing
+        preserves: [机器级软件状态和既有项目文件]
+      - reason: xflow.failure-reason.authorization-or-remote-review-required
+        preserves: [本地和远端历史、未发布状态及现有审批状态]
+  - id: xflow.interaction.initialize-or-recover-project-local-tools
+    version: 0.1.0
+    context: xflow.context.project-local-initialization-recovery
+    participants: [xflow.role.bootstrap-agent, xflow.role.project-local-devctl]
+    accepts: [xflow.value.project-inspection, xflow.value.tool-binding-record]
+    produces: [xflow.value.local-recovery-result, xflow.value.recovery-audit-record, xflow.value.implementation-evidence-record]
+    constraints: [xflow.constraint.project-local-authority, xflow.constraint.tool-binding-reproducibility, xflow.constraint.managed-configuration-and-ignore-preservation, xflow.constraint.recovery-artifact-and-git-preservation, xflow.constraint.partial-safe-recovery, xflow.constraint.machine-and-commit-preparation-boundary, xflow.constraint.approval-noninheritance-and-remote-gate, xflow.constraint.ready-result-audit, xflow.constraint.verify-before-projection]
+    failureExpectations:
+      - reason: xflow.failure-reason.existing-material-conflict
+        preserves: [既有代码、项目规则、配置、Issue、task、approval、evidence、工具选择和 Git 状态]
+      - reason: xflow.failure-reason.authorization-or-remote-review-required
+        preserves: [本地和远端历史、未发布状态及现有审批状态]
+      - reason: xflow.failure-reason.readiness-not-satisfied
+        preserves: [项目资料、工具状态和审计记录]
+verificationMatrix:
+  - id: xflow.verify.project-route.empty-directory
+    version: 0.1.0
+    traces: [xflow.interaction.inspect-and-route-project, xflow.constraint.enablement-authorization-boundary]
+    given: 新电脑上的确认空目录且 Git 和 Python 可用
+    when: 项目负责人请求启用 XFlow
+    then: 结果选择空目录初始化路由，只执行本地检查和安全初始化，不启动开发、远端动作或机器安装
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/route-empty-directory.json
+  - id: xflow.verify.project-route.non-git-project
+    version: 1.0.0
+    traces: [xflow.interaction.inspect-and-route-project, xflow.constraint.local-git-inspection-boundary, xflow.constraint.confirmed-root-and-trusted-source]
+    given: 含既有代码和规则的确认非 Git 项目
+    when: 项目负责人请求启用 XFlow
+    then: 结果选择非 Git 检查路由并返回授权阻塞；未来实现审计可判定项目仍无.git、没有初始化、commit、remote或push，目标 containment 保持成立且既有项目资料字节不变
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/route-non-git-project.json
+  - id: xflow.verify.project-route.no-or-empty-remote-git
+    version: 0.1.0
+    traces: [xflow.interaction.inspect-and-route-project, xflow.constraint.machine-and-commit-preparation-boundary]
+    given: Git 项目没有远端或远端为空
+    when: 项目负责人请求启用 XFlow并要求准备初始提交
+    then: 结果只产生候选文件清单、检查结果和提交信息草案，没有 stage、commit、push 或机器安装
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/route-no-or-empty-remote-git.json
+  - id: xflow.verify.project-route.existing-remote-git
+    version: 0.1.0
+    traces: [xflow.interaction.inspect-and-route-project, xflow.constraint.approval-noninheritance-and-remote-gate]
+    given: Git 项目已有远端和既有项目资料
+    when: 项目负责人请求启用 XFlow
+    then: 结果选择既有远端 Git 路由，任何远端写入都返回稳定人工审核阻塞
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/route-existing-remote-git.json
+  - id: xflow.verify.tool-binding.reproducible-modes
+    version: 0.1.0
+    traces: [xflow.interaction.initialize-or-recover-project-local-tools, xflow.constraint.tool-binding-reproducibility]
+    given: workflow 与 devctl 分别有 source、expectedRef、resolvedCommit 和 vendor或submodule模式记录，且两工具模式可能相同或不同
+    when: 恢复项目本地工具
+    then: 每工具固定其 resolvedCommit且不隐式升级；每工具只为vendor或submodule，只有两工具不同才报告aggregate mixed；每个submodule仅在项目配置、.gitmodules和Git index gitlink三方一致时恢复
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/tool-binding-and-mode.json
+  - id: xflow.verify.managed-text-config-and-ignore-preservation
+    version: 0.1.0
+    traces: [xflow.interaction.initialize-or-recover-project-local-tools, xflow.constraint.managed-configuration-and-ignore-preservation]
+    given: 项目含已知 managed block、其外文本、未知 xflow.json 字段、无效或冲突配置，以及可能隐藏 .xflow/issues 的宽 ignore
+    when: 协调规则、配置和 ignore
+    then: 只更新已知受管内容，区块外和未知字段逐字不变；无效、冲突或宽规则返回 conflict，且不移除原有文本；缺失精确 ignore 仅追加并验证 effective ignore
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/managed-text-config-ignore.json
+  - id: xflow.verify.recovery-artifact-and-git-preservation
+    version: 0.1.0
+    traces: [xflow.interaction.initialize-or-recover-project-local-tools, xflow.constraint.recovery-artifact-and-git-preservation, xflow.constraint.partial-safe-recovery]
+    given: 工具目录分别为缺失、clean matching、dirty或non-Git，且项目具有 Issue、task、approval、evidence、wrapper、branch或detached、worktree和本地修改
+    when: 恢复项目本地工具
+    then: 仅获取缺失vendor、对齐clean matching checkout、创建缺失或更新已知生成wrapper，并允许新增缺失空XFlow路径；dirty、non-Git或未知同名文件返回 conflict，既有Issue、task、approval和evidence逐字不变。冲突目标保持原样并使结果进入needs-review或blocked；独立确定安全的本地动作可继续，审计分别记录applied、skipped和conflicts，未解决冲突禁止开发。远端操作不得写入；若执行fetch，证据记录明确临时引用或FETCH_HEAD和refs影响，且业务branch、index、worktree、remotes和业务remote-tracking refs保持不变
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/recovery-preservation-and-git-audit.json
+  - id: xflow.verify.root-source-prerequisite-fail-closed
+    version: 0.1.0
+    traces: [xflow.interaction.inspect-and-route-project, xflow.constraint.confirmed-root-and-trusted-source, xflow.constraint.machine-and-commit-preparation-boundary]
+    given: bare或越界根、symlink/junction/reparse路径、未信任来源、全局PATH或临时目录候选，或缺少Git/Python
+    when: bootstrap-agent 检查启用请求
+    then: 返回对应稳定失败原因，未写入项目外、未使用公共搜索或全局回退，且只报告缺失前提不安装
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/root-source-prerequisite.json
+  - id: xflow.verify.bootstrap-handoff-and-independent-gates
+    version: 0.1.0
+    traces: [xflow.interaction.initialize-or-recover-project-local-tools, xflow.constraint.project-local-authority, xflow.constraint.enablement-authorization-boundary, xflow.constraint.approval-noninheritance-and-remote-gate]
+    given: minimal bootstrap 已取得并验证项目本地 workflow 和 devctl，且存在历史审批或 unattended 状态
+    when: bootstrap 完成安全恢复
+    then: 证据记录 bootstrap 已完成取得和验证、project-local-devctl 已接管 initialize/recover、bootstrap 已退出授权链；历史只保留为证据而不继承；AI 不改 Approved:no，且在 Issue、任务、契约验收、开发、commit、push 或PR/MR前停止等待各自人工门
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/handoff-and-independent-gates.json
+  - id: xflow.verify.ready-result-audit
+    version: 0.1.0
+    traces: [xflow.interaction.initialize-or-recover-project-local-tools, xflow.constraint.ready-result-audit]
+    given: 两工具各自source、expectedRef、resolvedCommit、vendor或submodule模式，aggregate mixed适用的三方submodule证明，兼容性、wrapper、adapter、effective ignore和冲突检查均有记录
+    when: 生成恢复结果
+    then: 仅所有联合条件通过且无阻塞冲突时返回 ready；否则返回 needs-review或blocked。未来实现验收证据必须包含可审计binding记录、before/after文件哈希或字节比较、Git status/ref/command审计、effective-ignore输出，以及planned、applied、skipped、conflicts、commits和verification
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/readiness-and-audit.json
+  - id: xflow.verify.projection-after-contract-verification
+    version: 0.1.0
+    traces: [xflow.interaction.initialize-or-recover-project-local-tools, xflow.constraint.verify-before-projection]
+    given: 交互与约束尚无可观察 verification
+    when: 提出工程投影
+    then: 投影不被视为可执行承诺，直到对应 verification 存在
+    verifyBy:
+      - type: planned-implementation-evidence
+        target: .xflow/local/evidence/project-local-initialization-recovery/projection-prerequisites.json
+engineeringProjections:
+  - id: xflow.projection.project-local-bootstrap-and-reconcile
+    version: 1.0.0
+    traces: [xflow.interaction.initialize-or-recover-project-local-tools]
+    authorityRepresentation: 已验证的项目检查、每工具可复现绑定、恢复审计记录和契约 verification matrix
+    derivedRepresentations: [项目级 .xflow/xflow.json, 项目本地 .xflow/ops/workflow, 项目本地 .xflow/ops/devctl, ignored local recovery report]
+    transformationBoundary: bootstrap 只取得经允许的项目本地工具；项目本地 devctl 只将已验证的契约约束投影为确定性协调步骤。确认的非 Git 项目只报告授权阻塞，不执行 git init，且不新增业务语义或后续授权
+    preservedInvariants: [xflow.constraint.project-local-authority, xflow.constraint.enablement-authorization-boundary, xflow.constraint.local-git-inspection-boundary, xflow.constraint.confirmed-root-and-trusted-source, xflow.constraint.tool-binding-reproducibility, xflow.constraint.managed-configuration-and-ignore-preservation, xflow.constraint.recovery-artifact-and-git-preservation, xflow.constraint.partial-safe-recovery, xflow.constraint.machine-and-commit-preparation-boundary, xflow.constraint.approval-noninheritance-and-remote-gate, xflow.constraint.ready-result-audit, xflow.constraint.verify-before-projection]
+dependsOn:
+  - id: xflow.dependency.project-local-devctl
+    version: 0.1.0
+    contract: xflow.contract.project-local-devctl
+    requiredFor: [xflow.interaction.initialize-or-recover-project-local-tools]
+    ownerRepository: xflow-devctl
+  - id: xflow.dependency.project-local-workflow
+    version: 0.1.0
+    contract: xflow.contract.project-local-workflow
+    requiredFor: [xflow.interaction.initialize-or-recover-project-local-tools]
+    ownerRepository: xflow-skills
+preconditionsToResolve:
+  - id: xflow.question.bootstrap-source-access
+    version: 0.1.0
+    question: 在离线新电脑上由哪个已批准来源提供首次 bootstrap 所需的精确工具内容
+    requiredBefore: implementation
+    status: open
+    decision: 当前契约要求每工具受信任且可访问的 source、expectedRef和resolvedCommit；不可访问时停止并请求来源，不回退到公共搜索、全局安装或临时开发目录
+  - id: xflow.question.remote-repository-provider-details
+    version: 0.1.0
+    question: 远端存在时各 Git 提供方的只读检查和人工审核界面如何实现
+    requiredBefore: implementation
+    status: deferred
+    decision: 仅在provider-specific implementation或adapter前需要；不阻塞当前通用本地语义或engineering projection，任何远端写入仍由独立人工门阻止
+futureCapabilitiesOutOfScope:
+  - id: xflow.future.machine-prerequisite-installation
+    version: 0.1.0
+    capability: 自动安装 Git、Python 或其他机器级软件
+    reason: 启用项目能力不授予机器级包管理权限
+  - id: xflow.future.automatic-conflict-overwrite
+    version: 0.1.0
+    capability: 自动覆盖项目规则、代码、配置、Issue资料、工具目录或wrapper冲突
+    reason: 冲突必须保留原状并由人工决策
+  - id: xflow.future.unreviewed-development-or-remote-write
+    version: 0.1.0
+    capability: 未经独立人工门的开发、Issue、契约验收、commit、push 或 PR/MR
+    reason: 启用和恢复不替代后续工作流状态或人类授权
+references:
+  - kind: decision-record
+    target: task-13-discovery
+    note: D01-D22 approved discovery replay
+  - kind: pressure-scenario
+    target: contract-generation-input
+    note: 新电脑与四种项目状态的自然语言输入场景
