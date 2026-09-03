@@ -33,6 +33,7 @@ CAPABILITY_ENTRYPOINT_ANCHORS = (
     "AI must not edit implementation code before accepted-design",
     "Verification matrix must exist before engineering projection",
     ".xflow/issues/ is tracked by default",
+    "Early XFlow artifact commit",
     "One worktree may activate only one remote Issue",
     "implementation-gap requires an immutable human gap-recognition record; contract acceptance cannot satisfy it",
 )
@@ -1472,6 +1473,12 @@ def main() -> None:
     require("SKILL.md", "subtask-001")
     require("SKILL.md", "Subtask evidence must stay under that subtask's `evidence/` directory")
     require("SKILL.md", ".xflow/issues/ is tracked by default")
+    require("SKILL.md", "Early XFlow artifact commit")
+    require("SKILL.md", "After `devctl git start` succeeds")
+    require("SKILL.md", "artifact commit does not authorize push, MR/PR, or entering development")
+    require("references/git-policy.md", "Early XFlow artifact commit")
+    require("references/git-policy.md", "after `devctl git start` succeeds")
+    require("references/git-policy.md", "Do not delay solely because G2 is still pending")
     require("SKILL.md", ".xflow/publish/issues/")
     require("SKILL.md", "~/.xflow/env.local")
     require("SKILL.md", "Do not put `XFLOW_PLATFORM` in user-level")

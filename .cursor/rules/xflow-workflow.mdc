@@ -14,6 +14,7 @@ AI must not edit implementation code before accepted-design.
 implementation-gap requires an immutable human gap-recognition record; contract acceptance cannot satisfy it.
 Verification matrix must exist before engineering projection.
 .xflow/issues/ is tracked by default.
+Early XFlow artifact commit: after `git start` and each major gate that writes trackable process files, commit those artifacts alone before implementation; does not authorize push/MR.
 One worktree may activate only one remote Issue.
 
 Human Approval Is Non-Delegable by default. Task-Scoped Unattended Mode is valid only when the exact `XFLOW_HUMAN_UNATTENDED_ALL` safety word came from the user's current message and devctl confirms the state is bound to the current repository, worktree, and task. It replaces only ordinary remote-write approval gates for Issue create/comment/close, Git push, PR/MR create/merge, and state backfill. It never replaces human gates for entering development, gap-analysis acceptance, non-trivial conflict resolution, or local cleanup; mechanical checks and evidence requirements remain mandatory. For `shared-infrastructure`, it does not replace or satisfy the separate human semantic decision, and parent approval or unattended state must never be reused to authorize dependency Issue creation or implementation.
