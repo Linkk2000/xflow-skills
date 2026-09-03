@@ -6,9 +6,10 @@
 |---|---|---|---|---|
 | Inspect status | Any | No | None | `git status`, `devctl git status` |
 | Create and activate final task branch | Issue created, no implementation | Yes: exact `task-branch-start` identity approval | Base branch active; canonical task-state binds the final branch; changes limited to the matching Issue workspace | `devctl git start <slug> --issue <number> --file .xflow/issues/issue-<number>/task-state.md` |
-| Enter development | Final task branch active; required contract acceptance or gap recognition is bound | Yes: separate development-start approval | Route semantic exit verified | Set `S4_TDD_AND_IMPLEMENTATION`, then begin TDD |
-| Stage files | Development | No | Scope matches issue | `git add <scoped files>` |
-| Commit | Development | No, unless project requires | Read project rules, run tests/checks, run `devctl check commit-msg` | `devctl git commit-msg` or native `git commit` if message passes checks |
+| Early artifact commit after `git start` | Final task branch just activated; Issue workspace / process files written | No, unless project requires commit approval | Artifacts-only staging; no product implementation paths | `git add` scoped process files, then `devctl git commit-msg` / `git commit` |
+| Enter development | Final task branch active; required contract acceptance or gap recognition is bound; prior early artifact commits done | Yes: separate development-start approval | Route semantic exit verified; process artifacts not left untracked dominating the worktree | Set `S4_TDD_AND_IMPLEMENTATION`, then begin TDD |
+| Stage files | Task branch active (artifact commits allowed before development; implementation staging during development) | No | Scope matches issue; artifact commits exclude active `local-review.md` and runtime-only files | `git add <scoped files>` |
+| Commit | Task branch active (early artifact commits before G2/S4; implementation commits during development) | No, unless project requires | Read project rules, run tests/checks, run `devctl check commit-msg`; keep artifact commits separate from implementation | `devctl git commit-msg` or native `git commit` if message passes checks |
 | Pull/rebase base | Before branch or conflict work | Ask if conflicts likely | Clean worktree or stash plan | `git pull --ff-only`, explicit rebase only after strategy preview |
 | Push branch | After verification | Yes: approve push | `devctl check current-task`, tests/checks completed, no base branch | `devctl git push --issue <id> --file <evidence.md>` |
 | Sync target branch before MR/PR | After branch push, before MR/PR approval | Ask if merge/rebase may create conflicts; approval required for non-trivial conflict resolution | Clean worktree, target branch fetched, target branch SHA recorded | `git fetch origin <base>` then `git merge origin/<base>`; explicit rebase only after strategy preview |
@@ -27,6 +28,20 @@
 
 ## Commit Requirements
 
+- Early XFlow artifact commit: after `devctl git start` succeeds, commit the
+  Issue workspace and other newly written trackable process files alone before
+  contract acceptance, gap recognition, G2, or implementation. After each later
+  major gate that adds trackable process files—at least `contract-acceptance` /
+  `gap-recognition` and other pre-development gates that append
+  `approvals/history/`—again commit those artifacts alone before changing
+  product implementation paths. Keep artifact commits separate from
+  implementation commits. Do not delay solely because G2 is still pending:
+  once contract or gap history is on disk, commit the process files. If the
+  project still requires explicit human approval to commit, request that
+  approval immediately after the gate, not at the end of implementation. Do
+  not stage active `approvals/local-review.md` or machine-local/runtime-only
+  files. Early artifact commit does not authorize push, MR/PR, or entering
+  development. Still obey “no Issue number, no commit” and scoped staging.
 - Before commit, re-read project rules or run the project-rule check.
 - Commit messages must be portable, scoped, Chinese-dominant, multi-line, and issue-linked.
 - First line format: `type(scope): 中文核心摘要[#Issue编号]`, where `scope`
@@ -72,10 +87,13 @@ type(scope): 中文核心摘要[#Issue编号]
 - Issue must have title, background, scope, acceptance criteria, and verification commands.
 - Branch slug must derive from the approved issue title and issue number.
 - `task-branch-start` creates and activates only the exact final branch. It
-  authorizes neither implementation nor remote write.
+  authorizes neither implementation nor remote write. Immediately after
+  `git start`, perform the first Early XFlow artifact commit (or immediately
+  request commit approval) before further gates.
 - Development may not begin merely because an issue or task branch exists. For
   capability work, contract acceptance occurs on the final branch, and the
-  user must separately approve development afterward.
+  user must separately approve development afterward. Contract or gap history
+  may be committed as artifacts before that development approval.
 
 ## MR/PR Requirements
 

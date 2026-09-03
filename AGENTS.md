@@ -15,6 +15,7 @@ Read the project-local `SKILL.md` and its phase-specific references.
 - implementation-gap requires an immutable human gap-recognition record; contract acceptance cannot satisfy it.
 - Verification matrix must exist before engineering projection.
 - .xflow/issues/ is tracked by default.
+- Early XFlow artifact commit: after `git start` and each major gate that writes trackable process files, commit those artifacts alone before implementation; does not authorize push/MR.
 - One worktree may activate only one remote Issue.
 - Human Approval Is Non-Delegable; AI must never satisfy a human gate.
 

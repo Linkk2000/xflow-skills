@@ -138,12 +138,26 @@ This is a phase-selected reference index. If unsure which file applies, read
      evidence must not be moved to COS/OSS/object storage or HTTP URLs.
      Rendered remote bodies and published attachment manifests belong under
      `.xflow/publish/issues/`.
-12. Large issues may be split into local subtask directories named
+12. Early XFlow artifact commit. After `devctl git start` succeeds, create an
+    artifacts-only commit of the Issue workspace (and any other newly written
+    trackable process files) before continuing to contract acceptance, gap
+    recognition, G2, or implementation. After each later major gate that adds
+    trackable process files—at least `contract-acceptance` /
+    `gap-recognition`, and other pre-development gates that append
+    `approvals/history/`—again create an artifacts-only commit before changing
+    product implementation paths. Do not let untracked `.xflow/issues/**` or
+    contract-root files accumulate across gates. If this session still needs
+    explicit human approval to commit, request that approval immediately after
+    the gate, not at the end of implementation. Keep artifact commits separate
+    from implementation commits. Do not stage active
+    `approvals/local-review.md` or machine-local/runtime-only files. Early
+    artifact commit does not authorize push, MR/PR, or entering development.
+13. Large issues may be split into local subtask directories named
     `.xflow/issues/issue-<id>/subtask-001`, `subtask-002`, and so on. Each
     subtask needs `README.md` and must pass `devctl check subtask --issue <id>`.
     Subtask evidence must stay under that subtask's `evidence/` directory in
     the repository; do not store it in COS/OSS or any object storage backend.
-13. Advisory Dependency Issue Workflow. Compare discovered work with the
+14. Advisory Dependency Issue Workflow. Compare discovered work with the
     accepted main Issue scope. Keep ordinary in-scope work on the main feature
     branch, and use a local `subtask-*` only for local decomposition and
     repository-owned evidence. Propose an independently owned dependency Issue
@@ -159,19 +173,19 @@ This is a phase-selected reference index. If unsure which file applies, read
     Before claiming `integrated`, collect fresh parent-side integration
     evidence. Read `references/dependency-issue-workflow.md` for branch,
     lifecycle, ownership, and closure rules.
-14. Use the user's language for Git-related public text: commit messages,
+15. Use the user's language for Git-related public text: commit messages,
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
-15. Commit messages must be portable, scoped, Chinese-dominant, multi-line,
+16. Commit messages must be portable, scoped, Chinese-dominant, multi-line,
     and issue-linked. Use `type(scope): 中文核心摘要[#Issue编号]` on the first
     line and Chinese bullet lines for actual changes, contracts or acceptance
     conditions, tests, and evidence. Ordinary commits use one direct-owner
     Issue ID. Only a `merge(...)` integration commit may use both parent and dependency
     Issue IDs. Do not include AI-client trailers, local absolute paths, or
     provider-specific metadata that would not travel across GitHub/Gitee.
-16. Do not add AI-client co-author trailers. In particular, never add
+17. Do not add AI-client co-author trailers. In particular, never add
     `Co-authored-by: Cursor <cursoragent@cursor.com>`.
-17. Browser Must Not Remain about:blank. When browser or Chrome validation is
+18. Browser Must Not Remain about:blank. When browser or Chrome validation is
     part of the task, first identify the exact target URL, then navigate to an explicit target URL,
     wait for load, and verify the current URL is not `about:blank`.
     Opening a browser window or tab alone is not verification.
@@ -185,7 +199,7 @@ This is a phase-selected reference index. If unsure which file applies, read
    product-page capture. Capture only after an explicitly navigated real product
    URL, never `about:blank, prototype, or test harness`; otherwise must not
    claim integration passed.
-18. Problem/Gap Closure Loop. When the user orally reports a problem or gap,
+19. Problem/Gap Closure Loop. When the user orally reports a problem or gap,
     AI must first create or update `gap-analysis.md`, add evidence, clarify
     the gap, scope, proposed fix, and acceptance criteria, then stop for human
     recognition before implementation. After implementation, AI must create
@@ -304,6 +318,12 @@ fresh parent-side integration evidence.
    <slug> --issue <id> --file .xflow/issues/issue-<id>/task-state.md`. This
    command creates and activates only the exact final task branch.
    Branch identity approval does not authorize implementation or any remote write.
+   Immediately after `git start` succeeds, create (or immediately request approval
+   for) an Early XFlow artifact commit that contains only the Issue workspace and
+   other newly written trackable process files. Do not continue to contract
+   acceptance, gap recognition, G2, or implementation while those files remain
+   untracked or uncommitted and dominate the worktree. This commit does not
+   authorize push, MR/PR, or development.
 9. On that final branch, run `devctl task status` and
    `devctl check classification --issue <id>`. For a capability change,
    materialize the exact candidate bytes at the
@@ -318,18 +338,27 @@ fresh parent-side integration evidence.
    unattended mode and cannot be satisfied by Issue-create approval.
 10. Bind the resulting immutable history record in task-state as
    `Human Approval Ref`, set `Semantic Phase: accepted-design`, and verify the
-   migrated traceability matrix. Only then ask the human to approve entering development at `G2_APPROVE_DEVELOPMENT_START`.
+   migrated traceability matrix. Immediately create (or immediately request
+   approval for) another Early XFlow artifact commit covering the accepted
+   contract root file(s), Issue workspace updates, and new
+   `approvals/history/` records—still artifacts-only, still separate from
+   implementation. Only then ask the human to approve entering development at
+   `G2_APPROVE_DEVELOPMENT_START`.
    For `implementation-gap`, instead run `devctl check gap-analysis --issue
    <id>`, prepare exact action `gap-recognition` for the canonical
    `gap-analysis.md`, stop for the human decision, run `devctl gap recognize
    --issue <id> --file .xflow/issues/issue-<id>/gap-analysis.md`, then bind that
-   distinct history record and set `Semantic Phase: gap-recognized`. Never use
-   contract acceptance for this route.
+   distinct history record and set `Semantic Phase: gap-recognized`. Immediately
+   create (or immediately request approval for) an Early XFlow artifact commit
+   for the gap-analysis and history records before G2. Never use contract
+   acceptance for this route.
 11. Only after the separate `G2_APPROVE_DEVELOPMENT_START` human gate may task
-    state enter `S4_TDD_AND_IMPLEMENTATION`. The branch identity gate,
-    contract-acceptance gate, and development-start gate are distinct and none
-    authorizes another. For non-capability routes, satisfy the route-specific
-    semantic exit before entering implementation.
+    state enter `S4_TDD_AND_IMPLEMENTATION`. Do not begin changing product
+    implementation paths while trackable process artifacts from earlier gates
+    remain untracked or uncommitted and dominate the worktree. The branch
+    identity gate, contract-acceptance gate, and development-start gate are
+    distinct and none authorizes another. For non-capability routes, satisfy the
+    route-specific semantic exit before entering implementation.
 12. Follow TDD: write or identify a failing test/check first, then implement the
     smallest change to pass it.
 13. Record work evidence in `.xflow/issues/issue-<id>/walkthrough.md`.
