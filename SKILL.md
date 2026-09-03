@@ -152,12 +152,23 @@ This is a phase-selected reference index. If unsure which file applies, read
     from implementation commits. Do not stage active
     `approvals/local-review.md` or machine-local/runtime-only files. Early
     artifact commit does not authorize push, MR/PR, or entering development.
-13. Large issues may be split into local subtask directories named
+13. Post-merge Issue residual discard. After the remote PR/MR for this Issue is
+    merged, do not propose further commits or pushes on that feature branch.
+    At `git-cleanup` / `devctl git done`, discard uncommitted process residuals
+    under `.xflow/issues/issue-<id>/` and `.xflow/publish/issues/issue-<id>/`
+    rather than preserving them. Do not stash those residuals (or any worktree
+    dirt) to pass a clean-worktree check and then restore them onto the base
+    branch. Cleanup must finish on a clean base aligned with `origin/<base>`;
+    do not propose committing those discarded residuals afterward. Unrelated
+    local changes outside those Issue prefixes must be preserved and must not
+    be discarded by cleanup; never stash them just to run `git done`. Do not
+    try to backfill post-merge residuals into the already-merged PR.
+14. Large issues may be split into local subtask directories named
     `.xflow/issues/issue-<id>/subtask-001`, `subtask-002`, and so on. Each
     subtask needs `README.md` and must pass `devctl check subtask --issue <id>`.
     Subtask evidence must stay under that subtask's `evidence/` directory in
     the repository; do not store it in COS/OSS or any object storage backend.
-14. Advisory Dependency Issue Workflow. Compare discovered work with the
+15. Advisory Dependency Issue Workflow. Compare discovered work with the
     accepted main Issue scope. Keep ordinary in-scope work on the main feature
     branch, and use a local `subtask-*` only for local decomposition and
     repository-owned evidence. Propose an independently owned dependency Issue
@@ -173,19 +184,19 @@ This is a phase-selected reference index. If unsure which file applies, read
     Before claiming `integrated`, collect fresh parent-side integration
     evidence. Read `references/dependency-issue-workflow.md` for branch,
     lifecycle, ownership, and closure rules.
-15. Use the user's language for Git-related public text: commit messages,
+16. Use the user's language for Git-related public text: commit messages,
    remote Issue text, remote PR/MR text, review comments, and branch task
    summaries. Do not expand this rule to unrelated source code or docs.
-16. Commit messages must be portable, scoped, Chinese-dominant, multi-line,
+17. Commit messages must be portable, scoped, Chinese-dominant, multi-line,
     and issue-linked. Use `type(scope): 中文核心摘要[#Issue编号]` on the first
     line and Chinese bullet lines for actual changes, contracts or acceptance
     conditions, tests, and evidence. Ordinary commits use one direct-owner
     Issue ID. Only a `merge(...)` integration commit may use both parent and dependency
     Issue IDs. Do not include AI-client trailers, local absolute paths, or
     provider-specific metadata that would not travel across GitHub/Gitee.
-17. Do not add AI-client co-author trailers. In particular, never add
+18. Do not add AI-client co-author trailers. In particular, never add
     `Co-authored-by: Cursor <cursoragent@cursor.com>`.
-18. Browser Must Not Remain about:blank. When browser or Chrome validation is
+19. Browser Must Not Remain about:blank. When browser or Chrome validation is
     part of the task, first identify the exact target URL, then navigate to an explicit target URL,
     wait for load, and verify the current URL is not `about:blank`.
     Opening a browser window or tab alone is not verification.
@@ -199,7 +210,7 @@ This is a phase-selected reference index. If unsure which file applies, read
    product-page capture. Capture only after an explicitly navigated real product
    URL, never `about:blank, prototype, or test harness`; otherwise must not
    claim integration passed.
-19. Problem/Gap Closure Loop. When the user orally reports a problem or gap,
+20. Problem/Gap Closure Loop. When the user orally reports a problem or gap,
     AI must first create or update `gap-analysis.md`, add evidence, clarify
     the gap, scope, proposed fix, and acceptance criteria, then stop for human
     recognition before implementation. After implementation, AI must create
@@ -382,6 +393,13 @@ fresh parent-side integration evidence.
     After PR/MR creation, devctl records the PR number/URL, creates a
     metadata-only state backfill commit, and pushes that commit to the same
     branch under the `git-mr` approval scope.
+18. After remote review merges the PR/MR, stop proposing feature-branch commits.
+    For `G6_APPROVE_CLEANUP`, run approved `devctl git done`: it discards that
+    Issue's uncommitted process residuals under `.xflow/issues/issue-<id>/` and
+    `.xflow/publish/issues/issue-<id>/`, checks out the base branch, pulls, and
+    deletes the local task branch. Do not stash residuals onto base, and do not
+    propose committing them after cleanup. Unrelated dirty paths outside those
+    prefixes must remain untouched; do not stash them to force cleanup.
 
 ## Browser Verification
 

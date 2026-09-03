@@ -12,3 +12,5 @@ project-local Skill.
 Early XFlow artifact commit: after `git start` and each major gate that writes
 trackable process files, commit those artifacts alone before implementation;
 does not authorize push/MR.
+
+Post-merge Issue residual discard: after PR merge, discard that Issue's process residuals at cleanup; do not stash them onto main or propose feature-branch commits afterward.
