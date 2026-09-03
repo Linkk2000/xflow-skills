@@ -34,6 +34,7 @@ CAPABILITY_ENTRYPOINT_ANCHORS = (
     "Verification matrix must exist before engineering projection",
     ".xflow/issues/ is tracked by default",
     "Early XFlow artifact commit",
+    "Post-merge Issue residual discard",
     "One worktree may activate only one remote Issue",
     "implementation-gap requires an immutable human gap-recognition record; contract acceptance cannot satisfy it",
 )
@@ -1476,9 +1477,15 @@ def main() -> None:
     require("SKILL.md", "Early XFlow artifact commit")
     require("SKILL.md", "After `devctl git start` succeeds")
     require("SKILL.md", "artifact commit does not authorize push, MR/PR, or entering development")
+    require("SKILL.md", "Post-merge Issue residual discard")
+    require("SKILL.md", "Do not stash those residuals")
     require("references/git-policy.md", "Early XFlow artifact commit")
     require("references/git-policy.md", "after `devctl git start` succeeds")
     require("references/git-policy.md", "Do not delay solely because G2 is still pending")
+    require("references/git-policy.md", "Post-merge Issue residual discard")
+    require("references/git-policy.md", "do not stash")
+    require("references/workflow-state-machine.md", "do not propose further")
+    require("references/workflow-state-machine.md", "must not stash them onto base")
     require("SKILL.md", ".xflow/publish/issues/")
     require("SKILL.md", "~/.xflow/env.local")
     require("SKILL.md", "Do not put `XFLOW_PLATFORM` in user-level")

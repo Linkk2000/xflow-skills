@@ -11,4 +11,5 @@ implementation-gap requires an immutable human gap-recognition record; contract 
 Verification matrix must exist before engineering projection.
 .xflow/issues/ is tracked by default.
 Early XFlow artifact commit: after `git start` and each major gate that writes trackable process files, commit those artifacts alone before implementation; does not authorize push/MR.
+Post-merge Issue residual discard: after PR merge, discard that Issue's process residuals at cleanup; do not stash them onto main or propose feature-branch commits afterward.
 One worktree may activate only one remote Issue.

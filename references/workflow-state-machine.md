@@ -277,7 +277,11 @@ and name the human decision or external condition needed.
   actions after remote review finishes.
   Task-scoped unattended mode never satisfies this gate. Safe branch cleanup
   uses exact action `git-cleanup`; forced deletion uses exact action
-  `git-cleanup-force`.
+  `git-cleanup-force`. After the PR/MR is merged, do not propose further
+  feature-branch commits. Cleanup discards that Issue's uncommitted process
+  residuals under `.xflow/issues/issue-<id>/` and
+  `.xflow/publish/issues/issue-<id>/`, must not stash them onto base, and must
+  finish on a clean base without proposing post-cleanup residual commits.
 
 ## Pre-Merge Synchronization Checkpoint
 

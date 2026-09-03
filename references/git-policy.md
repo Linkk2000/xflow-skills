@@ -17,7 +17,7 @@
 | Resolve conflicts | During pull/rebase/merge | Yes for non-trivial conflicts | Conflict file list, strategy preview | Native git plus explicit file edits |
 | Merge MR/PR | Remote review phase | Human performs or explicitly authorizes | CI/review status known | Provider UI/API only if authorized |
 | Close issue | After merge or explicit cancellation | Yes: approve close | Confirm MR merged or task canceled | `devctl issue close <number>` |
-| Delete branch / cleanup | After merge/close | Yes: exact `git-cleanup`; forced deletion uses exact `git-cleanup-force` | Confirm base updated, branch merged | `devctl git done --issue <id> --file <resolution-report.md>` |
+| Delete branch / cleanup | After remote PR/MR merge or close | Yes: exact `git-cleanup`; forced deletion uses exact `git-cleanup-force` | PR merged/closed (unless force); discard Issue process residuals under `.xflow/issues/issue-<id>/` and `.xflow/publish/issues/issue-<id>/` only; unrelated dirty paths fail closed—do not stash | `devctl git done --issue <id> --file <resolution-report.md>` |
 
 ## Branch Requirements
 
@@ -71,6 +71,16 @@ Normal cleanup uses only `git branch -d` after exact
 human approval and fails when Git reports the branch is not merged. There is
 no implicit fallback to forced deletion. `--force` is a separate destructive
 choice and requires exact human approval for `git-cleanup-force`.
+
+Post-merge Issue residual discard: after the remote PR/MR is merged, do not
+propose further feature-branch commits or pushes for that Issue. `devctl git
+done` discards uncommitted residuals under `.xflow/issues/issue-<id>/` and
+`.xflow/publish/issues/issue-<id>/` when they are the only dirt, then lands on
+a clean base aligned with `origin/<base>`. Do not stash those residuals (or
+unrelated work) to pass a clean-worktree check and restore them onto base, and
+do not propose committing discarded residuals afterward. Unrelated dirty paths
+outside those prefixes must be preserved; finish or move them before retrying
+cleanup. Do not backfill post-merge residuals into the already-merged PR.
 
 Required downstream shape:
 
