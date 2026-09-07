@@ -377,7 +377,9 @@ If the body refers to pasted files, screenshots, or images, use
 placeholders, but issue/comment images must be published only through an
 approved object storage backend. Remote-published bodies must contain only
 reviewed public URLs for approved attachments. Do not publish `C:\...`,
-`/tmp/...`, `.xflow/...`, `file://...`, or WSL mount paths as attachment links.
+`/tmp/...`, `.xflow/local/...`, `file://...`, or WSL mount paths as attachment
+or machine-local links. Tracked repository-relative paths such as
+`.xflow/issues/...` remain allowed when the project tracks them.
 
 Remote-published body files must be public-facing Markdown. Use hidden
 `<!-- xflow: ... -->` anchors for machine checks, and do not include internal
