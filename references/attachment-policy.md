@@ -9,10 +9,19 @@ URLs in the attachment manifest.
 
 ## Core Rule
 
-Remote GitHub/Gitee Markdown cannot safely reference local paths such as
-`C:\...`, `/tmp/...`, `.xflow/...`, or `file://...`. Before a remote write, the
-AI must convert local artifacts into reviewed attachment records and approved
-publishable URLs, or stop and ask the human to choose an attachment backend.
+Remote GitHub/Gitee Markdown must not reference machine-local paths such as
+`C:\...`, `/tmp/...`, `file://...`, or `.xflow/local/...`. Before a remote
+write, convert pasted binary artifacts into reviewed attachment records and
+approved publishable URLs, or stop and ask the human to choose an attachment
+backend.
+
+Tracked repository-relative XFlow paths are allowed in remote bodies when the
+project tracks them (default): for example `.xflow/issues/...`,
+`.xflow/publish/...`, and `.xflow/ops/...` documentation references. Issue
+Markdown does not always turn relative paths into clickable blob links; a full
+`https://.../blob/<ref>/...` URL remains optional when a clickable link is
+required.
+
 For issue/comment images or screenshots, the only supported publishing path is
 an approved object storage backend such as Aliyun OSS. GitHub release assets
 are not an approved issue image store.
@@ -21,7 +30,8 @@ Search anchor: GitHub release assets are not an approved issue image store.
 
 Never publish:
 
-- raw local file paths
+- raw machine-local file paths (`file://`, drive letters, `/tmp`, `/home`, …)
+- `.xflow/local/...` paths (machine-local runtime; not for git)
 - unresolved `xflow-attachment://<id>` placeholders
 - private temp paths from chat clients, browsers, shells, or WSL mounts
 - filenames without a reviewed storage plan
@@ -36,6 +46,16 @@ Only an explicit `issueWorkspace.mode: local` project rule may opt out. Active
 `approvals/local-review.md` remains ignored. Issue-local `evidence/` and
 subtask evidence must never be uploaded to COS/OSS/object storage or exposed
 through HTTP URLs.
+
+### Local-only placement
+
+Material that is suitable for the local machine but **not** suitable for git
+must live under `.xflow/local/` (for example project `env.local`, worktree
+active-task pointers, machine runtime, temporary probes, and other private
+state). User-level secrets may continue to use `~/.xflow/env.local` and related
+home paths when that convention already applies. Do not park that material
+under `.xflow/issues/` for convenience, and do not scatter it under `/tmp` or
+home directories and then paste those paths into remote bodies.
 
 Object storage is only a publication mechanism for a reviewed attachment copy
 that must appear in a remote GitHub/Gitee Issue, comment, or PR/MR body. Its
@@ -223,9 +243,10 @@ Before a remote write, `devctl` or the AI must reject body files containing:
 - Windows local paths matching drive-letter forms such as `C:\` or `D:\`
 - `file://`
 - POSIX local temp/home paths such as `/tmp/`, `/mnt/`, or `/home/`
-- `.xflow/` paths in public Markdown bodies
+- `.xflow/local` paths in public Markdown bodies
 - image MIME types or Markdown image attachments in issue/comment manifests
   unless they were published by an approved object storage backend
 
 This check is a publication guard. Local drafts may contain placeholders; final
-remote bodies may not.
+remote bodies may not. Tracked `.xflow/issues/`, `.xflow/publish/`, and similar
+non-`local` repository paths are allowed.

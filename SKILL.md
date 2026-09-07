@@ -124,20 +124,28 @@ This is a phase-selected reference index. If unsure which file applies, read
 9. Use `--body-file` for Issue bodies, comments, and PR/MR bodies. Do not pass
    multiline Markdown, fenced code, JSON, shell snippets, backticks, or `$()`
    through inline command arguments.
-10. Do not publish local file paths or unresolved `xflow-attachment://`
-   placeholders in remote Issues, comments, or PR/MR bodies. If a pasted file
-   or image is referenced, use `references/attachment-policy.md`. Issue/comment
-   image attachments are currently disabled unless an approved object storage
-   backend published reviewed URLs; never use GitHub release assets as an
-   issue/comment image store.
+10. Do not publish machine-local file paths or unresolved `xflow-attachment://`
+   placeholders in remote Issues, comments, or PR/MR bodies. Machine-local
+   means `file://`, drive-letter paths, POSIX temp/home paths such as `/tmp/`
+   or `/home/`, and `.xflow/local/...`. Tracked repository-relative paths such
+   as `.xflow/issues/...` and `.xflow/publish/...` are allowed when the project
+   tracks them. If a pasted file or image is referenced, use
+   `references/attachment-policy.md`. Issue/comment image attachments are
+   currently disabled unless an approved object storage backend published
+   reviewed URLs; never use GitHub release assets as an issue/comment image
+   store.
 11. .xflow/issues/ is tracked by default. Track Issue process artifacts,
      task state, evidence, and immutable `approvals/history/` records. Ignore
      only machine-local/runtime material and active
-     `approvals/local-review.md`. A project may use `issueWorkspace.mode: local`
-     only when its own rules explicitly declare the exception. Issue-local
-     evidence must not be moved to COS/OSS/object storage or HTTP URLs.
-     Rendered remote bodies and published attachment manifests belong under
-     `.xflow/publish/issues/`.
+     `approvals/local-review.md`. Material that is suitable for the local
+     machine but not suitable for git **must** live under `.xflow/local/`
+     (or an established user-level path such as `~/.xflow/env.local`); do not
+     place secrets, worktree pointers, or machine runtime under
+     `.xflow/issues/` for convenience. A project may use
+     `issueWorkspace.mode: local` only when its own rules explicitly declare
+     the exception. Issue-local evidence must not be moved to COS/OSS/object
+     storage or HTTP URLs. Rendered remote bodies and published attachment
+     manifests belong under `.xflow/publish/issues/`.
 12. Early XFlow artifact commit. After `devctl git start` succeeds, create an
     artifacts-only commit of the Issue workspace (and any other newly written
     trackable process files) before continuing to contract acceptance, gap
