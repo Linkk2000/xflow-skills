@@ -15,7 +15,7 @@ Read the project-local `SKILL.md` and its phase-specific references.
 - implementation-gap requires an immutable human gap-recognition record; contract acceptance cannot satisfy it.
 - Verification matrix must exist before engineering projection.
 - .xflow/issues/ is tracked by default.
-- Early XFlow artifact commit: after `git start` and each major gate that writes trackable process files, commit those artifacts alone before implementation; does not authorize push/MR.
+- Early XFlow artifact commit: after `git start` and semantic gates (contract/gap/task-branch-start), commit those artifacts alone before implementation; does not authorize push/MR. Remote-write receipts stay under `.xflow/local/` — do not commit them or re-approve `git-push` for them.
 - Post-merge Issue residual discard: after PR merge, discard that Issue's process residuals at cleanup; do not stash them onto main or propose feature-branch commits afterward.
 - One worktree may activate only one remote Issue.
 - Human Approval Is Non-Delegable; AI must never satisfy a human gate.

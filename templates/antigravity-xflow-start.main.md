@@ -6,7 +6,8 @@
 4. For a remote Issue, create its `task-state.md` and run
    `devctl task activate --issue <id>`.
 5. After `devctl git start`, create an Early XFlow artifact commit of trackable
-   process files before contract/G2/implementation; it does not authorize push/MR.
+   semantic process files before contract/G2/implementation; it does not
+   authorize push/MR. Do not commit `.xflow/local/` remote-write receipts.
 
 Human Approval Is Non-Delegable. Stop at every gate required by the
 project-local Skill.
