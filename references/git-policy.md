@@ -11,13 +11,13 @@
 | Stage files | Task branch active (artifact commits allowed before development; implementation staging during development) | No | Scope matches issue; artifact commits exclude active `local-review.md` and runtime-only files | `git add <scoped files>` |
 | Commit | Task branch active (early artifact commits before G2/S4; implementation commits during development) | No, unless project requires | Read project rules, run tests/checks, run `devctl check commit-msg`; keep artifact commits separate from implementation | `devctl git commit-msg` or native `git commit` if message passes checks |
 | Pull/rebase base | Before branch or conflict work | Ask if conflicts likely | Clean worktree or stash plan | `git pull --ff-only`, explicit rebase only after strategy preview |
-| Push branch | After verification | Yes: approve push | `devctl check current-task`, tests/checks completed, no base branch | `devctl git push --issue <id> --file <evidence.md>` |
+| Push branch | After verification | Yes: approve push | `devctl check current-task`, tests/checks completed, no base branch; after approval, commit already-trackable process files then push; do not commit `.xflow/local/` receipts | `devctl git push --issue <id> --file <evidence.md>` |
 | Sync target branch before MR/PR | After branch push, before MR/PR approval | Ask if merge/rebase may create conflicts; approval required for non-trivial conflict resolution | Clean worktree, target branch fetched, target branch SHA recorded | `git fetch origin <base>` then `git merge origin/<base>`; explicit rebase only after strategy preview |
 | Create MR/PR | Branch pushed and target branch synced into the task branch | Yes: approve MR/PR | MR title/body preview, issue link, verification list, target branch SHA, sync result | `devctl git mr` |
 | Resolve conflicts | During pull/rebase/merge | Yes for non-trivial conflicts | Conflict file list, strategy preview | Native git plus explicit file edits |
 | Merge MR/PR | Remote review phase | Human performs or explicitly authorizes | CI/review status known | Provider UI/API only if authorized |
 | Close issue | After merge or explicit cancellation | Yes: approve close | Confirm MR merged or task canceled | `devctl issue close <number>` |
-| Delete branch / cleanup | After remote PR/MR merge or close | Yes: exact `git-cleanup`; forced deletion uses exact `git-cleanup-force` | PR merged/closed (unless force); discard Issue process residuals under `.xflow/issues/issue-<id>/` and `.xflow/publish/issues/issue-<id>/` only; unrelated dirty paths fail closed—do not stash | `devctl git done --issue <id> --file <resolution-report.md>` |
+| Delete branch / cleanup | After remote PR/MR merge or close | Yes: exact `git-cleanup`; forced deletion uses exact `git-cleanup-force` | PR merged/closed (unless force); discard Issue process residuals under `.xflow/issues/issue-<id>/`, `.xflow/publish/issues/issue-<id>/`, and `.xflow/local/issues/issue-<id>/` only; unrelated dirty paths fail closed—do not stash | `devctl git done --issue <id> --file <resolution-report.md>` |
 
 ## Branch Requirements
 
@@ -29,19 +29,21 @@
 ## Commit Requirements
 
 - Early XFlow artifact commit: after `devctl git start` succeeds, commit the
-  Issue workspace and other newly written trackable process files alone before
-  contract acceptance, gap recognition, G2, or implementation. After each later
-  major gate that adds trackable process files—at least `contract-acceptance` /
-  `gap-recognition` and other pre-development gates that append
-  `approvals/history/`—again commit those artifacts alone before changing
+  Issue workspace and other newly written **trackable** process files alone
+  before contract acceptance, gap recognition, G2, or implementation. After
+  each later **semantic** gate—`contract-acceptance` / `gap-recognition` /
+  `task-branch-start`—again commit those artifacts alone before changing
   product implementation paths. Keep artifact commits separate from
   implementation commits. Do not delay solely because G2 is still pending:
   once contract or gap history is on disk, commit the process files. If the
   project still requires explicit human approval to commit, request that
   approval immediately after the gate, not at the end of implementation. Do
   not stage active `approvals/local-review.md` or machine-local/runtime-only
-  files. Early artifact commit does not authorize push, MR/PR, or entering
+  files, including remote-write receipts under `.xflow/local/`. Early
+  artifact commit does not authorize push, MR/PR, or entering
   development. Still obey “no Issue number, no commit” and scoped staging.
+  After an approved `git-push`, do not commit push receipts or prepare
+  another `git-push` for them.
 - Before commit, re-read project rules or run the project-rule check.
 - Commit messages must be portable, scoped, Chinese-dominant, multi-line, and issue-linked.
 - First line format: `type(scope): 中文核心摘要[#Issue编号]`, where `scope`
@@ -74,8 +76,9 @@ choice and requires exact human approval for `git-cleanup-force`.
 
 Post-merge Issue residual discard: after the remote PR/MR is merged, do not
 propose further feature-branch commits or pushes for that Issue. `devctl git
-done` discards uncommitted residuals under `.xflow/issues/issue-<id>/` and
-`.xflow/publish/issues/issue-<id>/` when they are the only dirt, then lands on
+done` discards uncommitted residuals under `.xflow/issues/issue-<id>/`,
+`.xflow/publish/issues/issue-<id>/`, and `.xflow/local/issues/issue-<id>/`
+when they are the only dirt, then lands on
 a clean base aligned with `origin/<base>`. Do not stash those residuals (or
 unrelated work) to pass a clean-worktree check and restore them onto base, and
 do not propose committing discarded residuals afterward. Unrelated dirty paths
@@ -111,6 +114,7 @@ type(scope): 中文核心摘要[#Issue编号]
 - Push and MR/PR creation are separate human gates. MR/PR creation requires separate approval after push approval.
 - Push approval only authorizes `devctl git push`; it does not authorize `devctl git mr`.
 - `devctl git mr` must not push implicitly. If the branch has no upstream, fail and ask for push approval first, then request MR approval after `devctl git push` completes.
+- After a successful `git-push`, remote-write receipts under `.xflow/local/` are not unpushed task commits. Do not prepare another `git-push` for them.
 - After PR/MR creation succeeds, devctl may create and push one metadata-only
   state backfill commit containing XFlow PR number/URL state. This post-MR
   push is covered by the `git-mr` approval and must not include business code

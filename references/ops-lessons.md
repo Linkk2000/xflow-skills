@@ -53,6 +53,19 @@
 - Run `devctl check submodule-hygiene` only for projects that intentionally use
   submodules.
 
+## Push Receipt Loop
+
+- Symptom: after `devctl git push`, the agent commits `approvals/history/*git-push*`
+  files, the branch is ahead again, and another `git-push` human gate is
+  requested. This never finishes.
+- Cause: treating remote-write **receipts** as Early XFlow artifact commits.
+  The load-bearing human gate is `approvals/local-review.md`. Push/comment/close
+  receipts belong under `.xflow/local/` and are not product Git.
+- Correct next step: do not commit those receipts and do not prepare another
+  `git-push`. Request `git-mr` if the branch is already published.
+- After human `git-push` approval, it is valid to commit already-trackable
+  files (walkthrough) then push; never commit `local-review.md`.
+
 ## Context Drift
 
 - Symptom: the AI ignores project language rules, stale state files, or the

@@ -208,9 +208,13 @@ Task-scoped unattended mode never authorizes local branch deletion.
 `--force` requires exact `git-cleanup-force`; failed cleanup preserves state.
 
 `.xflow/issues/` is tracked by default. Issue task state, classification,
-evidence, subtasks, and immutable approval history stay in Git. Active
-`approvals/local-review.md`, `.xflow/local/`, and `.xflow/runtime/` stay
-ignored. An explicit project `issueWorkspace.mode: local` is the only default
+evidence, subtasks, and **semantic** approval history
+(`contract-acceptance` / `gap-recognition` / `task-branch-start` /
+`issue-create`) stay in Git. Active `approvals/local-review.md`,
+`.xflow/local/` (including remote-write receipts for `git-push` / `git-mr` /
+`issue-comment` / `issue-close`), and `.xflow/runtime/` stay ignored. Do not
+commit push receipts or re-approve `git-push` for them. An explicit project
+`issueWorkspace.mode: local` is the only default
 tracking exception. Issue-local evidence must not be uploaded to COS/OSS,
 object storage, or HTTP URLs. Rendered remote bodies and published manifests
 belong under `.xflow/publish/issues/issue-<id>/`.

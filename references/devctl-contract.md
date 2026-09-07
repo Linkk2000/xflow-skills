@@ -336,8 +336,12 @@ is not true, AI must rework and rewrite the report before human handoff.
 Gap/resolution evidence must remain under `.xflow/issues/issue-<number>/`, not
 in COS/OSS, object storage, or HTTP URLs.
 
-Completed approvals produce immutable tracked records under
-`.xflow/issues/issue-<id>/approvals/history/`. Ordinary local-review remote
+Semantic gates (`contract-acceptance`, `gap-recognition`, `task-branch-start`,
+and `issue-create`) produce immutable tracked records under
+`.xflow/issues/issue-<id>/approvals/history/`. Remote-write receipts for
+`git-push`, `git-mr`, `git-pr-merge`, `issue-comment`, and `issue-close`
+are written under `.xflow/local/issues/issue-<id>/approvals/` and must not
+be committed. Ordinary local-review remote
 actions use `<timestamp>-<action>-<approval-id>.yaml`; other gate-specific
 records retain their defined names. Records contain
 repository/worktree/branch/Issue/action binding, file SHA256, reviewer identity

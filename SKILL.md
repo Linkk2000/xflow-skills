@@ -130,43 +130,50 @@ This is a phase-selected reference index. If unsure which file applies, read
    or `/home/`, and `.xflow/local/...`. Tracked repository-relative paths such
    as `.xflow/issues/...` and `.xflow/publish/...` are allowed when the project
    tracks them. If a pasted file or image is referenced, use
-   `references/attachment-policy.md`. Issue/comment image attachments are
-   currently disabled unless an approved object storage backend published
+   `references/attachment-policy.md`. Issue/comment image attachments are currently disabled unless an approved object storage backend published
    reviewed URLs; never use GitHub release assets as an issue/comment image
    store.
 11. .xflow/issues/ is tracked by default. Track Issue process artifacts,
-     task state, evidence, and immutable `approvals/history/` records. Ignore
-     only machine-local/runtime material and active
-     `approvals/local-review.md`. Material that is suitable for the local
-     machine but not suitable for git **must** live under `.xflow/local/`
-     (or an established user-level path such as `~/.xflow/env.local`); do not
-     place secrets, worktree pointers, or machine runtime under
-     `.xflow/issues/` for convenience. A project may use
-     `issueWorkspace.mode: local` only when its own rules explicitly declare
-     the exception. Issue-local evidence must not be moved to COS/OSS/object
-     storage or HTTP URLs. Rendered remote bodies and published attachment
-     manifests belong under `.xflow/publish/issues/`.
+     task state, evidence, and **semantic** `approvals/history/` records
+     (`contract-acceptance`, `gap-recognition`, `task-branch-start`, and
+     `issue-create`). Ignore machine-local/runtime material, active
+     `approvals/local-review.md`, and **remote-write receipts**. The human
+     gate is the live `local-review.md` file (AI must read the human-edited
+     `Approved` decision). Receipts for `git-push`, `git-mr`, `git-pr-merge`,
+     `issue-comment`, and `issue-close` belong under
+     `.xflow/local/issues/issue-<id>/approvals/` and must not be committed.
+     Material that is suitable for the local machine but not suitable for git
+     **must** live under `.xflow/local/` (or an established user-level path
+     such as `~/.xflow/env.local`); do not place secrets, worktree pointers,
+     or machine runtime under `.xflow/issues/` for convenience. A project may
+     use `issueWorkspace.mode: local` only when its own rules explicitly
+     declare the exception. Issue-local evidence must not be moved to
+     COS/OSS/object storage or HTTP URLs. Rendered remote bodies and published
+     attachment manifests belong under `.xflow/publish/issues/`.
 12. Early XFlow artifact commit. After `devctl git start` succeeds, create an
     artifacts-only commit of the Issue workspace (and any other newly written
-    trackable process files) before continuing to contract acceptance, gap
-    recognition, G2, or implementation. After each later major gate that adds
-    trackable process files—at least `contract-acceptance` /
-    `gap-recognition`, and other pre-development gates that append
-    `approvals/history/`—again create an artifacts-only commit before changing
-    product implementation paths. Do not let untracked `.xflow/issues/**` or
-    contract-root files accumulate across gates. If this session still needs
-    explicit human approval to commit, request that approval immediately after
-    the gate, not at the end of implementation. Keep artifact commits separate
+    **trackable** process files) before continuing to contract acceptance, gap
+    recognition, G2, or implementation. After each later **semantic** gate that
+    adds trackable process files—`contract-acceptance` / `gap-recognition` /
+    `task-branch-start` (and `issue-create` migration)—again create an
+    artifacts-only commit before changing product implementation paths. Do
+    not treat `git-push` or other remote-write receipts as Early artifact
+    material. Do not let untracked `.xflow/issues/**` or contract-root files
+    accumulate across semantic gates. If this session still needs explicit
+    human approval to commit, request that approval immediately after the
+    gate, not at the end of implementation. Keep artifact commits separate
     from implementation commits. Do not stage active
     `approvals/local-review.md` or machine-local/runtime-only files. Early
     artifact commit does not authorize push, MR/PR, or entering development.
+    After an approved `git-push`, do not commit newly written receipts or
+    prepare another `git-push` for them; next remote gate is `git-mr`.
 13. Post-merge Issue residual discard. After the remote PR/MR for this Issue is
     merged, do not propose further commits or pushes on that feature branch.
     At `git-cleanup` / `devctl git done`, discard uncommitted process residuals
-    under `.xflow/issues/issue-<id>/` and `.xflow/publish/issues/issue-<id>/`
-    rather than preserving them. Do not stash those residuals (or any worktree
-    dirt) to pass a clean-worktree check and then restore them onto the base
-    branch. Cleanup must finish on a clean base aligned with `origin/<base>`;
+    under `.xflow/issues/issue-<id>/`, `.xflow/publish/issues/issue-<id>/`, and
+    `.xflow/local/issues/issue-<id>/` rather than preserving them. Do not stash those residuals (or any worktree dirt) to pass a clean-worktree check and
+    then restore them onto the base branch. Cleanup must finish on a clean
+    base aligned with `origin/<base>`;
     do not propose committing those discarded residuals afterward. Unrelated
     local changes outside those Issue prefixes must be preserved and must not
     be discarded by cleanup; never stash them just to run `git done`. Do not
@@ -393,18 +400,24 @@ fresh parent-side integration evidence.
 16. For push, run applicable mechanical checks, then use the same chosen path:
     the default human path prepares and validates `Approved Action: git-push`;
     the valid task-scoped unattended path skips only those approval-file steps.
-    Run `devctl git push --issue <id> --file .xflow/issues/issue-<id>/walkthrough.md`.
+    After human approval, commit any already-existing **trackable** process
+    files (for example walkthrough), then
+    `devctl git push --issue <id> --file .xflow/issues/issue-<id>/walkthrough.md`.
+    Do not commit `local-review.md`. Push receipts land under `.xflow/local/`
+    and must not trigger another `git-push` approval.
 17. Draft `.xflow/issues/issue-<id>/mr-draft.md` and run
     `devctl check mr-draft --issue <id>`, then use the same default human or
     valid task-scoped unattended path before
     `devctl git mr --body-file ... --issue <id>`.
     After PR/MR creation, devctl records the PR number/URL, creates a
     metadata-only state backfill commit, and pushes that commit to the same
-    branch under the `git-mr` approval scope.
+    branch under the `git-mr` approval scope. `git-mr` receipts stay local;
+    do not commit them.
 18. After remote review merges the PR/MR, stop proposing feature-branch commits.
     For `G6_APPROVE_CLEANUP`, run approved `devctl git done`: it discards that
-    Issue's uncommitted process residuals under `.xflow/issues/issue-<id>/` and
-    `.xflow/publish/issues/issue-<id>/`, checks out the base branch, pulls, and
+    Issue's uncommitted process residuals under `.xflow/issues/issue-<id>/`,
+    `.xflow/publish/issues/issue-<id>/`, and `.xflow/local/issues/issue-<id>/`,
+    checks out the base branch, pulls, and
     deletes the local task branch. Do not stash residuals onto base, and do not
     propose committing them after cleanup. Unrelated dirty paths outside those
     prefixes must remain untouched; do not stash them to force cleanup.
