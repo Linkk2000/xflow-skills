@@ -116,7 +116,11 @@ This is a phase-selected reference index. If unsure which file applies, read
    branch and recording the sync evidence.
 7. The active approval file is always
    `.xflow/issues/issue-<id>/approvals/local-review.md`; for issue creation use
-   `.xflow/issues/issue-draft/approvals/local-review.md`.
+   `.xflow/issues/issue-draft/approvals/local-review.md`. This live slot is only
+   for an unused human decision. After `devctl` consumes that approval, it must
+   retire the live file. The next `approval prepare` writes a new
+   `Approved: no` file and must not require `--force` or a human deleting the
+   leftover. An unused `Approved: yes` still must not be overwritten.
 8. Do not invent alternate active approval names such as
    `local-review-mr.md`. Historical approvals may be archived under
    `approvals/history/`, but only `approvals/local-review.md` satisfies the

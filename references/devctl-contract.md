@@ -347,6 +347,8 @@ records retain their defined names. Records contain
 repository/worktree/branch/Issue/action binding, file SHA256, reviewer identity
 summary, result, and `reusable: false`. The active
 `approvals/local-review.md` is ignored and must never be committed.
+After a consume succeeds, `devctl` retires that live file so the next
+`approval prepare` does not need `--force`.
 
 Approved MR/PR creation:
 

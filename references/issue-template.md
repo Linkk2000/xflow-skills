@@ -421,7 +421,10 @@ repository, not in COS/OSS or any object storage backend.
 ## approvals/local-review.md
 
 `approvals/local-review.md` is the active local approval file. It binds one
-approved action to one exact file hash.
+approved action to one exact file hash. After that approval is consumed, the
+live file is retired; history under `approvals/history/` remains the durable
+record. The next gate starts with a new `Approved: no` file from
+`devctl approval prepare`.
 
 Prefer generating it with `devctl approval prepare`. The tool should prefill
 mechanical fields such as `Approved At`, `Approved File`, `Approved SHA256`,
