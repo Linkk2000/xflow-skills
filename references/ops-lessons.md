@@ -76,3 +76,16 @@
   legacy `.xflow/current-task.md` only when explicitly running
   `devctl task migrate-current`; it is not active authority.
 - Treat push approval and MR/PR approval as separate gates.
+
+## Consumed Live Review Blocking Next Prepare
+
+- Symptom: `devctl approval prepare` for the next action fails with
+  `refusing to overwrite approved local review` after a previous gate such as
+  `contract-acceptance` already succeeded.
+- Cause: the live `approvals/local-review.md` still contains the consumed
+  `Approved: yes`. That file is a one-use slot; the immutable copy already
+  lives under `approvals/history/consumed/`.
+- Correct next step: do not use `--force` and do not ask the human to delete
+  the file. `devctl` must retire the live slot after consume, and `prepare`
+  must treat a consumed leftover as stale. The next gate still needs a fresh
+  `Approved: no` that only the human may change to `yes`.

@@ -346,7 +346,9 @@ to the same branch under the `git-mr` approval scope.
 On the default human path, core remote writes require local review of the exact
 file being published or used as evidence. The active approval file is
 `.xflow/issues/issue-<id>/approvals/local-review.md`; for issue creation use
-`.xflow/issues/issue-draft/approvals/local-review.md`.
+`.xflow/issues/issue-draft/approvals/local-review.md`. After a gate is consumed,
+devctl retires that live file; the next `approval prepare` is an ordinary new
+`Approved: no` slot. Do not use `--force` or invent `local-review-mr.md`.
 
 Human Approval Is Non-Delegable. AI may prepare approval files, evidence,
 command drafts, and review notes.

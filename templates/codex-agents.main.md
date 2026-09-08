@@ -106,6 +106,8 @@ Hard rules:
   restore ordinary human review. `--no-local-review` alone is invalid.
 - Active approval file:
   `.xflow/issues/issue-<id>/approvals/local-review.md`.
+  After consume, `devctl` retires this live slot; the next prepare is a new
+  `Approved: no` file and must not use `--force`.
 - For issue creation, use:
   `.xflow/issues/issue-draft/approvals/local-review.md`.
 - Do not create alternate active approval files such as `local-review-mr.md`.
