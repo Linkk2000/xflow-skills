@@ -21,6 +21,8 @@ XFlow locally without committing the XFlow tool repositories.
 - 不要把多个 native git 命令写在同一行。
 - 不要使用 `2>&1 | Out-String` 包裹 git clone、git fetch、git checkout。
 - 本次只允许本地初始化，不允许 push，不允许创建 issue，不允许创建 MR/PR，不允许远端写操作。
+- 如果已经存在 `.xflow/xflow.json`，不要重新初始化或覆盖绑定；按其中记录的 source/ref/mode/path 执行 restore。
+- 不得创建或切换业务仓库分支，不得 merge/rebase、解决业务冲突、关闭 Issue 或删除业务分支；工具 checkout 内按已确认绑定取得 ref 不代表获得业务仓库 Git 操作授权。
 
 工具来源：
 - xflow-skills: git@github.com:Linkk2000/xflow-skills.git
@@ -62,6 +64,8 @@ D. 有 git 已有项目：
    - 当前分支
    - 远端地址
    - git status --short
+   - 是否已存在 `.xflow/xflow.json`
+   - 若已存在，读取并验证其中的 skill/devctl source、ref、mode、path；与现有 `.xflow/ops/` 不一致时停止并报告，不得擅自选择一方或改写绑定。
 
 2. 创建目录：
    - .xflow/ops/
@@ -79,27 +83,50 @@ D. 有 git 已有项目：
    - 不得添加 `.xflow/issues/`、`.xflow/issues/**` 或其他会忽略整个 Issue workspace 的规则。
 
 4. 初始化工具：
-   - 如果 .xflow/ops/devctl 不存在，clone `git@github.com:Linkk2000/xflow-devctl.git` 到 `.xflow/ops/devctl`，checkout main。
-   - 如果 .xflow/ops/workflow 不存在，clone `git@github.com:Linkk2000/xflow-skills.git` 到 `.xflow/ops/workflow`，checkout main。
-   - 如果目录已存在且是 git 仓库，只允许 fetch/checkout main，不得覆盖本地未提交修改。
+   - 首次初始化且 .xflow/ops/devctl 不存在时，clone `git@github.com:Linkk2000/xflow-devctl.git` 到 `.xflow/ops/devctl`，checkout main。
+   - 首次初始化且 .xflow/ops/workflow 不存在时，clone `git@github.com:Linkk2000/xflow-skills.git` 到 `.xflow/ops/workflow`，checkout main。
+   - 如果已有 `.xflow/xflow.json`，严格按其中记录的 source/ref/mode/path 恢复；不得强制切换到本提示词默认值。
+   - 如果工具目录已存在且是 git 仓库，先验证 remote URL 与记录/默认 source 完全一致，再检查工作树干净；只有 clean 且当前分支/ref 一致时，才允许 fetch 后 fast-forward 到对应远端 ref。
+   - 工具目录存在未提交修改、分支/ref 不一致、remote URL 不一致、无法 fast-forward，或目标 ref 不存在时，停止并报告；不得 reset、clean、stash、覆盖或自动切换版本。
    - 如果目录已存在但不是 git 仓库，停止并报告给用户。
 
 5. 创建或更新 .xflow/xflow.json：
-   使用 local-ignored-vendor 模式，记录：
-   - workflow path: .xflow/ops/workflow
-   - devctl path: .xflow/ops/devctl
-   - source URL
-   - ref: main
-   - mode: local-ignored-vendor
-   - humanGated: true
-   - issueWorkspace: { "mode": "tracked" }
-   - contracts: { "root": "docs/requirements" }
+   - 首次初始化时使用以下完整 local-ignored-vendor 绑定：
+
+   {
+     "version": 1,
+     "issueWorkspace": {
+       "mode": "tracked"
+     },
+     "contracts": {
+       "root": "docs/requirements"
+     },
+     "skill": {
+       "source": "git@github.com:Linkk2000/xflow-skills.git",
+       "ref": "main",
+       "mode": "local-ignored-vendor",
+       "path": ".xflow/ops/workflow"
+     },
+     "devctl": {
+       "source": "git@github.com:Linkk2000/xflow-devctl.git",
+       "ref": "main",
+       "mode": "local-ignored-vendor",
+       "path": ".xflow/ops/devctl"
+     },
+     "humanGated": true
+   }
+
+   - 已有 `.xflow/xflow.json` 时只验证并恢复其绑定，不得用上述默认值覆盖。
+   - 首次初始化默认 `issueWorkspace.mode: tracked`。若既有绑定明确为 `local`，只有项目规则也明确声明该例外时才保留，并按 local 模式验证；不得静默改回 tracked，也不得仅凭本提示词新建 local 模式。
+   - 将生成结果作为 JSON 解析，校验顶层和 skill/devctl 字段名称与类型；不得生成 `workflow path`、`devctl path`、`source URL` 等非规范字段。
+   - 创建 `.xflow/config.env.example`（若不存在），只放项目可配置参数的占位说明，禁止写入 token、密钥或本机绝对路径。
 
 6. 同步入口文件：
    - 以 `.xflow/ops/workflow/SKILL.md` 为项目本地方法来源，不使用用户级或全局 Skill。
    - 读取 `.xflow/ops/workflow/templates/ai-rules.json`，逐一处理其中每个 target-template 映射，不得漏装任何目标。
    - 目标不存在时，从对应 template 创建；目标存在时只合并 XFlow 管理段。
    - 若项目自有文本与模板冲突，必须报告冲突并保留项目自有文本；不得覆盖项目自有文本，也不得用整文件复制替换。
+   - 不得把同一 XFlow 规则重复追加；重复执行必须幂等。无法可靠识别可管理段时停止并报告冲突，不得猜测合并。
    - 所有适配器只保留短硬规则，并路由到项目本地 `.xflow/ops/workflow/SKILL.md` 及其 references。
    - 创建根目录 `devctl.ps1`，调用 `.xflow/ops/devctl/devctl.ps1`。
    - 创建根目录 `devctl`，调用 `.xflow/ops/devctl/devctl`。
@@ -107,12 +134,18 @@ D. 有 git 已有项目：
 
 7. 验证：
    - git status --short --branch
-   - .\devctl.ps1 help
-   - .\devctl.ps1 preflight
+   - Windows 必跑：`.\devctl.ps1 help`、`.\devctl.ps1 preflight`
+   - POSIX 必跑：`./devctl help`、`./devctl preflight`
+   - 当前版本提供时再运行同平台的 `doctor` 与 `check encoding`；不可用时记录为 unavailable，不得因此改用全局 devctl。
+   - 仅运行当前平台对应的 wrapper 和命令。
    - 确认 git status 中没有出现 `.xflow/ops/devctl/` 或 `.xflow/ops/workflow/` 内源码文件。
    - 确认 `.xflow/issues/` 未被忽略，且 Issue 过程材料可被 Git 跟踪。
    - 确认 `.xflow/local/`、`.xflow/runtime/` 和所有活动 `approvals/local-review.md` 被忽略。
+   - 使用 `git check-ignore -v` 检查代表性 ops/local/runtime/active-approval 路径，确认命中来源是当前项目 `.gitignore`，不是全局 ignore 或 `.git/info/exclude`。
+   - tracked 模式下运行 `git check-ignore -v --no-index .xflow/issues/issue-probe/probe.md`，预期无匹配且返回非零；只检查假设路径，不创建探针文件。
    - 确认 `.xflow/ops/devctl` 和 `.xflow/ops/workflow` 各自有 git commit SHA。
+   - 确认两个工具 checkout 的 remote URL、ref、commit SHA 与 `.xflow/xflow.json` 一致。
+   - 确认 `templates/ai-rules.json` 声明的每个 target 都已创建、正确合并或被明确报告为冲突。
 
 8. 输出初始化报告：
    - 当前项目路径
@@ -122,6 +155,7 @@ D. 有 git 已有项目：
    - devctl 本地路径、分支、commit SHA
    - workflow 本地路径、分支、commit SHA
    - 创建/更新的文件
+   - `.xflow/xflow.json` 是新建绑定还是按既有绑定 restore
    - .gitignore 是否正确忽略 ops/local
    - `.xflow/issues/` 是否保持 tracked，以及所有入口映射的安装/合并/冲突结果
    - 验证命令结果
@@ -132,8 +166,12 @@ D. 有 git 已有项目：
 - 不要 push。
 - 不要创建 issue。
 - 不要创建 MR/PR。
+- 不要创建或切换业务分支，不要 merge/rebase、解决业务冲突、关闭 Issue 或删除业务分支。
 - 不要把“继续”“都可以”“你看着办”当作 commit/push/issue/MR 批准。
 - 不要把工具源码加入业务仓库 git。
 - 不要提交 `.xflow/local/`、`.xflow/runtime/` 或活动审批文件。
 - 不要使用 submodule。
+- 不要安装、复制或软链到用户目录，不要创建用户级 PATH shim。
+- 不要 reset、clean、stash 或覆盖已有工具 checkout 与业务文件。
+- 初始化完成后停止；不得自动进入 Issue 草拟、分支创建或开发阶段。
 ```
