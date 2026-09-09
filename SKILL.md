@@ -429,7 +429,9 @@ fresh parent-side integration evidence.
     Issue's uncommitted process residuals under `.xflow/issues/issue-<id>/`,
     `.xflow/publish/issues/issue-<id>/`, and `.xflow/local/issues/issue-<id>/`,
     checks out the base branch, pulls, and
-    deletes the local task branch. Do not stash residuals onto base, and do not
+    deletes the local task branch. It must also retire that worktree's active
+    task pointer and matching task authority so the next Issue can bind on the
+    base branch. Do not stash residuals onto base, and do not
     propose committing them after cleanup. Unrelated dirty paths outside those
     prefixes must remain untouched; do not stash them to force cleanup.
 

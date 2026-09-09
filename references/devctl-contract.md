@@ -253,7 +253,9 @@ gate.
 Task-scoped unattended mode never authorizes local branch deletion. Run
 `devctl git done --issue <id> --file <resolution-report.md>` only after exact
 human approval for `git-cleanup`; `--force` requires exact
-`git-cleanup-force` approval. Failed cleanup must not disable the state.
+`git-cleanup-force` approval. Successful cleanup retires the worktree's active
+task pointer and matching task authority after returning to the base branch;
+failed cleanup must leave them intact and must not disable the state.
 
 Each valid bypass prints:
 
