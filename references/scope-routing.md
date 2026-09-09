@@ -12,8 +12,12 @@ devctl check classification --issue draft
 Draft the route's next artifact under `.xflow/issues/issue-draft/`. After the
 separately approved Issue-create action returns a confirmed ID, migrate the
 draft artifacts to `.xflow/issues/issue-<id>/`, replace draft placeholders,
-create canonical task state, run `devctl task activate --issue <id>`, and check
-the migrated classification again. Do not run contract acceptance for `draft`.
+create canonical task state, obtain exact `task-branch-start` approval, run
+`devctl git start <slug> --issue <id> --file
+.xflow/issues/issue-<id>/task-state.md`, and check the migrated classification
+again on the activated final branch. For a non-contract route, bind both
+`Contract` and `Contract File` to `none`. Do not run contract acceptance for
+`draft`.
 
 The document is version `0.1.0` and includes `request.originalStatement`,
 `contractSearch.status`, `contractSearch.refs`, `classification`,

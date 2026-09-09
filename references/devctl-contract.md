@@ -65,11 +65,13 @@ current repository.
   a PR/MR number and URL, it may create and push one metadata-only state
   backfill commit containing XFlow PR number/URL state.
 - `devctl git start <slug> --issue <id> --file
-  .xflow/issues/issue-<id>/task-state.md`: for a first capability task, consume
-  exact local `task-branch-start` approval while on the base branch, create and
-  activate the task-state's final branch, and perform no implementation or
-  remote write. `status/commit-msg/done` are the remaining commands. These are
-  Git lifecycle commands implemented by Python core for normal Windows/POSIX use.
+  .xflow/issues/issue-<id>/task-state.md`: for a first non-lightweight Issue
+  task, consume exact local `task-branch-start` approval while on the base
+  branch, create and activate the task-state's final branch, and perform no
+  implementation or remote write. Non-contract routes may bind both `Contract`
+  and `Contract File` to `none`; this does not bypass route-specific semantic
+  decisions or G2. `status/commit-msg/done` are the remaining commands. These
+  are Git lifecycle commands implemented by Python core for normal Windows/POSIX use.
 - `devctl app start-frontend/status/stop-frontend`: App helper commands
   implemented by Python core for normal Windows/POSIX use.
 - `devctl doctor`: check environment health.

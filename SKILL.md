@@ -346,7 +346,12 @@ fresh parent-side integration evidence.
    .xflow/issues/issue-<id>/task-state.md`, stop for the human to explicitly
    approve `Approved Action: task-branch-start`, then run `devctl git start
    <slug> --issue <id> --file .xflow/issues/issue-<id>/task-state.md`. This
-   command creates and activates only the exact final task branch.
+   command creates and activates only the exact final task branch. This
+   identity gate applies to every non-`ui-defect` Issue route, including
+   `infrastructure`, `governance`, and `future`; it is not limited to
+   `capability-change`. A route with no canonical capability contract may bind
+   `Contract: none` and `Contract File: none`. That binding does not waive any
+   route-specific semantic decision, G2, or verification requirement.
    Branch identity approval does not authorize implementation or any remote write.
    Immediately after `git start` succeeds, create (or immediately request approval
    for) an Early XFlow artifact commit that contains only the Issue workspace and
