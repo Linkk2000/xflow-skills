@@ -58,7 +58,11 @@ current repository.
 
 - `devctl init`: bootstrap a repository with XFlow project rules, cross-agent adapters, local devctl entrypoints, project-local `.xflow/ops/` tool binding metadata, and default config templates. This is local-only and must not create issues, branches, commits, pushes, or MR/PRs.
 - `devctl restore`: rehydrate an existing XFlow repository on a new machine from `.xflow/xflow.json`. It restores project-local `.xflow/ops/` tools, local devctl entrypoints, and `.xflow/devctl`. This is local-only and must not create issues, branches, commits, pushes, or MR/PRs.
-- `devctl issue create`: create issue only after duplicate check.
+- `devctl issue create`: create issue only after duplicate check. On a clean
+  base branch with no active task pointer, retained historical modern Issue
+  artifacts do not block a new draft when `.xflow/current-task.md` explicitly
+  binds `Issue: draft`; a live pointer or any non-draft identity still fails
+  closed.
 - `devctl git push`: push current branch only after `Approved Action: git-push`.
 - `devctl git mr`: create MR/PR only, after push has already been approved or
   completed. It must not push task code implicitly. After the provider returns
