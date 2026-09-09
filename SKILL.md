@@ -351,7 +351,9 @@ fresh parent-side integration evidence.
    `infrastructure`, `governance`, and `future`; it is not limited to
    `capability-change`. A route with no canonical capability contract may bind
    `Contract: none` and `Contract File: none`. That binding does not waive any
-   route-specific semantic decision, G2, or verification requirement.
+   route-specific semantic decision, G2, or verification requirement. Such a
+   route must not fabricate a capability contract or traceability matrix;
+   Issue-local verification evidence and the resolution report remain required.
    Branch identity approval does not authorize implementation or any remote write.
    Immediately after `git start` succeeds, create (or immediately request approval
    for) an Early XFlow artifact commit that contains only the Issue workspace and

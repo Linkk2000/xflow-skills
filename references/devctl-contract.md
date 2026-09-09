@@ -70,8 +70,11 @@ current repository.
   branch, create and activate the task-state's final branch, and perform no
   implementation or remote write. Non-contract routes may bind both `Contract`
   and `Contract File` to `none`; this does not bypass route-specific semantic
-  decisions or G2. `status/commit-msg/done` are the remaining commands. These
-  are Git lifecycle commands implemented by Python core for normal Windows/POSIX use.
+  decisions or G2. For that exact `none`/`none` binding, resolution-report and
+  Issue-evidence checks validate the non-contract closure without requiring a
+  fabricated contract traceability matrix. `status/commit-msg/done` are the
+  remaining commands. These are Git lifecycle commands implemented by Python
+  core for normal Windows/POSIX use.
 - `devctl app start-frontend/status/stop-frontend`: App helper commands
   implemented by Python core for normal Windows/POSIX use.
 - `devctl doctor`: check environment health.
