@@ -153,7 +153,7 @@ def require_task_state_reference_parser_parity() -> None:
             canonical.replace("<id>", "PARITY7")
             .replace("<contract-id>", "example.contract.parity")
             .replace("<version>", "1.0.0")
-            .replace("<repository-relative-contract.yaml>", "docs/requirements/parity/contract.yaml")
+            .replace("<configured-contract-root>/<capability>/contract.yaml", "docs/requirements/parity/contract.yaml")
             .replace("<task-branch>", "feat/PARITY7-template-parity")
         )
         parsed = parse_task_state_text(

@@ -345,7 +345,11 @@ fresh parent-side integration evidence.
    See `references/issue-policy.md` for the exact-history exception at branch start.
 8. Create `.xflow/issues/issue-<id>/task-state.md` from
    `templates/task-state.md`, bind the confirmed Issue and final task branch,
-   and keep it at `S2_REMOTE_ISSUE_CREATED`. From the base branch, run
+   and predeclare `Contract File` under the configured `contracts.root`
+   (`<contract-root>/<capability>/contract.yaml`). Never bind the Issue-local
+   candidate path. The formal file need not exist yet; keep the candidate
+   separately until it is materialized on the final branch.
+   Keep task-state at `S2_REMOTE_ISSUE_CREATED`. From the base branch, run
    `devctl approval prepare --issue <id> --action task-branch-start --file
    .xflow/issues/issue-<id>/task-state.md`, stop for the human to explicitly
    approve `Approved Action: task-branch-start`, then run `devctl git start
@@ -368,8 +372,10 @@ fresh parent-side integration evidence.
 9. On that final branch, run `devctl task status` and
    `devctl check classification --issue <id>`. For a capability change,
    materialize the exact candidate bytes at the
-   configured `<contract-root>/<capability>/contract.yaml`, update task-state
-   to bind that path, and run `devctl contract lint --file <contract.yaml>`.
+   already-bound `<contract-root>/<capability>/contract.yaml` and run
+   `devctl contract lint --file <contract.yaml>`. Do not change the sealed
+   task identity. For an older candidate-path misbinding, stop and follow
+   `references/contract-path-recovery.md`; never delete runtime authority.
    Prepare the exact object list with
    `devctl approval prepare --issue <id> --action contract-acceptance --file <contract.yaml> --objects <approved-id-list>`, stop for the human decision,
    then run
