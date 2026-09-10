@@ -1,5 +1,11 @@
 # Git Policy
 
+For issue-create evidence referenced from the draft workspace, apply the exact,
+validated history exception in `issue-policy.md#creation-history-and-branch-start`.
+Ordinary dirty paths must still belong to the matching numbered Issue workspace;
+never allow the whole draft directory. The first artifacts-only commit includes
+the validated creation evidence at its original paths, not relocated copies.
+
 ## Git Action Matrix
 
 | Action | Required state | Human gate | Required preflight | Allowed command |

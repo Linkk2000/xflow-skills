@@ -1,5 +1,35 @@
 # Issue Policy
 
+## Creation History And Branch Start
+
+After a provider-confirmed Issue creation, migrate ordinary draft materials
+(classification, proposal, candidate contract, matrix, body and evidence) to
+the numbered Issue workspace. Do not move the entire draft directory over an
+already-created numbered directory: tooling may already have written history there.
+
+The numbered Issue's successful issue-create record can reference its original
+claim, reviewed approval and approved-body snapshot under
+`.xflow/issues/issue-draft/approvals/history/`. Preserve these files and their
+references byte-for-byte at their original paths. Their historical draft
+identity is intentional; do not replace it with the new number.
+
+At task-branch-start, compatible devctl versions admit only those exact paths
+after validating the completed claim, provider-confirmed Issue, current
+repository/worktree, canonical paths and sealed digests. This is not a blanket
+exception for issue-draft and is not a reusable approval. Unrelated drafts,
+tampered or missing history, and another Issue/worktree's records remain rejected.
+The issue-create branch is historical; it is not the new task branch identity.
+
+After the separately approved final branch is created, include these validated,
+trackable issue-create history files in the Early artifact commit alongside the
+numbered Issue workspace. Do not include active approvals or local runtime
+receipts. Do not ignore, delete, relocate, or hand-edit history to satisfy a
+branch check. If the installed runtime rejects its own valid creation history,
+report its version and exact failure; update through an authorized tool fix.
+
+This exception does not replace task-branch-start approval, contract acceptance,
+or development-start permission. Each remains a separate decision.
+
 - Draft issue title/body/labels in Chinese unless project rules say otherwise.
 - Use `references/issue-template.md`.
 - Use `--body-file` for multiline or shell-sensitive Markdown.
