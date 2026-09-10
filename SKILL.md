@@ -339,6 +339,10 @@ fresh parent-side integration evidence.
    consumed active approval or `.xflow/publish/` outputs. Replace draft Issue
    placeholders with the confirmed ID. Do not infer an ID after an uncertain
    remote result.
+   Preserve sealed issue-create history at its original paths: the numbered
+   Issue record can reference claim/review/snapshot files under issue-draft.
+   Do not move those referenced files or rewrite their sealed references.
+   See `references/issue-policy.md` for the exact-history exception at branch start.
 8. Create `.xflow/issues/issue-<id>/task-state.md` from
    `templates/task-state.md`, bind the confirmed Issue and final task branch,
    and keep it at `S2_REMOTE_ISSUE_CREATED`. From the base branch, run
