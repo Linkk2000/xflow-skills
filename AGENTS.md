@@ -35,6 +35,11 @@ Stop for explicit human approval before each exact action:
 - Non-trivial conflict resolution strategy.
 - Issue close and local cleanup.
 
+When asking the human in chat to open a gate file or approved artifact, always
+cite **absolute filesystem paths** (`Local Review Absolute` /
+`Approved File Absolute` from `devctl approval prepare`). Relative paths alone
+are insufficient for that handoff.
+
 Human Approval Is Non-Delegable remains the default.
 Task-Scoped Unattended Mode is the sole exception to ordinary remote-write
 approval gates for Issue create/comment/close, Git push, PR/MR create/merge,
