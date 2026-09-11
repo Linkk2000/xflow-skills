@@ -55,7 +55,10 @@ and that Issue is active in the current worktree. Before Issue creation, a
 candidate may be reviewed under `.xflow/issues/issue-draft/`, but there is no
 pre-Issue contract-acceptance command and AI must not implement it.
 
-Materialize the exact candidate under the configured contract root, then run:
+Before task-branch-start approval, bind task-state to the eventual formal path
+under configured `contracts.root`, not the Issue-local candidate. That formal
+file may be absent at branch start. On the final branch, materialize the exact
+candidate bytes at that already-bound path, then run:
 
 ```text
 devctl task activate --issue <id>
@@ -64,6 +67,9 @@ devctl contract lint --file <contract.yaml>
 devctl approval prepare --issue <id> --action contract-acceptance --file <contract.yaml> --objects <approved-id-list>
 devctl contract accept --issue <id> --file <contract.yaml> --objects <approved-id-list>
 ```
+
+An existing candidate-path binding is not repaired by editing task-state or
+reactivating it. Follow [controlled path recovery](contract-path-recovery.md).
 
 Issue-create approval does not satisfy this recipe. First obtain exact local
 `task-branch-start` approval and create/activate the final task branch without
