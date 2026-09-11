@@ -18,6 +18,9 @@ phase references.
 - Post-merge Issue residual discard: after PR merge, discard that Issue's process residuals at cleanup; do not stash them onto main or propose feature-branch commits afterward.
 - One worktree may activate only one remote Issue.
 - Human Approval Is Non-Delegable; AI must never satisfy a human gate.
+- When asking the human in chat to open a gate or approved artifact, paste
+  absolute filesystem paths (`Local Review Absolute` /
+  `Approved File Absolute` from `devctl approval prepare`).
 
 Task-Scoped Unattended Mode never replaces accepted-design, development-start,
 non-trivial conflict, or cleanup gates. Keep the commit and browser rules in

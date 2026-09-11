@@ -427,13 +427,17 @@ record. The next gate starts with a new `Approved: no` file from
 `devctl approval prepare`.
 
 Prefer generating it with `devctl approval prepare`. The tool should prefill
-mechanical fields such as `Approved At`, `Approved File`, `Approved SHA256`,
+mechanical fields such as `Approved At`, `Approved File`,
+`Approved File Absolute`, `Local Review Absolute`, `Approved SHA256`,
 `Reviewer`, and the suggested command. By default, `Reviewer` comes from
 `git config user.name` and `git config user.email` when available; pass
 `--reviewer` to override it. The human reviewer should inspect the referenced
 artifact and then change `Approved: no` to `Approved: yes`.
 AI may prepare this file but must never make that approval edit. If AI changes
 `Approved: no` to `Approved: yes`, the approval is invalid.
+When asking the human in chat to open this gate, AI must paste the absolute
+paths (`Local Review Absolute` and `Approved File Absolute`), not only the
+repository-relative `Approved File`.
 This active file is machine-local and ignored by Git.
 
 ```markdown
@@ -443,7 +447,9 @@ Issue: <draft|id>
 Reviewer: <human reviewer>
 Approved At: <ISO-8601 time>
 Approved Action: <issue-create|issue-comment|issue-close|git-mr|remote-write>
-Approved File: <path>
+Approved File: <repo-relative path>
+Approved File Absolute: </absolute/path/to/approved-artifact>
+Local Review Absolute: </absolute/path/to/approvals/local-review.md>
 Approved SHA256: <sha256>
 Attachment Manifest: <none|path>
 Attachment Manifest SHA256: <none|sha256>
@@ -455,6 +461,9 @@ Approved: no
 Prepared by AI or tooling does not mean approved.
 Only the human reviewer may change Approved: no to Approved: yes.
 If this file was approved by the AI, the approval is invalid.
+When asking the human to open this gate in chat, AI must paste the
+Local Review Absolute and Approved File Absolute paths (not only
+repository-relative paths).
 
 ## Notes
 <review notes and constraints>

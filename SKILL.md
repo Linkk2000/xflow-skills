@@ -121,6 +121,12 @@ This is a phase-selected reference index. If unsure which file applies, read
    retire the live file. The next `approval prepare` writes a new
    `Approved: no` file and must not require `--force` or a human deleting the
    leftover. An unused `Approved: yes` still must not be overwritten.
+   When stopping for a human gate in chat, AI must paste **absolute filesystem
+   paths** for (1) that live `local-review.md` and (2) the approved artifact
+   (`Approved File Absolute` / `Local Review Absolute` from the prepared file
+   or `devctl approval prepare` stdout). Repository-relative paths alone are
+   insufficient. This chat handoff rule does not authorize publishing those
+   absolute paths into remote Issue/comment/PR bodies (see item 10).
 8. Do not invent alternate active approval names such as
    `local-review-mr.md`. Historical approvals may be archived under
    `approvals/history/`, but only `approvals/local-review.md` satisfies the
@@ -535,9 +541,11 @@ Before each remote write:
 Choose one gate path after the common checks:
 
 - Default human path: `devctl approval prepare` prefills action, path,
+  absolute open paths (`Approved File Absolute`, `Local Review Absolute`),
   timestamp, and SHA256; the human reviewer sets `Approved: yes`; then
   `devctl check local-review --issue <id> --file <file> --action <action>` must
-  pass. If AI made the approval edit, the approval is invalid. Before every
+  pass. After prepare, AI must paste those absolute paths in chat (relative
+  paths alone are insufficient). If AI made the approval edit, the approval is invalid. Before every
   provider mutation, devctl must atomically create a persistent approval-ID reservation
   and an exact approved byte snapshot. Issue/comment/MR bodies
   sent to the provider come only from that snapshot; push, merge, close, and

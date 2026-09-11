@@ -7,6 +7,14 @@ AI must never satisfy a human gate itself.
 AI must never edit `Approved: no` to `Approved: yes`.
 If AI approved the file, the approval is invalid.
 
+When asking the human in chat to open, inspect, or approve a gate, AI must
+paste **absolute filesystem paths** for the live
+`approvals/local-review.md` and for the approved artifact. Prefer the
+`Local Review Absolute` and `Approved File Absolute` fields written by
+`devctl approval prepare` (also printed on stdout). Repository-relative paths
+alone are not enough for that handoff. Do not put those absolute paths into
+remote Issue, comment, or PR/MR bodies.
+
 Valid approval must explicitly name the exact next action. Valid examples:
 
 - "创建 issue"
