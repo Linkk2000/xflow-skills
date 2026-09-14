@@ -295,8 +295,9 @@ devctl check commit-msg --file .xflow/local/commit-message.txt --issue IK152D
 ```
 
 `devctl git commit-msg` should generate or accept messages in this shape.
-Do not add AI-client co-author trailers, local absolute paths, or provider-only
-metadata to commit messages.
+Do not add local absolute paths or provider-only metadata to commit messages.
+IDE/client may inject `Co-authored-by:` trailers; do not rewrite commits solely
+to strip them.
 
 Advisory dependency check:
 

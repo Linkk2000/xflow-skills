@@ -317,8 +317,9 @@ type(scope): 中文核心摘要[#Issue编号]
 Ordinary commits use one direct-owner Issue ID. Explicit integration commits
 may use both the parent and dependency Issue IDs.
 
-Portable commit text must not include AI-client trailers, local absolute paths,
-machine-specific usernames, or provider-only metadata.
+Portable commit text must not include local absolute paths,
+machine-specific usernames, or provider-only metadata. IDE/client may inject
+`Co-authored-by:` trailers; do not rewrite commits solely to strip them.
 
 ## Pre-MR Target Branch Synchronization
 

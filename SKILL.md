@@ -217,11 +217,11 @@ This is a phase-selected reference index. If unsure which file applies, read
     line and Chinese bullet lines for actual changes, contracts or acceptance
     conditions, tests, and evidence. Ordinary commits use one direct-owner
     Issue ID. Only a `merge(...)` integration commit may use both parent and dependency
-    Issue IDs. Do not include AI-client trailers, local absolute paths, or
-    provider-specific metadata that would not travel across GitHub/Gitee.
-18. Do not add AI-client co-author trailers. In particular, never add
-    `Co-authored-by: Cursor <cursoragent@cursor.com>`.
-19. Browser Must Not Remain about:blank. When browser or Chrome validation is
+    Issue IDs. Do not include local absolute paths or provider-specific
+    metadata that would not travel across GitHub/Gitee. IDE/client may inject
+    `Co-authored-by:` trailers; do not rewrite commits solely to strip them
+    (unsigned rewrite drops GitHub Verified).
+18. Browser Must Not Remain about:blank. When browser or Chrome validation is
     part of the task, first identify the exact target URL, then navigate to an explicit target URL,
     wait for load, and verify the current URL is not `about:blank`.
     Opening a browser window or tab alone is not verification.
@@ -235,7 +235,7 @@ This is a phase-selected reference index. If unsure which file applies, read
    product-page capture. Capture only after an explicitly navigated real product
    URL, never `about:blank, prototype, or test harness`; otherwise must not
    claim integration passed.
-20. Problem/Gap Closure Loop. When the user orally reports a problem or gap,
+19. Problem/Gap Closure Loop. When the user orally reports a problem or gap,
     AI must first create or update `gap-analysis.md`, add evidence, clarify
     the gap, scope, proposed fix, and acceptance criteria, then stop for human
     recognition before implementation. After implementation, AI must create

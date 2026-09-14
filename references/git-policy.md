@@ -64,7 +64,7 @@ the validated creation evidence at its original paths, not relocated copies.
   `merge(canvas): 集成统一容器事务能力[#IK152D][#IK17AW]`.
 - GitHub numeric IDs and Gitee alphanumeric IDs are both valid, for example
   `[#123]` and `[#IK17AW]`.
-- Portable means plain Git text that travels across GitHub/Gitee: no AI-client trailers, no local absolute paths, no machine-specific usernames, and no provider-only metadata.
+- Portable means plain Git text that travels across GitHub/Gitee: no local absolute paths, no machine-specific usernames, and no provider-only metadata. IDE/client may inject `Co-authored-by:` trailers; do not rewrite commits solely to strip them.
 - If no Issue number is known, stop before committing. Run `devctl task status`,
   verify the worktree-local pointer, and open the matching
   `.xflow/issues/issue-<id>/task-state.md`; never infer authority from a branch

@@ -129,7 +129,8 @@ Hard rules:
   use one direct-owner Issue. Only `merge(...)` integration commits may use
   the parent and dependency Issue IDs. Use Chinese bullet lines for changes,
   acceptance conditions, tests, and evidence. Do not include local absolute
-  paths, provider-only metadata, or AI-client signatures.
+  paths or provider-only metadata. IDE/client may inject `Co-authored-by:`
+  trailers; do not rewrite commits solely to strip them.
 - Browser Must Not Remain about:blank. When browser or Chrome validation is
   required, identify the exact target URL, navigate to that URL, wait for load,
   and verify the current URL is not `about:blank`. Opening Chrome alone is not
@@ -156,8 +157,6 @@ Hard rules:
   review checkbox. For UI work with browser access, retain both a live
   screenshot and DOM observation. A code diff or "tests passed" statement is
   not completion evidence.
-- Do not add AI-client co-author trailers, including
-  `Co-authored-by: Cursor <cursoragent@cursor.com>`.
 - Direct `main` maintenance is an exception only for the `xflow-devctl` and
   `xflow-skills` tool repositories when the user explicitly requests it. Do
   not apply that exception to ordinary user projects.
