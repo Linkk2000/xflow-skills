@@ -1,0 +1,49 @@
+{
+  "policy": "mr-only-v1",
+  "automaticActions": [
+    "issue-create",
+    "issue-comment",
+    "task-branch-start",
+    "contract-acceptance",
+    "gap-recognition",
+    "development-start",
+    "commit",
+    "sync-base",
+    "git-push",
+    "git-mr",
+    "state-backfill",
+    "issue-close",
+    "safe-merged-cleanup"
+  ],
+  "humanActions": [
+    "mr-review"
+  ],
+  "excludedActions": [
+    "force-push",
+    "rewrite-history",
+    "discard-uncommitted",
+    "secret-change",
+    "permission-change",
+    "self-approve-mr"
+  ],
+  "preservedTransitions": [
+    "draft-to-issue",
+    "issue-to-branch",
+    "design-to-implementation",
+    "implementation-to-mr"
+  ],
+  "retiredTransitions": [
+    "disable",
+    "cancel",
+    "safe-cleanup-completed"
+  ],
+  "semanticRecordSource": "unattended",
+  "merge": {
+    "requires": [
+      "human-reviewed-current-head",
+      "matching-target",
+      "required-checks-passed",
+      "explicit-merge-scope"
+    ]
+  }
+}

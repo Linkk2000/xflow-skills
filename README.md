@@ -2,6 +2,12 @@
 
 This repository contains the generic XFlow workflow rules and templates.
 
+New unattended sessions use [MR-only policy](references/unattended-mr-only.md):
+one task authorization, automatic delivery to an open MR, then human review
+before merge. Branch start and semantic transitions do not add approval files.
+This requires a compatible devctl runtime; older remote-write-only modes are
+legacy, not equivalent. This skill change alone does not upgrade devctl.
+
 Workflow policy includes Advisory Dependency Issue Workflow and
 Task-Scoped Unattended Mode. Read `SKILL.md` and `references/human-gates.md` for the
 canonical safety-word, scope, invalidation, mechanical-check, and high-risk
